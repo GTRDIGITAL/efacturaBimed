@@ -1,0 +1,311 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+
+			<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
+ xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:ns4="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2 http://docs.oasis-open.org/ubl/os-UBL-2.1/xsd/maindoc/UBL-Invoice-2.1.xsd">
+			<cbc:CustomizationID>urn:cen.eu:en16931:2017#compliant#urn:efactura.mfinante.ro:CIUS-RO:1.0.1</cbc:CustomizationID>
+			<cbc:ID>BMD-90001902</cbc:ID>
+			<cbc:IssueDate>2023-03-10</cbc:IssueDate>
+			<cbc:DueDate>2023-05-09</cbc:DueDate>
+			<cbc:InvoiceTypeCode>380</cbc:InvoiceTypeCode>
+
+<cbc:DocumentCurrencyCode>RON</cbc:DocumentCurrencyCode>
+<cbc:TaxCurrencyCode>RON</cbc:TaxCurrencyCode>
+		   
+
+			
+			<cac:AccountingSupplierParty>
+				<cac:Party>
+					<cac:PostalAddress>
+						<cbc:StreetName>Str. Dacia 3</cbc:StreetName>
+						<cbc:CityName>Oarja</cbc:CityName>
+						<cbc:CountrySubentity>RO-AG</cbc:CountrySubentity>
+						<cac:Country>
+							<cbc:IdentificationCode>RO</cbc:IdentificationCode>
+						</cac:Country>
+					</cac:PostalAddress>
+					<cac:PartyTaxScheme>
+						<cbc:CompanyID>RO37623474</cbc:CompanyID>
+						<cac:TaxScheme>
+							<cbc:ID>VAT</cbc:ID>
+						</cac:TaxScheme>
+					</cac:PartyTaxScheme>
+					<cac:PartyLegalEntity>
+						<cbc:RegistrationName>S.C. BIMED TEKNIK ROMANIA SRL</cbc:RegistrationName>
+						<cbc:CompanyID>RO37623474</cbc:CompanyID>
+					</cac:PartyLegalEntity>
+				</cac:Party>
+			</cac:AccountingSupplierParty>
+			
+			<cac:AccountingCustomerParty>
+				<cac:Party>
+					<cac:PostalAddress>
+						<cbc:StreetName>str. abc</cbc:StreetName>
+						<cbc:CityName>BUCURESTI</cbc:CityName>
+						<cbc:CountrySubentity>RO-DB</cbc:CountrySubentity>
+						<cac:Country>
+							<cbc:IdentificationCode>RO</cbc:IdentificationCode>
+						</cac:Country>
+					</cac:PostalAddress>
+					<cac:PartyTaxScheme>
+						<cbc:CompanyID>RO32999886</cbc:CompanyID>
+						<cac:TaxScheme>
+							<cbc:ID>VAT</cbc:ID>
+						</cac:TaxScheme>
+					</cac:PartyTaxScheme>
+					<cac:PartyLegalEntity>
+						<cbc:RegistrationName>S.C. INDUSTRIAL ELECTRICAL SOLUTION</cbc:RegistrationName>
+						<cbc:CompanyID>RO32999886</cbc:CompanyID>
+					</cac:PartyLegalEntity>
+				</cac:Party>
+			</cac:AccountingCustomerParty>
+<cac:TaxTotal>
+<cbc:TaxAmount currencyID="RON">4350.87</cbc:TaxAmount>
+
+						<cac:TaxSubtotal>
+								<cbc:TaxableAmount currencyID="RON">22899.32</cbc:TaxableAmount>
+								<cbc:TaxAmount currencyID="RON">4350.87</cbc:TaxAmount>
+								<cac:TaxCategory>
+									<cbc:ID>S</cbc:ID>
+									<cbc:Percent>19.0</cbc:Percent>
+									<cac:TaxScheme>
+										<cbc:ID>VAT</cbc:ID>
+									</cac:TaxScheme>
+								</cac:TaxCategory>
+						</cac:TaxSubtotal>
+					
+
+</cac:TaxTotal>
+
+			<cac:LegalMonetaryTotal>
+				<cbc:LineExtensionAmount currencyID="RON">22899.32</cbc:LineExtensionAmount>
+				<cbc:TaxExclusiveAmount currencyID="RON">22899.32</cbc:TaxExclusiveAmount>
+				<cbc:TaxInclusiveAmount currencyID="RON">27250.19</cbc:TaxInclusiveAmount>
+				<cbc:AllowanceTotalAmount currencyID="RON">0.00</cbc:AllowanceTotalAmount>
+				<cbc:ChargeTotalAmount currencyID="RON">0.00</cbc:ChargeTotalAmount>
+				<cbc:PrepaidAmount currencyID="RON">0.00</cbc:PrepaidAmount>
+				<cbc:PayableRoundingAmount currencyID="RON">0.00</cbc:PayableRoundingAmount>
+				<cbc:PayableAmount currencyID="RON">27250.19</cbc:PayableAmount>
+			</cac:LegalMonetaryTotal><cac:InvoiceLine>
+						<cbc:ID>1</cbc:ID>
+						<cbc:InvoicedQuantity unitCode="H87">35.0</cbc:InvoicedQuantity>
+						<cbc:LineExtensionAmount currencyID="RON">3743.05</cbc:LineExtensionAmount>
+						<cac:Item>
+							<cbc:Name>M20x1.5 Ex-db/eb ORION UNIVER. CABLE GLA</cbc:Name>
+							<cac:ClassifiedTaxCategory>
+								<cbc:ID>S</cbc:ID>
+								<cbc:Percent>19.0</cbc:Percent>
+								<cac:TaxScheme>
+									<cbc:ID>VAT</cbc:ID>
+								</cac:TaxScheme>
+							</cac:ClassifiedTaxCategory>
+						</cac:Item>
+						<cac:Price>
+							<cbc:PriceAmount currencyID="RON">106.94</cbc:PriceAmount>
+						</cac:Price>
+					</cac:InvoiceLine><cac:InvoiceLine>
+						<cbc:ID>2</cbc:ID>
+						<cbc:InvoicedQuantity unitCode="H87">315.0</cbc:InvoicedQuantity>
+						<cbc:LineExtensionAmount currencyID="RON">4122.15</cbc:LineExtensionAmount>
+						<cac:Item>
+							<cbc:Name>M20x1.5 Ex-db/eb OCTANS CABLE GLAND (M26</cbc:Name>
+							<cac:ClassifiedTaxCategory>
+								<cbc:ID>S</cbc:ID>
+								<cbc:Percent>19.0</cbc:Percent>
+								<cac:TaxScheme>
+									<cbc:ID>VAT</cbc:ID>
+								</cac:TaxScheme>
+							</cac:ClassifiedTaxCategory>
+						</cac:Item>
+						<cac:Price>
+							<cbc:PriceAmount currencyID="RON">13.09</cbc:PriceAmount>
+						</cac:Price>
+					</cac:InvoiceLine><cac:InvoiceLine>
+						<cbc:ID>3</cbc:ID>
+						<cbc:InvoicedQuantity unitCode="H87">66.0</cbc:InvoicedQuantity>
+						<cbc:LineExtensionAmount currencyID="RON">2057.33</cbc:LineExtensionAmount>
+						<cac:Item>
+							<cbc:Name>M20x1.5 Ex-db/eb CENTAURUS GLAND TL16 (8</cbc:Name>
+							<cac:ClassifiedTaxCategory>
+								<cbc:ID>S</cbc:ID>
+								<cbc:Percent>19.0</cbc:Percent>
+								<cac:TaxScheme>
+									<cbc:ID>VAT</cbc:ID>
+								</cac:TaxScheme>
+							</cac:ClassifiedTaxCategory>
+						</cac:Item>
+						<cac:Price>
+							<cbc:PriceAmount currencyID="RON">31.17</cbc:PriceAmount>
+						</cac:Price>
+					</cac:InvoiceLine><cac:InvoiceLine>
+						<cbc:ID>4</cbc:ID>
+						<cbc:InvoicedQuantity unitCode="H87">35.0</cbc:InvoicedQuantity>
+						<cbc:LineExtensionAmount currencyID="RON">1257.92</cbc:LineExtensionAmount>
+						<cac:Item>
+							<cbc:Name>M25x1.5 Ex-db/eb CENT.GL.13.5-21(1F)WSLS</cbc:Name>
+							<cac:ClassifiedTaxCategory>
+								<cbc:ID>S</cbc:ID>
+								<cbc:Percent>19.0</cbc:Percent>
+								<cac:TaxScheme>
+									<cbc:ID>VAT</cbc:ID>
+								</cac:TaxScheme>
+							</cac:ClassifiedTaxCategory>
+						</cac:Item>
+						<cac:Price>
+							<cbc:PriceAmount currencyID="RON">35.94</cbc:PriceAmount>
+						</cac:Price>
+					</cac:InvoiceLine><cac:InvoiceLine>
+						<cbc:ID>5</cbc:ID>
+						<cbc:InvoicedQuantity unitCode="H87">30.0</cbc:InvoicedQuantity>
+						<cbc:LineExtensionAmount currencyID="RON">927.8</cbc:LineExtensionAmount>
+						<cac:Item>
+							<cbc:Name>NPT 1/2/M16x1.5 METAL ENLARGER Ex-db/eb</cbc:Name>
+							<cac:ClassifiedTaxCategory>
+								<cbc:ID>S</cbc:ID>
+								<cbc:Percent>19.0</cbc:Percent>
+								<cac:TaxScheme>
+									<cbc:ID>VAT</cbc:ID>
+								</cac:TaxScheme>
+							</cac:ClassifiedTaxCategory>
+						</cac:Item>
+						<cac:Price>
+							<cbc:PriceAmount currencyID="RON">30.93</cbc:PriceAmount>
+						</cac:Price>
+					</cac:InvoiceLine><cac:InvoiceLine>
+						<cbc:ID>6</cbc:ID>
+						<cbc:InvoicedQuantity unitCode="H87">20.0</cbc:InvoicedQuantity>
+						<cbc:LineExtensionAmount currencyID="RON">1017.49</cbc:LineExtensionAmount>
+						<cac:Item>
+							<cbc:Name>M32x1.5 Ex-db/eb ORION UNIVERSAL GLANDS</cbc:Name>
+							<cac:ClassifiedTaxCategory>
+								<cbc:ID>S</cbc:ID>
+								<cbc:Percent>19.0</cbc:Percent>
+								<cac:TaxScheme>
+									<cbc:ID>VAT</cbc:ID>
+								</cac:TaxScheme>
+							</cac:ClassifiedTaxCategory>
+						</cac:Item>
+						<cac:Price>
+							<cbc:PriceAmount currencyID="RON">50.87</cbc:PriceAmount>
+						</cac:Price>
+					</cac:InvoiceLine><cac:InvoiceLine>
+						<cbc:ID>7</cbc:ID>
+						<cbc:InvoicedQuantity unitCode="H87">6.0</cbc:InvoicedQuantity>
+						<cbc:LineExtensionAmount currencyID="RON">781.94</cbc:LineExtensionAmount>
+						<cac:Item>
+							<cbc:Name>M50x1.5 Ex-db/eb ORION UNIVERSAL GLAND (</cbc:Name>
+							<cac:ClassifiedTaxCategory>
+								<cbc:ID>S</cbc:ID>
+								<cbc:Percent>19.0</cbc:Percent>
+								<cac:TaxScheme>
+									<cbc:ID>VAT</cbc:ID>
+								</cac:TaxScheme>
+							</cac:ClassifiedTaxCategory>
+						</cac:Item>
+						<cac:Price>
+							<cbc:PriceAmount currencyID="RON">130.32</cbc:PriceAmount>
+						</cac:Price>
+					</cac:InvoiceLine><cac:InvoiceLine>
+						<cbc:ID>8</cbc:ID>
+						<cbc:InvoicedQuantity unitCode="H87">378.0</cbc:InvoicedQuantity>
+						<cbc:LineExtensionAmount currencyID="RON">3242.14</cbc:LineExtensionAmount>
+						<cac:Item>
+							<cbc:Name>HEXAGONAL SCREW PLUG M20 TL15,5 BRASS LO</cbc:Name>
+							<cac:ClassifiedTaxCategory>
+								<cbc:ID>S</cbc:ID>
+								<cbc:Percent>19.0</cbc:Percent>
+								<cac:TaxScheme>
+									<cbc:ID>VAT</cbc:ID>
+								</cac:TaxScheme>
+							</cac:ClassifiedTaxCategory>
+						</cac:Item>
+						<cac:Price>
+							<cbc:PriceAmount currencyID="RON">8.58</cbc:PriceAmount>
+						</cac:Price>
+					</cac:InvoiceLine><cac:InvoiceLine>
+						<cbc:ID>9</cbc:ID>
+						<cbc:InvoicedQuantity unitCode="H87">40.0</cbc:InvoicedQuantity>
+						<cbc:LineExtensionAmount currencyID="RON">456.79</cbc:LineExtensionAmount>
+						<cac:Item>
+							<cbc:Name>HEXAGONAL SCREW PLUG M25 TL15,5 BRASS LO</cbc:Name>
+							<cac:ClassifiedTaxCategory>
+								<cbc:ID>S</cbc:ID>
+								<cbc:Percent>19.0</cbc:Percent>
+								<cac:TaxScheme>
+									<cbc:ID>VAT</cbc:ID>
+								</cac:TaxScheme>
+							</cac:ClassifiedTaxCategory>
+						</cac:Item>
+						<cac:Price>
+							<cbc:PriceAmount currencyID="RON">11.42</cbc:PriceAmount>
+						</cac:Price>
+					</cac:InvoiceLine><cac:InvoiceLine>
+						<cbc:ID>10</cbc:ID>
+						<cbc:InvoicedQuantity unitCode="H87">63.0</cbc:InvoicedQuantity>
+						<cbc:LineExtensionAmount currencyID="RON">2149.08</cbc:LineExtensionAmount>
+						<cac:Item>
+							<cbc:Name>M20x1.5 Ex-e DRAIN VALF WITH LOCK NUT</cbc:Name>
+							<cac:ClassifiedTaxCategory>
+								<cbc:ID>S</cbc:ID>
+								<cbc:Percent>19.0</cbc:Percent>
+								<cac:TaxScheme>
+									<cbc:ID>VAT</cbc:ID>
+								</cac:TaxScheme>
+							</cac:ClassifiedTaxCategory>
+						</cac:Item>
+						<cac:Price>
+							<cbc:PriceAmount currencyID="RON">34.11</cbc:PriceAmount>
+						</cac:Price>
+					</cac:InvoiceLine><cac:InvoiceLine>
+						<cbc:ID>11</cbc:ID>
+						<cbc:InvoicedQuantity unitCode="H87">20.0</cbc:InvoicedQuantity>
+						<cbc:LineExtensionAmount currencyID="RON">247.02</cbc:LineExtensionAmount>
+						<cac:Item>
+							<cbc:Name>M40x1.5 HIGH IMPACT CABLEGLANDS BLACK Ex</cbc:Name>
+							<cac:ClassifiedTaxCategory>
+								<cbc:ID>S</cbc:ID>
+								<cbc:Percent>19.0</cbc:Percent>
+								<cac:TaxScheme>
+									<cbc:ID>VAT</cbc:ID>
+								</cac:TaxScheme>
+							</cac:ClassifiedTaxCategory>
+						</cac:Item>
+						<cac:Price>
+							<cbc:PriceAmount currencyID="RON">12.35</cbc:PriceAmount>
+						</cac:Price>
+					</cac:InvoiceLine><cac:InvoiceLine>
+						<cbc:ID>12</cbc:ID>
+						<cbc:InvoicedQuantity unitCode="H87">700.0</cbc:InvoicedQuantity>
+						<cbc:LineExtensionAmount currencyID="RON">2676.06</cbc:LineExtensionAmount>
+						<cac:Item>
+							<cbc:Name>M20x1.5 HIGH IMPACT GLANDS BLACK Ex (PG1</cbc:Name>
+							<cac:ClassifiedTaxCategory>
+								<cbc:ID>S</cbc:ID>
+								<cbc:Percent>19.0</cbc:Percent>
+								<cac:TaxScheme>
+									<cbc:ID>VAT</cbc:ID>
+								</cac:TaxScheme>
+							</cac:ClassifiedTaxCategory>
+						</cac:Item>
+						<cac:Price>
+							<cbc:PriceAmount currencyID="RON">3.82</cbc:PriceAmount>
+						</cac:Price>
+					</cac:InvoiceLine><cac:InvoiceLine>
+						<cbc:ID>13</cbc:ID>
+						<cbc:InvoicedQuantity unitCode="H87">20.0</cbc:InvoicedQuantity>
+						<cbc:LineExtensionAmount currencyID="RON">220.55</cbc:LineExtensionAmount>
+						<cac:Item>
+							<cbc:Name>NPT 1/2"/M20x1.5 ENLARGER Ex-d ORING(WS)</cbc:Name>
+							<cac:ClassifiedTaxCategory>
+								<cbc:ID>S</cbc:ID>
+								<cbc:Percent>19.0</cbc:Percent>
+								<cac:TaxScheme>
+									<cbc:ID>VAT</cbc:ID>
+								</cac:TaxScheme>
+							</cac:ClassifiedTaxCategory>
+						</cac:Item>
+						<cac:Price>
+							<cbc:PriceAmount currencyID="RON">11.03</cbc:PriceAmount>
+						</cac:Price>
+					</cac:InvoiceLine>
+</Invoice>

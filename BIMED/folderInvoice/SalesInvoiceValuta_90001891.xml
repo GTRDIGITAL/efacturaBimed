@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+
+			<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
+ xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:ns4="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2 http://docs.oasis-open.org/ubl/os-UBL-2.1/xsd/maindoc/UBL-Invoice-2.1.xsd">
+			<cbc:CustomizationID>urn:cen.eu:en16931:2017#compliant#urn:efactura.mfinante.ro:CIUS-RO:1.0.1</cbc:CustomizationID>
+			<cbc:ID>BMD-90001891</cbc:ID>
+			<cbc:IssueDate>2023-03-02</cbc:IssueDate>
+			<cbc:DueDate>2023-05-01</cbc:DueDate>
+			<cbc:InvoiceTypeCode>380</cbc:InvoiceTypeCode>
+			<cbc:DocumentCurrencyCode>EUR</cbc:DocumentCurrencyCode>
+			<cbc:TaxCurrencyCode>RON</cbc:TaxCurrencyCode>
+			
+			<cac:AccountingSupplierParty>
+				<cac:Party>
+					<cac:PostalAddress>
+						<cbc:StreetName>Str. Dacia 3</cbc:StreetName>
+						<cbc:CityName>Oarja</cbc:CityName>
+						<cbc:CountrySubentity>RO-AG</cbc:CountrySubentity>
+						<cac:Country>
+							<cbc:IdentificationCode>RO</cbc:IdentificationCode>
+						</cac:Country>
+					</cac:PostalAddress>
+					<cac:PartyTaxScheme>
+						<cbc:CompanyID>RO37623474</cbc:CompanyID>
+						<cac:TaxScheme>
+							<cbc:ID>VAT</cbc:ID>
+						</cac:TaxScheme>
+					</cac:PartyTaxScheme>
+					<cac:PartyLegalEntity>
+						<cbc:RegistrationName>S.C. BIMED TEKNIK ROMANIA SRL</cbc:RegistrationName>
+						<cbc:CompanyID>RO37623474</cbc:CompanyID>
+					</cac:PartyLegalEntity>
+				</cac:Party>
+			</cac:AccountingSupplierParty>
+			
+			<cac:AccountingCustomerParty>
+				<cac:Party>
+					<cac:PostalAddress>
+						<cbc:StreetName>str. abc</cbc:StreetName>
+						<cbc:CityName>BUCURESTI</cbc:CityName>
+						<cbc:CountrySubentity>RO-DB</cbc:CountrySubentity>
+						<cac:Country>
+							<cbc:IdentificationCode>RO</cbc:IdentificationCode>
+						</cac:Country>
+					</cac:PostalAddress>
+					<cac:PartyTaxScheme>
+						<cbc:CompanyID>RO25609697</cbc:CompanyID>
+						<cac:TaxScheme>
+							<cbc:ID>VAT</cbc:ID>
+						</cac:TaxScheme>
+					</cac:PartyTaxScheme>
+					<cac:PartyLegalEntity>
+						<cbc:RegistrationName>Electroprecizia Electro Motors SRL</cbc:RegistrationName>
+						<cbc:CompanyID>RO25609697</cbc:CompanyID>
+					</cac:PartyLegalEntity>
+				</cac:Party>
+			</cac:AccountingCustomerParty>
+<cac:TaxTotal>
+<cbc:TaxAmount currencyID="RON">114.14</cbc:TaxAmount>
+</cac:TaxTotal>
+
+<cac:TaxTotal>
+<cbc:TaxAmount currencyID="EUR">23.17</cbc:TaxAmount>
+
+						<cac:TaxSubtotal>
+								<cbc:TaxableAmount currencyID="EUR">121.94</cbc:TaxableAmount>
+								<cbc:TaxAmount currencyID="EUR">23.17</cbc:TaxAmount>
+								<cac:TaxCategory>
+									<cbc:ID>S</cbc:ID>
+									<cbc:Percent>19.0</cbc:Percent>
+									<cac:TaxScheme>
+										<cbc:ID>VAT</cbc:ID>
+									</cac:TaxScheme>
+								</cac:TaxCategory>
+						</cac:TaxSubtotal>
+					
+
+</cac:TaxTotal>
+
+			<cac:LegalMonetaryTotal>
+				<cbc:LineExtensionAmount currencyID="EUR">121.94</cbc:LineExtensionAmount>
+				<cbc:TaxExclusiveAmount currencyID="EUR">121.94</cbc:TaxExclusiveAmount>
+				<cbc:TaxInclusiveAmount currencyID="EUR">145.11</cbc:TaxInclusiveAmount>
+				<cbc:AllowanceTotalAmount currencyID="EUR">0.00</cbc:AllowanceTotalAmount>
+				<cbc:ChargeTotalAmount currencyID="EUR">0.00</cbc:ChargeTotalAmount>
+				<cbc:PrepaidAmount currencyID="EUR">0.00</cbc:PrepaidAmount>
+				<cbc:PayableRoundingAmount currencyID="EUR">0.00</cbc:PayableRoundingAmount>
+				<cbc:PayableAmount currencyID="EUR">145.11</cbc:PayableAmount>
+			</cac:LegalMonetaryTotal><cac:InvoiceLine>
+						<cbc:ID>1</cbc:ID>
+						<cbc:InvoicedQuantity unitCode="H87">100.0</cbc:InvoicedQuantity>
+						<cbc:LineExtensionAmount currencyID="EUR">16.4</cbc:LineExtensionAmount>
+						<cac:Item>
+							<cbc:Name>M20x1.5 CABLE GLANDS BLACK (PG13.5)</cbc:Name>
+							<cac:ClassifiedTaxCategory>
+								<cbc:ID>S</cbc:ID>
+								<cbc:Percent>19.0</cbc:Percent>
+								<cac:TaxScheme>
+									<cbc:ID>VAT</cbc:ID>
+								</cac:TaxScheme>
+							</cac:ClassifiedTaxCategory>
+						</cac:Item>
+						<cac:Price>
+							<cbc:PriceAmount currencyID="EUR">0.16</cbc:PriceAmount>
+						</cac:Price>
+					</cac:InvoiceLine><cac:InvoiceLine>
+						<cbc:ID>2</cbc:ID>
+						<cbc:InvoicedQuantity unitCode="H87">300.0</cbc:InvoicedQuantity>
+						<cbc:LineExtensionAmount currencyID="EUR">90.12</cbc:LineExtensionAmount>
+						<cac:Item>
+							<cbc:Name>M25x1.5 CABLE GLANDS BLACK (PG21)10</cbc:Name>
+							<cac:ClassifiedTaxCategory>
+								<cbc:ID>S</cbc:ID>
+								<cbc:Percent>19.0</cbc:Percent>
+								<cac:TaxScheme>
+									<cbc:ID>VAT</cbc:ID>
+								</cac:TaxScheme>
+							</cac:ClassifiedTaxCategory>
+						</cac:Item>
+						<cac:Price>
+							<cbc:PriceAmount currencyID="EUR">0.3</cbc:PriceAmount>
+						</cac:Price>
+					</cac:InvoiceLine><cac:InvoiceLine>
+						<cbc:ID>3</cbc:ID>
+						<cbc:InvoicedQuantity unitCode="H87">50.0</cbc:InvoicedQuantity>
+						<cbc:LineExtensionAmount currencyID="EUR">15.42</cbc:LineExtensionAmount>
+						<cac:Item>
+							<cbc:Name>M16x1.5 CABLE GLANDS L.GRAY SPIRAL</cbc:Name>
+							<cac:ClassifiedTaxCategory>
+								<cbc:ID>S</cbc:ID>
+								<cbc:Percent>19.0</cbc:Percent>
+								<cac:TaxScheme>
+									<cbc:ID>VAT</cbc:ID>
+								</cac:TaxScheme>
+							</cac:ClassifiedTaxCategory>
+						</cac:Item>
+						<cac:Price>
+							<cbc:PriceAmount currencyID="EUR">0.31</cbc:PriceAmount>
+						</cac:Price>
+					</cac:InvoiceLine>
+</Invoice>

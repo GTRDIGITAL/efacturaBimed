@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+
+			<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
+ xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:ns4="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2 http://docs.oasis-open.org/ubl/os-UBL-2.1/xsd/maindoc/UBL-Invoice-2.1.xsd">
+			<cbc:CustomizationID>urn:cen.eu:en16931:2017#compliant#urn:efactura.mfinante.ro:CIUS-RO:1.0.1</cbc:CustomizationID>
+			<cbc:ID>BMD-90002081</cbc:ID>
+			<cbc:IssueDate>2023-08-25</cbc:IssueDate>
+			<cbc:DueDate>2023-10-24</cbc:DueDate>
+			<cbc:InvoiceTypeCode>380</cbc:InvoiceTypeCode>
+			<cbc:DocumentCurrencyCode>EUR</cbc:DocumentCurrencyCode>
+			<cbc:TaxCurrencyCode>RON</cbc:TaxCurrencyCode>
+			
+			<cac:AccountingSupplierParty>
+				<cac:Party>
+					<cac:PostalAddress>
+						<cbc:StreetName>Str. Dacia 3</cbc:StreetName>
+						<cbc:CityName>Oarja</cbc:CityName>
+						<cbc:CountrySubentity>RO-AG</cbc:CountrySubentity>
+						<cac:Country>
+							<cbc:IdentificationCode>RO</cbc:IdentificationCode>
+						</cac:Country>
+					</cac:PostalAddress>
+					<cac:PartyTaxScheme>
+						<cbc:CompanyID>RO37623474</cbc:CompanyID>
+						<cac:TaxScheme>
+							<cbc:ID>VAT</cbc:ID>
+						</cac:TaxScheme>
+					</cac:PartyTaxScheme>
+					<cac:PartyLegalEntity>
+						<cbc:RegistrationName>S.C. BIMED TEKNIK ROMANIA SRL</cbc:RegistrationName>
+						<cbc:CompanyID>RO37623474</cbc:CompanyID>
+					</cac:PartyLegalEntity>
+				</cac:Party>
+			</cac:AccountingSupplierParty>
+			
+			<cac:AccountingCustomerParty>
+				<cac:Party>
+					<cac:PostalAddress>
+						<cbc:StreetName>str. abc</cbc:StreetName>
+						<cbc:CityName>BUCURESTI</cbc:CityName>
+						<cbc:CountrySubentity>RO-DB</cbc:CountrySubentity>
+						<cac:Country>
+							<cbc:IdentificationCode>RO</cbc:IdentificationCode>
+						</cac:Country>
+					</cac:PostalAddress>
+					<cac:PartyTaxScheme>
+						<cbc:CompanyID>RO39977770</cbc:CompanyID>
+						<cac:TaxScheme>
+							<cbc:ID>VAT</cbc:ID>
+						</cac:TaxScheme>
+					</cac:PartyTaxScheme>
+					<cac:PartyLegalEntity>
+						<cbc:RegistrationName>HELUKABEL ROMANIA SRL</cbc:RegistrationName>
+						<cbc:CompanyID>RO39977770</cbc:CompanyID>
+					</cac:PartyLegalEntity>
+				</cac:Party>
+			</cac:AccountingCustomerParty>
+<cac:TaxTotal>
+<cbc:TaxAmount currencyID="RON">3164.38</cbc:TaxAmount>
+</cac:TaxTotal>
+
+<cac:TaxTotal>
+<cbc:TaxAmount currencyID="EUR">641.28</cbc:TaxAmount>
+
+						<cac:TaxSubtotal>
+								<cbc:TaxableAmount currencyID="EUR">3375.14</cbc:TaxableAmount>
+								<cbc:TaxAmount currencyID="EUR">641.28</cbc:TaxAmount>
+								<cac:TaxCategory>
+									<cbc:ID>S</cbc:ID>
+									<cbc:Percent>19.0</cbc:Percent>
+									<cac:TaxScheme>
+										<cbc:ID>VAT</cbc:ID>
+									</cac:TaxScheme>
+								</cac:TaxCategory>
+						</cac:TaxSubtotal>
+					
+
+</cac:TaxTotal>
+
+			<cac:LegalMonetaryTotal>
+				<cbc:LineExtensionAmount currencyID="EUR">3375.14</cbc:LineExtensionAmount>
+				<cbc:TaxExclusiveAmount currencyID="EUR">3375.14</cbc:TaxExclusiveAmount>
+				<cbc:TaxInclusiveAmount currencyID="EUR">4016.42</cbc:TaxInclusiveAmount>
+				<cbc:AllowanceTotalAmount currencyID="EUR">0.00</cbc:AllowanceTotalAmount>
+				<cbc:ChargeTotalAmount currencyID="EUR">0.00</cbc:ChargeTotalAmount>
+				<cbc:PrepaidAmount currencyID="EUR">0.00</cbc:PrepaidAmount>
+				<cbc:PayableRoundingAmount currencyID="EUR">0.00</cbc:PayableRoundingAmount>
+				<cbc:PayableAmount currencyID="EUR">4016.42</cbc:PayableAmount>
+			</cac:LegalMonetaryTotal><cac:InvoiceLine>
+						<cbc:ID>1</cbc:ID>
+						<cbc:InvoicedQuantity unitCode="H87">4000.0</cbc:InvoicedQuantity>
+						<cbc:LineExtensionAmount currencyID="EUR">504.0</cbc:LineExtensionAmount>
+						<cac:Item>
+							<cbc:Name>M12x1.5 CABLE GLANDS HELUKABEL L.GRAY</cbc:Name>
+							<cac:ClassifiedTaxCategory>
+								<cbc:ID>S</cbc:ID>
+								<cbc:Percent>19.0</cbc:Percent>
+								<cac:TaxScheme>
+									<cbc:ID>VAT</cbc:ID>
+								</cac:TaxScheme>
+							</cac:ClassifiedTaxCategory>
+						</cac:Item>
+						<cac:Price>
+							<cbc:PriceAmount currencyID="EUR">0.13</cbc:PriceAmount>
+						</cac:Price>
+					</cac:InvoiceLine><cac:InvoiceLine>
+						<cbc:ID>2</cbc:ID>
+						<cbc:InvoicedQuantity unitCode="H87">3200.0</cbc:InvoicedQuantity>
+						<cbc:LineExtensionAmount currencyID="EUR">473.6</cbc:LineExtensionAmount>
+						<cac:Item>
+							<cbc:Name>M20x1.5 C.GLAND HELUKABEL L.GRAY(PG13.5)</cbc:Name>
+							<cac:ClassifiedTaxCategory>
+								<cbc:ID>S</cbc:ID>
+								<cbc:Percent>19.0</cbc:Percent>
+								<cac:TaxScheme>
+									<cbc:ID>VAT</cbc:ID>
+								</cac:TaxScheme>
+							</cac:ClassifiedTaxCategory>
+						</cac:Item>
+						<cac:Price>
+							<cbc:PriceAmount currencyID="EUR">0.15</cbc:PriceAmount>
+						</cac:Price>
+					</cac:InvoiceLine><cac:InvoiceLine>
+						<cbc:ID>3</cbc:ID>
+						<cbc:InvoicedQuantity unitCode="H87">340.0</cbc:InvoicedQuantity>
+						<cbc:LineExtensionAmount currencyID="EUR">306.34</cbc:LineExtensionAmount>
+						<cac:Item>
+							<cbc:Name>M40x1.5 CABLE GLANDS HELUKA.L.GRAY(EURO)</cbc:Name>
+							<cac:ClassifiedTaxCategory>
+								<cbc:ID>S</cbc:ID>
+								<cbc:Percent>19.0</cbc:Percent>
+								<cac:TaxScheme>
+									<cbc:ID>VAT</cbc:ID>
+								</cac:TaxScheme>
+							</cac:ClassifiedTaxCategory>
+						</cac:Item>
+						<cac:Price>
+							<cbc:PriceAmount currencyID="EUR">0.9</cbc:PriceAmount>
+						</cac:Price>
+					</cac:InvoiceLine><cac:InvoiceLine>
+						<cbc:ID>4</cbc:ID>
+						<cbc:InvoicedQuantity unitCode="H87">200.0</cbc:InvoicedQuantity>
+						<cbc:LineExtensionAmount currencyID="EUR">17.6</cbc:LineExtensionAmount>
+						<cac:Item>
+							<cbc:Name>M40x1.5 LOCK NUTS L.GRAY</cbc:Name>
+							<cac:ClassifiedTaxCategory>
+								<cbc:ID>S</cbc:ID>
+								<cbc:Percent>19.0</cbc:Percent>
+								<cac:TaxScheme>
+									<cbc:ID>VAT</cbc:ID>
+								</cac:TaxScheme>
+							</cac:ClassifiedTaxCategory>
+						</cac:Item>
+						<cac:Price>
+							<cbc:PriceAmount currencyID="EUR">0.09</cbc:PriceAmount>
+						</cac:Price>
+					</cac:InvoiceLine><cac:InvoiceLine>
+						<cbc:ID>5</cbc:ID>
+						<cbc:InvoicedQuantity unitCode="H87">400.0</cbc:InvoicedQuantity>
+						<cbc:LineExtensionAmount currencyID="EUR">728.8</cbc:LineExtensionAmount>
+						<cac:Item>
+							<cbc:Name>M32x1.5 EURO BRASS CABLE GLANDS TL8</cbc:Name>
+							<cac:ClassifiedTaxCategory>
+								<cbc:ID>S</cbc:ID>
+								<cbc:Percent>19.0</cbc:Percent>
+								<cac:TaxScheme>
+									<cbc:ID>VAT</cbc:ID>
+								</cac:TaxScheme>
+							</cac:ClassifiedTaxCategory>
+						</cac:Item>
+						<cac:Price>
+							<cbc:PriceAmount currencyID="EUR">1.82</cbc:PriceAmount>
+						</cac:Price>
+					</cac:InvoiceLine><cac:InvoiceLine>
+						<cbc:ID>6</cbc:ID>
+						<cbc:InvoicedQuantity unitCode="H87">200.0</cbc:InvoicedQuantity>
+						<cbc:LineExtensionAmount currencyID="EUR">659.6</cbc:LineExtensionAmount>
+						<cac:Item>
+							<cbc:Name>M40x1.5 EURO BRASS CABLE GLANDS TL9</cbc:Name>
+							<cac:ClassifiedTaxCategory>
+								<cbc:ID>S</cbc:ID>
+								<cbc:Percent>19.0</cbc:Percent>
+								<cac:TaxScheme>
+									<cbc:ID>VAT</cbc:ID>
+								</cac:TaxScheme>
+							</cac:ClassifiedTaxCategory>
+						</cac:Item>
+						<cac:Price>
+							<cbc:PriceAmount currencyID="EUR">3.3</cbc:PriceAmount>
+						</cac:Price>
+					</cac:InvoiceLine><cac:InvoiceLine>
+						<cbc:ID>7</cbc:ID>
+						<cbc:InvoicedQuantity unitCode="H87">80.0</cbc:InvoicedQuantity>
+						<cbc:LineExtensionAmount currencyID="EUR">685.2</cbc:LineExtensionAmount>
+						<cac:Item>
+							<cbc:Name>M63x1.5 EURO BRASS CABLE GLANDS</cbc:Name>
+							<cac:ClassifiedTaxCategory>
+								<cbc:ID>S</cbc:ID>
+								<cbc:Percent>19.0</cbc:Percent>
+								<cac:TaxScheme>
+									<cbc:ID>VAT</cbc:ID>
+								</cac:TaxScheme>
+							</cac:ClassifiedTaxCategory>
+						</cac:Item>
+						<cac:Price>
+							<cbc:PriceAmount currencyID="EUR">8.57</cbc:PriceAmount>
+						</cac:Price>
+					</cac:InvoiceLine>
+</Invoice>
