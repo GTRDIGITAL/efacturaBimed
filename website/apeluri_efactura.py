@@ -180,7 +180,7 @@ def eFactura():
                         
                         listaMesaje = requests.get(api_url_updated, headers=headers, timeout=30)
                         raspunsMesajeFacturi = json.loads(listaMesaje.text)
-                        stocareMesajeAnaf(raspunsMesajeFacturi)
+                        # stocareMesajeAnaf(raspunsMesajeFacturi)
                         print('stocare a mesajelor cu success')
                         break 
                         # print("MESAJEEEEEEEEEEEE FACTURIIIIIIIIIIIIIIIIIIIII", raspunsMesajeFacturi)
@@ -280,7 +280,8 @@ def eFactura():
         shutil.make_archive(name, format, archive_from, archive_to)
         shutil.move('%s.%s'%(name,format), destination)   
         
-                     
+    stocarePDF()
+    print("aici stocam XML in BD")                  
     
 
     # def conversie():
