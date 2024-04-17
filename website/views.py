@@ -576,7 +576,7 @@ def refresh():
                 time.sleep(10)
 
     print('aici vedem mesajele anaf')
-    headers = {'Authorization': 'Bearer f323b048924db389ebe6a26c41e9a6a5a4b8b58b358bb051e9d6f074f2ade292'}
+    headers = {'Authorization': dateFirma['header']}
     current_time = datetime.datetime.now()
     start_time = current_time - datetime.timedelta(days=60)
     val1 = int(time.mktime(start_time.timetuple())) * 1000
