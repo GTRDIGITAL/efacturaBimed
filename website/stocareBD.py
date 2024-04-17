@@ -272,8 +272,8 @@ def stocarePDF():
     )
     cursor = connection.cursor()
     
-    director_fisiere = "C:/Dezvoltare/E-Factura/2023/eFactura/Ferro/eFacturaFerro local/output conversie PDF/"
-    # director_fisiere = '/home/efactura/efactura_ferro/outputConversiePDF'
+    # director_fisiere = "C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed/output conversie PDF/"
+    director_fisiere = '/home/efactura/efactura_bimed/outputConversiePDF/'
 
 # Parcurgerea fișierelor din director și inserarea în baza de date
     for nume_fisier in os.listdir(director_fisiere):
@@ -304,10 +304,10 @@ def stocarePDF():
 #     cursor = connection.cursor() 
     
 #     print(idSelectate, 'ASTEA AICI SUNT IN STOCARE.PY')
-#     downlPDFbaza = 'C:/Dezvoltare/E-Factura/2023/eFactura/Ferro/eFacturaFerro local/download pdf baza de date'
-#     destinatie = "C:/Dezvoltare/E-Factura/2023/eFactura/Ferro/eFacturaFerro local/destinatie/"
-#     # downlPDFbaza = '/home/efactura/efactura_ferro/downloadPdfBazaDate'
-#     # destinatie = '/home/efactura/efactura_ferro/destinatie/'
+#     downlPDFbaza = 'C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed/download pdf baza de date'
+#     destinatie = "C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed/destinatie/"
+#     # downlPDFbaza = '/home/efactura/efactura_bimed/downloadPdfBazaDate'
+#     # destinatie = '/home/efactura/efactura_bimed/destinatie/'
 #     idSelectate=idSelectate[1:]
 
 #     stringID=""
@@ -373,10 +373,10 @@ def descarcarepdf(idSelectate):
     cursor = connection.cursor() 
     
     print(idSelectate, 'ASTEA AICI SUNT IN STOCARE.PY')
-    downlXMLbaza = 'C:/Dezvoltare/E-Factura/2023/eFactura/Ferro/eFacturaFerro local/download pdf baza de date'
-    destinatie = "C:/Dezvoltare/E-Factura/2023/eFactura/Ferro/eFacturaFerro local/destinatie/"
-    # downlPDFbaza = '/home/efactura/efactura_ferro/downloadPdfBazaDate'
-    # destinatie = '/home/efactura/efactura_ferro/destinatie/'
+    # downlXMLbaza = 'C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed/download pdf baza de date'
+    # destinatie = "C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed/destinatie/"
+    downlPDFbaza = '/home/efactura/efactura_bimed/downloadPdfBazaDate'
+    destinatie = '/home/efactura/efactura_bimed/destinatie/'
     idSelectate=idSelectate[1:]
 
     stringID=""
@@ -422,7 +422,7 @@ def descarcarepdf(idSelectate):
 
         def conversie():
                 # xmlANAF = 'C:/Dezvoltare/E-Factura/2023/eFactura/Expeditors/eFacturaExpeditors local/output conversie'
-                cale_fisier = 'C:/Dezvoltare/E-Factura/2023/eFactura/Ferro/eFacturaFerro local/download pdf baza de date'
+                cale_fisier = 'C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed/download pdf baza de date'
                 headerss = {"Content-Type": "text/plain"}
 
                 # Creează un nou workbook Excel
@@ -468,7 +468,7 @@ def descarcarepdf(idSelectate):
 
                             if response and response.status_code == 200:
                                 filename_no_extension = os.path.splitext(filename)[0]
-                                with open(f'C:/Dezvoltare/E-Factura/2023/eFactura/Ferro/eFacturaFerro local/download pdf baza de date/{filename_no_extension}.pdf', 'wb') as file:
+                                with open(f'C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed/download pdf baza de date/{filename_no_extension}.pdf', 'wb') as file:
                                     # file.write(response.content)
                                     print(f'Fisierul {filename} a fost convertit cu succes')
                             else:

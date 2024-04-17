@@ -32,8 +32,8 @@ def trimitereMail():
     date = datetime.datetime.now().strftime("%d/%m/%Y %H:%M")
     subj = "Facturi SPV " + str(date)
     mailTo = "cristian.iordache@ro.gt.com"
-    destinatie = "C:/Dezvoltare/E-Factura/2023/eFactura/Ferro/eFacturaFerro local/destinatie/"
-    # destinatie = '/home/efactura/efactura_ferro/destinatie/'
+    # destinatie = "C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed/destinatie/"
+    destinatie = '/home/efactura/efactura_bimed/destinatie/'
     attachment_path = destinatie+"rezultat.zip"
 
     with open(attachment_path, "rb") as attachment:
@@ -139,8 +139,8 @@ def welcome():
             fisierDeVanzari = request.files["excelFileInput"]
             print(fisierDeVanzari,'--------ds--s-d-sd-sdss-s-s--s-ds-d--d-s-d-s-d-s-s--s-d-sd--g--gr-')
             # return fisierDeVanzari
-            file_path="C:/Dezvoltare/E-Factura/2023/eFactura/Ferro/eFacturaFerro local/Baza de date vanzari/"
-            # file_path="/home/efactura/efactura_ferro/bazaDateVanzari"
+            # file_path="C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed/Baza de date vanzari/"
+            file_path="/home/efactura/efactura_bimed/bazaDateVanzari"
             cale_fisier_temp = os.path.join(file_path + '/', 'baza de date.xlsx' )
             fisierDeVanzari.save(cale_fisier_temp)
             # cale_fisier_temp=file_path+"baza de date.xlsx"
@@ -169,8 +169,24 @@ def summary():
         numarFacturiCorecte = numarFacturiTrimise - facturiNuleUnice
         print(facturiNuleUnice, "facturi corecte")
         session['ultimaFactura'] = ultimaFactura
+        parts = ultimaFactura.split(":")
+        ultimaFactura = parts[1].strip()
+        if ultimaFactura.isdigit():
+            # Dacă este doar cifre, convertim valoarea la int pentru a fi folosită în JavaScript
+            numar_ultima_factura_js = int(ultimaFactura)
+        else:
+            # Dacă nu conține doar cifre, lăsăm valoarea neschimbată
+            numar_ultima_factura_js = ultimaFactura
+            
+        if primaFactura.isdigit():
+            # Dacă este doar cifre, convertim valoarea la int pentru a fi folosită în JavaScript
+            primaFactura_js = int(primaFactura)
+        else:
+            # Dacă nu conține doar cifre, lăsăm valoarea neschimbată
+            primaFactura_js = primaFactura
+        
         print(primaFactura, ultimaFactura, totalFactura, numarFacturiCorecte)
-        return render_template('summary.html', primaFactura=primaFactura, ultimaFactura=ultimaFactura, totalFactura=totalFactura, nrFacturiTrimise=numarFacturiTrimise, numarFacturiCorecte=numarFacturiCorecte, facturiNuleUnice=facturiNuleUnice)
+        return render_template('summary.html', primaFactura=primaFactura_js, ultimaFactura=numar_ultima_factura_js, totalFactura=totalFactura, nrFacturiTrimise=numarFacturiTrimise, numarFacturiCorecte=numarFacturiCorecte, facturiNuleUnice=facturiNuleUnice)
     else:
         return render_template('auth.html')
 
@@ -193,8 +209,8 @@ def download_excel():
     code = session.get('verified_code')
     if code == cod:
         try:
-            excel_file_path = "C:/Dezvoltare/E-Factura/2023/eFactura/Ferro/eFacturaFerro local/logs/informatii.txt"
-            # excel_file_path = "/home/efactura/efactura_ferro/logs/informatii.txt"
+            # excel_file_path = "C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed/logs/informatii.txt"
+            excel_file_path = "/home/efactura/efactura_bimed/logs/informatii.txt"
             return send_file(excel_file_path, as_attachment=True, download_name='Informatii erori facturi.txt')
         except:
             return render_template('auth.html')
@@ -219,8 +235,8 @@ def trimitere_anaf():
         return render_template('auth.html')
         
 
-    return send_from_directory('C:\\Dezvoltare\\E-Factura\\2023\\eFactura\\Ferro\\eFacturaFerro local\\output arhive conversie PDF', filename, as_attachment = True)
-    # return send_from_directory('/home/efactura/efactura_ferro/outputArhiveConversiePDF', filename, as_attachment = True)
+    # return send_from_directory('C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed/output arhive conversie PDF', filename, as_attachment = True)
+    return send_from_directory('/home/efactura/efactura_bimed/outputArhiveConversiePDF', filename, as_attachment = True)
     
 @views.route("/statusFacturi", methods=['GET','POST'])
 @login_required

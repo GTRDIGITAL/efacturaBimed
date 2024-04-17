@@ -11,12 +11,27 @@ import unicodedata
 from flask import session
 import json
 import math
+#de avut grija la sume (daca sunt cu , sau . si de schimbat codul la TB IN FUNCTIE DE ASTA)
+
+class MyDict(dict):
+    def __missing__(self, key):
+
+        return str(key)
+# def normal_round(n, decimals=0):
+#     expoN = n * 10 ** decimals
+#     if abs(expoN) - abs(math.floor(expoN)) < 0.5:
+#         return math.floor(expoN) / 10 ** decimals
+#     return math.ceil(expoN) / 10 ** decimals
+
+facturiNumeUnice = ""
+
 def normal_round(n, decimals=0):
     expoN = n * 10 ** decimals
-    if abs(expoN) - abs(math.floor(expoN)) < 0.5:
-        return math.floor(expoN) / 10 ** decimals
-    return math.ceil(expoN) / 10 ** decimals
-
+    rounded_value = round(expoN) / 10 ** decimals
+    if round(n, decimals) != rounded_value:
+        # Dacă valoarea rotunjită nu este corectă, scădem 0.01 pentru a corecta
+        rounded_value -= 0.01
+    return rounded_value
 
 def citeste_configurare(file_path):
     with open(file_path, 'r') as file:
@@ -25,13 +40,9 @@ def citeste_configurare(file_path):
 
 config = citeste_configurare('config.json')
 mysql_config = config['mysql']
-# global primaFactura, ultimaFactura, totalFactura, numarFacturiTrimise
-# facturi_nule=[]
-# facturi_nule.clear()
-facturiNuleUnice=""
-# ultimaFactura = session.get('ultimaFactura')
-# fisierDeVanzari="C:/Dezvoltare/E-Factura/2023/eFactura/Ferro/eFacturaFerro local/Baza de date vanzari/3370_Vanzari SAP_11.2023.xlsx"
+
 def prelucrareDate(fisierDeVanzari):
+    facturiNuleUnice = 0
     def stergeFisiere(directory_path, file_extension):
         try:
             for filename in os.listdir(directory_path):
@@ -42,298 +53,202 @@ def prelucrareDate(fisierDeVanzari):
         except Exception as e:
             print(f"Eroare la stergerea fișierelor: {str(e)}")
     
-    stergeFisiere('C:/Dezvoltare/E-Factura/2023/eFactura/Ferro/eFacturaFerro local/outs', '.xml')
-    # stergeFisiere("/home/efactura/efactura_ferro/outs", ".xml")
-        # Calea către directorul de loguri
-    log_folder = "C:/Dezvoltare/E-Factura/2023/eFactura/Ferro/eFacturaFerro local/logs"
-    # log_folder = "/home/efactura/efactura_ferro/logs"
-    facturi_nule=[]
-    print(fisierDeVanzari,'prelucrare date----------')
-    os.makedirs(log_folder, exist_ok=True)
-    log_path = os.path.join(log_folder, "informatii.txt")
-    if os.path.exists(log_path):
-        os.remove(log_path)
+    stergeFisiere('C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed/outs', '.xml')
+    facturiNumeUnice = 0
+    date=datetime.now().date()
+    periodStartYear="2024"
+    periodStart="2"
+    LEGRAND_TAXFILENUM_Header="RO37623474" 
+    LEGRAND_TAXFILENUM="0037623474" #PENTRU A COMPLETA CAMPURILE CUSTOMER SAU SUPPLIERID CU DATELE EXPUR ACOLO UNDE E CAZUL-CERINTA ESTE SA FIE FORMAT DIN 00+CUI, fara atribut RO
+    contactPersonFirstName="MIRELA"
+    contactPersonLastName="BERECHET"
+    contactPhone="0213202328"
+    headerComment="L" #L PT DECL LUNARA, VA TREBUI MODIFICATA DACA AVEM CEVA LA CERERE
+    IBAN="RO16BACX0000001559318000"
+    strada = "Str. Dacia 3"
+    oras = "Oarja"
+    # codPostal = "000000"
+    countrySubentity = "RO-AG"
+    country = "RO"
+    vatID ="RO37623474" 
+    numeCompanie = "S.C. BIMED TEKNIK ROMANIA SRL"
+
+    
+
+    engine = create_engine(f"mysql://{config['mysql']['user']}:{config['mysql']['password']}@{config['mysql']['host']}/{config['mysql']['database']}")
+    print("CONECTAT LA BAZA")
+    query = "SELECT * FROM clients WHERE region IS NOT NULL"
+
+    # bazaClienti = pd.read_sql(query, engine)
+
+    # Clients=pd.read_excel("D:/Projects/27. Efactura/BIMED/MasterDate Clienti _FBL5N_Customer by tax_AD.XLSX")
+    Clients = pd.read_sql(query, engine)
+
+    # newheader=["Tax no 1","Tax no 2","Exmpty1","Empty2", "VAT registration no", "Country","Name", "Customer","Empty3"]
+    # listheader=["Tax Number 1", "Tax No. 2"]
+
+    # m = [set(listheader).issubset(i) for i in Clients.values.tolist()] #gasire rand pe care se afla headerul
+    # Clients=Clients.iloc[:, 1:10]
+    # index=Clients[m].index.values #salvare index header
+    # # print(index[0]+1)
+    # new_header=Clients.iloc[int(index[0])]
+    # Clients.columns=newheader
+
+
+    # Clients.drop(Clients.index[:1], inplace=True)
+    # # Clients=Clients[newheader]
+    # Clients.dropna(axis=1, how="all", inplace=True)
+    Clients["regno"]=Clients["regno"].fillna(Clients["regno"]).fillna(Clients["regno"])
+
+
+    Clients["Name"]=Clients["Name"].astype(str).str.lstrip("0").str.replace(r'\.0$', '', regex=True)
+    # Clients.loc[Clients["CUI"].astype(str).str.startswith("RO"), "Cty"]="RO"
+    Clients=Clients.loc[Clients["Country"].astype(str)=="RO"]
+    dictClients_CUI=Clients.set_index('CUST#').to_dict()['regno']
+    # dictClients_City=Clients.set_index('Customer').to_dict()['CITY']
+    dictClients_Country=Clients.set_index('CUST#').to_dict()['Country']
+    dictClients_Street=Clients.set_index('CUST#').to_dict()['Street']
+    dictClients_Region=Clients.set_index('CUST#').to_dict()['region']
+    dictClients_City=Clients.set_index('CUST#').to_dict()['City']
+    dictClients_Company=Clients.set_index('CUST#').to_dict()['Name']
+    print("AICI AVEM UN DICTIONAR -------------------------", dictClients_Country)
+    # dictClients_Street=Clients.set_index('Customer').to_dict()['FORMATTED_LINE_2']
+    dictUM={'PAC':'AB','CM2':'CMK','EA':'EA','PC':'H87','KG':'KGM','L':'LTR','M':'MTR','ROL':'XRO',}
+
+    Clients.to_excel("C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed/Baza de date vanzari/out/Clients.xlsx")
 
     file_path = fisierDeVanzari
+    # Sales_EFACTURA=pd.read_excel("C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed/Baza de date vanzari/Sales invoices _credit note_NA MARTIE 2023-FEB 2024.XLSX")
+    Sales_EFACTURA = pd.read_excel(file_path)
 
-    # Numele coloanelor obligatorii
-    coloane_obligatorii = ["Billing Document", "Material", "Billing Date", "sold-to party", "Sold-to-name",
-                            "bill qty ZSDSABIL", "AC bill net val", "Description", "Net value", "Document Currency",
-                            "Sales unit"]
+    # Se actualizează moneda pentru liniile cu contul 704 folosind dicționarul creat
 
-    # Încărcare fișier Excel
-    try:
-        df = pd.read_excel(file_path, sheet_name='vanzari')
-        df=df.loc[df['Billing Document'].astype(str)!="nan"]
-        dp = pd.read_excel(file_path, sheet_name='Fisa cont venituri')
-        
-    except Exception as e:
-        # er="Fisier invalid!"
-        generare_fisier_text("Eroare la citirea fisierului Excel-va rugam sa va asigurati ca nu exista Sheet-uri in plus in fisierul importat, iar cele existente au denumirea corecta!De asemenea, coloanele 'Billing Document si Document Currency trebuie sa fie prezenta si sa nu aiba valori nule!'", {e})
-        return
-    # print(df)
-    # df=df.dropna(subset=["Billing Document"])
+    Sales_EFACTURA["Reference"]=Sales_EFACTURA["Reference"].astype(str).str.lstrip("0").str.replace(r'\.0$', '', regex=True)
 
-    # Verificare dacă toate coloanele obligatorii există în fișierul Excel
-    coloane_lipsa = [col for col in coloane_obligatorii if col not in df.columns]
-    if coloane_lipsa:
-        # Generare fișier text cu informații despre coloanele lipsă
-        generare_fisier_text("-------------------COLOANE LIPSA------------------------\n\n'Următoarele coloane obligatorii lipsesc din fișierul Excel:\n", coloane_lipsa)
-        # logging.error(f"Coloanele obligatorii lipsesc din fișierul Excel: {', '.join(coloane_lipsa)}")
-
-    # Verificare dacă există valori nule în coloanele obligatorii și generare informații despre pozițiile lor
-    filtrareRO = df.loc[df['Document Currency'] == 'RON']
-    print(filtrareRO)
-    for coloana in coloane_obligatorii:
-        try:
-            if filtrareRO[coloana].isnull().any():
-                # Obținere poziții cu valori nule
-                pozitii_nule = filtrareRO[filtrareRO[coloana].isnull()].index + 2
-                
-                # print(facturi_nule)
-                generare_fisier_text(f"-------------------VALORI NULE------------------------\n\n'Coloana {coloana} conține valori nule la linia/liniile din fisierul Excel:\n", pozitii_nule)
-                print(coloana)
-                if coloana!='Billing Document':
-                    print(filtrareRO.loc[filtrareRO[coloana].isnull(), 'Billing Document'])
-                    facturi_nule.extend(filtrareRO.loc[filtrareRO[coloana].isnull(), 'Billing Document'].values)
-                else:
-                    facturi_nule.append("nan")
-                    
-                # logging.error(f"Coloana {coloana} conține valori nule la liniile: {pozitii_nule.tolist()}")
-        except KeyError:
-            print("Coloana missing")
-            
-
-    print(coloana, 'plm')
-    facturiNuleUnice = len(list(set(list(facturi_nule))))
-    print(facturi_nule,"---------------------------")
-    #daca avem x valori "nan" in lista
-    # date=datetime.datetime.now().date()
-    strada = "ALEEA SINAIA, 120"
-    oras = "DOICESTI"
-    codPostal = "137195"
-    countrySubentity = "RO-DB"
-    country = "RO"
-    vatID ="RO901512" 
-    numeCompanie = "Vibrantz Performance Pigments Romania SRL"
-    contactPersonFirstName="IULIANA"
-    contactPersonLastName="CONSTANTIN"
-    contactPhone="0731490713"
-    IBAN="RO38RNCB0128045426650001"
-
-
-    # print(xml_efactura)
-
-    # with open("C:/Dezvoltare/E-Factura/2023/Baze de vanzari/outs/Header.xml", "w", encoding="utf-8") as f:
-
-    #     f.write(xml)
-    # if exista informatii.txt:
-    #     returnam fisier erori
-    # else:
-        
-    # filtrareRO = df.loc[df['Document Currency'] == 'RON']
-    Sales_EFACTURA=pd.DataFrame()
-
-    
-    
-    Sales_EFACTURA["Inv. No"] = filtrareRO["Billing Document"]
-   
-    
-    Sales_EFACTURA["Material"] = filtrareRO["Material"]
-    
-    
-    Sales_EFACTURA["Inv. Date"] = filtrareRO["Billing Date"]
-    Sales_EFACTURA['Data scadenta'] = Sales_EFACTURA['Inv. Date'] + pd.Timedelta(days=30)
-    
-    
-    Sales_EFACTURA["ClientNo"] = filtrareRO["sold-to party"]
-    
-    
-    Sales_EFACTURA["ClientName"] = filtrareRO["Sold-to-name"]
-    
-    # Sales_EFACTURA["AccountID"] = filtrareRO["Alternative Account"]
-
-    
-    Sales_EFACTURA["Quantity"] = filtrareRO["bill qty ZSDSABIL"]
-    
-    
-    Sales_EFACTURA["UnitPrice"] = filtrareRO["AC bill net val"] / filtrareRO["bill qty ZSDSABIL"]
-    
-    
-    Sales_EFACTURA["Description"] = filtrareRO["Description"]
-    
-    
-    Sales_EFACTURA["Amount in doc ccy"] = filtrareRO["Net value"]
-    
-    
-    Sales_EFACTURA["Amount in local ccy"] = filtrareRO["AC bill net val"]
-    
-    
-    Sales_EFACTURA["CcyCode"] = filtrareRO["Document Currency"]
-    
-    
-    Sales_EFACTURA["Unitate Masura"] = filtrareRO["Sales unit"]
-    
-    listaClientSales = list(Sales_EFACTURA["ClientNo"])
-
-    # try:
-    listaNumarFact = list(set(list(Sales_EFACTURA["Inv. No"])))
-    
-    
-    # except Exception as e:
-    #     logging.error(f"Coloana Billing Document nu exista. Eroare: {e}")
-
- 
+    # #!!!!!!!!!!
+    # #!!!!!!!!!!
+    # #!!!!!!!!!!
+    # #!!!!!!!!!!
+    # #!!!!!!!!!!
 
 
 
-    listaClientNameSalesrap=list(Sales_EFACTURA["ClientName"])
-    listaCUIRaportdepus=[]
-    listaSalesCountry=[]
-    listaLocalitateRap=[]
 
-    try:
-        for i in range(0, len(listaClientSales)):
-            listaClientSales[i]=str(listaClientSales[i]).replace(" ","").replace(".0","")
-        listaCUIRaportdepus.append("")
-        listaSalesCountry.append("")
-        listaLocalitateRap.append("")
-        # print(listaClientSales)
-
-        # print(Sales_EFACTURA)
-        # abc = Sales_EFACTURA.groupby('Inv. No').size()
+    # #=================================================DE STERS NEAPARAT===================================================================================
+    # Sales_EFACTURA["STREET_CLIENT"]="str. abc"
+    # Sales_EFACTURA["CITY_CLIENT"]="BUCURESTI"
+    # Sales_EFACTURA["REGION"]="DB"
+    # Sales_EFACTURA["Company"]=Sales_EFACTURA["Name 1"]
+    # #=================================================DE STERS NEAPARAT===================================================================================
 
 
-        # COD CLIENTI COMENTAT:
-        #    # --------------------------------------------------------------CLIENTI--------------------------------------------------------------------
-
-        #     Clients = pd.read_excel("C:/Dezvoltare/E-Factura/2023/Baze de vanzari/Baza de date vanzari/Clients.xlsx")
-
-        # conexiune baza de date
-        # engine = create_engine('mysql+mysqlconnector://userAdmin:some_pass@192.168.1.222/efacturaferro')
-        engine = create_engine(f"mysql://{config['mysql']['user']}:{config['mysql']['password']}@{config['mysql']['host']}/{config['mysql']['database']}")
-        print("CONECTAT LA BAZA")
-        query = "SELECT * FROM clients WHERE region IS NOT NULL"
-
-        bazaClienti = pd.read_sql(query, engine)
-        # print(bazaClienti)
-        engine.dispose()
-        print("Deconectat de la baza de date")
-
-        SalesInv=""
-        listaInvoiceNo=list(set(listaClientSales))
-        # print('asta e un len ',listaInvoiceNo)
-
-        dictClientName=bazaClienti.set_index('CUST#').to_dict()['Name']
-        dictClientCountry=bazaClienti.set_index('CUST#').to_dict()['Country']
-        dictClientCity=bazaClienti.set_index('CUST#').to_dict()['City']
-        dictClientRegNo=bazaClienti.set_index('CUST#').to_dict()['regno']
-        dictClientStreet=bazaClienti.set_index('CUST#').to_dict()['Street']
-        dictClientRegiune=bazaClienti.set_index('CUST#').to_dict()['region']
-        dpinVanzari=dp[dp['DocumentNo'].isin(list(Sales_EFACTURA["Inv. No"]))]
-        dictCodCota = dpinVanzari.set_index('DocumentNo').to_dict()['Tx']
-        dictCota={'A1': 19.00, 'B0': 0.00, 'A6':0.00}
-        # print(dictClientCity)
-        # Sales_EFACTURA["Name"] = Sales_EFACTURA["ClientName"].map(dictClientName)
-        Sales_EFACTURA["Country"] = Sales_EFACTURA["ClientNo"].map(dictClientCountry)
-        Sales_EFACTURA["City"] = Sales_EFACTURA["ClientNo"].map(dictClientCity)
-        Sales_EFACTURA["RegNo"] = Sales_EFACTURA["ClientNo"].map(dictClientRegNo)
-        Sales_EFACTURA["Street"] = Sales_EFACTURA["ClientNo"].map(dictClientStreet)
-        Sales_EFACTURA["CodRegiune"] = Sales_EFACTURA["ClientNo"].map(dictClientRegiune)
-        Sales_EFACTURA["Tx"] = Sales_EFACTURA['Inv. No'].map(dictCodCota)
-        # Sales_EFACTURA.loc[(Sales_EFACTURA['Tx'].astype(str) == 'nan') & (Sales_EFACTURA['Inv. No'].astype(str).str.startswith('18')), 'Tx'] = 'B0'
-
-        Sales_EFACTURA["Cota"] = Sales_EFACTURA['Tx'].map(dictCota)
-        # print(Sales_EFACTURA["ClientNo"])
 
 
-        dictTaxCodeVzIDTVA={'B0':"AE",	'A1':"S", 'A6':'AE'}
-        dictUnitateMasura={"KG":"KGM"}
-        # dictTaxCodeVzDescriere={310301:"Livrări intracomunitare de bunuri, scutite",310306:"Prestări de servicii intracomunitare care beneficiază de scutire in statul membru in care taxa este datorată",	310309:"Livrări de bunuri şi prestări de servicii taxabile cu cota 19%",	310310:"Livrări de bunuri şi prestări de servicii taxabile cu cota 9%",	310312:"Livrari de bunuri si prestari de servicii supuse masurilor de simplificare (taxare inversa)",	310313:"Livrari de bunuri scutite cu drept de deducere cf Art. 294 alin (1) lit a) si b) din Codul Fiscal  (Exporturi)"}
-        # dictTaxCodeVzTaxType={310301:300,	310309:300,	310310:300,310306:300,	310312:300,	310313:300, None:0}
-        # JurnalVz["Cota TVA"]=JurnalVz["TaxCode"].map(dictTaxCodeVzCotaTVA)
-        # JurnalVz["TaxType"]=JurnalVz["TaxCode"].map(dictTaxCodeVzTaxType)
-        # JurnalVz["TaxAmount"]=JurnalVz["FinalAmount"]*JurnalVz["Cota TVA"]
 
-        # #-------------aducere taxcode din jurnal in raport de sales----------------------------
 
-        # listaTaxCodeJurnal=list(JurnalVz["TaxCode"])
-        # listaFactJurnal=list(JurnalVz["Numar document"])
 
-        # try:
-        #     listaFacturaRaportVanzari=list(Sales_EFACTURA["Inv. No"])
-        # except:
-        #     print("Coloana Billing Document nu exista.")
-        # taxcoderaportsales=[]
-        # while True:
-        #     try:
-        #         for i in range(0, len(listaFacturaRaportVanzari)):
-        #             ok=0
-        #             for j in range(0, len(listaFactJurnal)):
-        #                 if ok==0:
-        #                     # print(str(listaFacturaRaportVanzari[i]).replace(".0",""),str(listaFactJurnal[j]).replace(".0","") )
-        #                     if str(listaFacturaRaportVanzari[i]).replace(".0","")==str(listaFactJurnal[j]).replace(".0",""):
-        #                         taxcoderaportsales.append(listaTaxCodeJurnal[j])
-        #                         ok=1
-        #             if ok==0:
-        #                 taxcoderaportsales.append(None)	
-        #     except:
-        #         print("Coloana Billing Document nu exista.")
-        #     break
-            
 
-        # Sales_EFACTURA["TaxCode"]=taxcoderaportsales
-        # # print(Sales_EFACTURA)
-        # Sales_EFACTURA["Cota"] = Sales_EFACTURA["TaxCode"].map(dictTaxCodeVzCotaTVA)
-        Sales_EFACTURA["ID TVA"] = Sales_EFACTURA["Tx"].map(dictTaxCodeVzIDTVA)
-        Sales_EFACTURA["Pret Unitar"] = Sales_EFACTURA['Amount in local ccy']/Sales_EFACTURA["Quantity"]
-        Sales_EFACTURA["Cod Unitate Masura"] = Sales_EFACTURA["Unitate Masura"].map(dictUnitateMasura)
-        Sales_EFACTURA["Pret cu TVA"] = Sales_EFACTURA["Pret Unitar"] * Sales_EFACTURA["Cota"]
-        Sales_EFACTURA["Valoare linia TVA"] = Sales_EFACTURA["Amount in local ccy"] * (Sales_EFACTURA["Cota"] / 100)
-        Sales_EFACTURA["Valoare linie cu TVA"] = Sales_EFACTURA["Valoare linia TVA"] + Sales_EFACTURA["Amount in local ccy"]
-        Sales_EFACTURA['is_positive_flagOB'] = Sales_EFACTURA['Amount in local ccy'] >= 0
-        Sales_EFACTURA['is_positive_flagOB']=Sales_EFACTURA['is_positive_flagOB'].astype(str).str.replace("True","D")
-        Sales_EFACTURA['is_positive_flagOB']=Sales_EFACTURA['is_positive_flagOB'].astype(str).str.replace("False","C")
-        
-        
-        total_factura=Sales_EFACTURA.groupby("Inv. No")["Amount in local ccy"].transform('sum')
-        Sales_EFACTURA["Total Factura"]=total_factura
-        Sales_EFACTURA['flagInvoiceCreditNote'] = Sales_EFACTURA['Total Factura'] >= 0
-        Sales_EFACTURA['flagInvoiceCreditNote']=Sales_EFACTURA['flagInvoiceCreditNote'].astype(str).str.replace("True","Invoice")
-        Sales_EFACTURA['flagInvoiceCreditNote']=Sales_EFACTURA['flagInvoiceCreditNote'].astype(str).str.replace("False","CreditNote")
-        listaFlagInvoiceCreditNote=list(set(list(Sales_EFACTURA["flagInvoiceCreditNote"])))
-        totalFactura=Sales_EFACTURA["Amount in local ccy"].sum()
-        primaFactura = list(Sales_EFACTURA["Inv. No"])[0]
-        ultimaFactura=list(Sales_EFACTURA["Inv. No"])[-1]
-        print(totalFactura, primaFactura, ultimaFactura)
-        print("asta e prima factura in prelucrare_date.py ",primaFactura)
-        
-        Sales_EFACTURA.to_excel("C:/Dezvoltare/E-Factura/2023/Baze de vanzari/outs/Output.xlsx", index=False)
-        # Sales_EFACTURA.to_excel("/home/efactura/efactura_ferro/bazadatevanzari/Output.xlsx", index=False)
 
-        issue_date = pd.to_datetime(Sales_EFACTURA["Inv. Date"]).dt.strftime('%Y-%m-%d').iloc[0]
-        data_scadenta=pd.to_datetime(Sales_EFACTURA["Data scadenta"]).dt.strftime('%Y-%m-%d').iloc[0]
-        nrFacturiTrimise = len(listaNumarFact)
 
-        for i in range(0, len(listaNumarFact)):
-            df_fact_curenta = Sales_EFACTURA.groupby(["Inv. No"]).get_group(listaNumarFact[i])
-            if df_fact_curenta["flagInvoiceCreditNote"].iloc[0]=="Invoice":
-            
+
+
+
+
+
+
+    # Sales_EFACTURA=Sales_EFACTURA.loc[~Sales_EFACTURA["GL Cat"].astype(str).str.contains("Currency Adjustment Factor")]
+    # Sales_EFACTURA.to_excel("D:/Projects/27. Efactura/E-Factura Expeditors/out/RJ GRUPAT.xlsx")
+    Sales_EFACTURA["Cod Unitate Masura"]=Sales_EFACTURA["Base Unit of Measure"].map(dictUM)
+    Sales_EFACTURA["Base Unit of Measure"]=Sales_EFACTURA["Base Unit of Measure"].fillna("PC")
+    Sales_EFACTURA["Cod Unitate Masura"]=Sales_EFACTURA["Cod Unitate Masura"].fillna("H87")
+    Sales_EFACTURA["CUI_CLIENT"]=Sales_EFACTURA["Customer"].astype(str).str.lstrip("0").str.replace(r'\.0$', '', regex=True).map(dictClients_CUI)
+    Sales_EFACTURA["COUNTRY_CLIENT"]=Sales_EFACTURA["Customer"].astype(str).str.lstrip("0").str.replace(r'\.0$', '', regex=True).map(dictClients_Country)
+    Sales_EFACTURA["STREET_CLIENT"]=Sales_EFACTURA["Customer"].astype(str).str.lstrip("0").str.replace(r'\.0$', '', regex=True).map(dictClients_Street)
+    Sales_EFACTURA["CITY_CLIENT"]=Sales_EFACTURA["Customer"].astype(str).str.lstrip("0").str.replace(r'\.0$', '', regex=True).map(dictClients_City)
+    Sales_EFACTURA["REGION"]=Sales_EFACTURA["Customer"].astype(str).str.lstrip("0").str.replace(r'\.0$', '', regex=True).map(dictClients_Region)
+    Sales_EFACTURA["Company"]=Sales_EFACTURA["Customer"].astype(str).str.lstrip("0").str.replace(r'\.0$', '', regex=True).map(dictClients_Company)
+    Sales_EFACTURA["General ledger amount"]=Sales_EFACTURA["General ledger amount"]*-1
+    Sales_EFACTURA["Amount in local currency"]=Sales_EFACTURA["Amount in local currency"]*-1
+    Sales_EFACTURA.to_excel("C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed/Baza de date vanzari/out/Sales initial.xlsx")
+    Sales_EFACTURA=Sales_EFACTURA.loc[Sales_EFACTURA["COUNTRY_CLIENT"]=="RO"]
+    # Sales_EFACTURA["CITY_CLIENT"]=Sales_EFACTURA["GCI"].str.lstrip("0").str.replace(r'\.0$', '', regex=True).map(dictClients_City)
+    # Sales_EFACTURA["STREET_CLIENT"]=Sales_EFACTURA["GCI"].str.lstrip("0").str.replace(r'\.0$', '', regex=True).map(dictClients_Street)
+    dictTaxCode={"A1":"S", 'B0':"AE", 'Y8':'E'}
+    Sales_EFACTURA["ID TVA"]=Sales_EFACTURA["Tax Code"].map(dictTaxCode)
+    dictCota={"AE":0, "S":19.00, "E":0 }
+    # Sales_EFACTURA.to_excel("C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed/Baza de date vanzari/out/Sales initial.xlsx")
+    Sales_EFACTURA["Valoare linia TVA (Valuta)"]=Sales_EFACTURA["General ledger amount"]*(Sales_EFACTURA["Tax Propotion"]/100)
+    Sales_EFACTURA["Cota"]=Sales_EFACTURA["Tax Propotion"]
+    Sales_EFACTURA["Valoare linia TVA"]=Sales_EFACTURA["Amount in local currency"]*(Sales_EFACTURA["Tax Propotion"]/100)
+    Sales_EFACTURA["Valoare linie cu TVA (Valuta)"]=Sales_EFACTURA["General ledger amount"]+Sales_EFACTURA["Valoare linia TVA (Valuta)"]
+    Sales_EFACTURA["Valoare linie cu TVA"]=Sales_EFACTURA["Amount in local currency"] + Sales_EFACTURA["Valoare linia TVA"]
+    total_factura=Sales_EFACTURA.groupby("Reference")["Amount in local currency"].transform('sum')
+    Sales_EFACTURA["Total Factura"]=total_factura
+    # Sales_EFACTURA.to_excel("C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed/Baza de date vanzari/out/Sales initial.xlsx")
+    Sales_EFACTURA['flagInvoiceCreditNote'] = Sales_EFACTURA['Total Factura'] >= 0
+    Sales_EFACTURA['flagInvoiceCreditNote']=Sales_EFACTURA['flagInvoiceCreditNote'].astype(str).str.replace("True","Invoice")
+    Sales_EFACTURA['flagInvoiceCreditNote']=Sales_EFACTURA['flagInvoiceCreditNote'].astype(str).str.replace("False","CreditNote")
+    Sales_EFACTURA.loc[Sales_EFACTURA["flagInvoiceCreditNote"]=="Invoice", 'Inv Type code']=380
+    Sales_EFACTURA.loc[Sales_EFACTURA["flagInvoiceCreditNote"]=="CreditNote", 'Inv Type code']=381
+    Sales_EFACTURA.loc[Sales_EFACTURA["Reference"].astype(str).str.startswith("BMD"), 'Inv Type code']=389
+    Sales_EFACTURA["Quantity"]=Sales_EFACTURA["Quantity"].fillna(-1)
+    Sales_EFACTURA["Quantity"]=Sales_EFACTURA["Quantity"]*(-1)
+    Sales_EFACTURA.loc[Sales_EFACTURA["Quantity"]==0, 'Quantity']=1
+    Sales_EFACTURA["Unit Price"]=Sales_EFACTURA["General ledger amount"]/Sales_EFACTURA["Quantity"]
+    Sales_EFACTURA['Data scadenta'] = Sales_EFACTURA['Document Date'] + pd.Timedelta(days=60)
+    # Sales_EFACTURA['Amount'] = Sales_EFACTURA.groupby(['Billing Description', 'Reference'])['Amount'].transform('sum').round(2)
+    # Sales_EFACTURA['General ledger amount'] = Sales_EFACTURA.groupby(['Billing Description', 'Reference'])['General ledger amount'].transform('sum').round(2)
+
+    # După ce am calculat suma prețurilor, eliminăm duplicatele
+
+    # Sales_EFACTURA = Sales_EFACTURA.drop_duplicates(subset=['Reference', 'Billing Description'])
+    # Sales_EFACTURA.loc[Sales_EFACTURA["General ledger amount"]!="nan", 'General ledger amount']=Sales_EFACTURA["General ledger amount"]/Sales_EFACTURA["FX Inv"]
+
+    # Sales_EFACTURA.loc[Sales_EFACTURA["General ledger currency"]!="nan", "FX"]=Sales_EFACTURA["General ledger amount"]/Sales_EFACTURA["General ledger amount"]
+    # Sales_EFACTURA['FX'] = Sales_EFACTURA.groupby('Reference')['FX'].transform(lambda x: x.fillna(method='ffill'))
+    # Sales_EFACTURA['General ledger currency'] = Sales_EFACTURA.groupby('Reference')['General ledger currency'].transform(lambda x: x.fillna(method='ffill'))
+    # Sales_EFACTURA.loc[Sales_EFACTURA["General ledger amount"].astype(str)=="nan", "General ledger amount" ]=Sales_EFACTURA["General ledger amount"]/Sales_EFACTURA['FX']
+
+    listaNumarFact = list(set(list(Sales_EFACTURA["Reference"])))
+    # listaTipFactura=list(set(list(Sales_EFACTURA["Inv Type code"])))
+    totalFactura=Sales_EFACTURA["Amount in local currency"].sum()
+    primaFactura = list(Sales_EFACTURA["Reference"])[0]
+    ultimaFactura=list(Sales_EFACTURA["Reference"])[-1]
+    print(totalFactura, primaFactura, ultimaFactura)
+    print("asta e prima factura in prelucrare_date.py ",primaFactura)
+    Sales_EFACTURA.to_excel("C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed/Baza de date vanzari//out/Sales.xlsx")
+
+    issue_date = pd.to_datetime(Sales_EFACTURA["Document Date"]).dt.strftime('%Y-%m-%d').iloc[0]
+    nrFacturiTrimise = len(listaNumarFact)
+
+    for i in range(0, len(listaNumarFact)):
+        df_fact_curenta = Sales_EFACTURA.groupby(["Reference"]).get_group(listaNumarFact[i])
+        if df_fact_curenta["flagInvoiceCreditNote"].iloc[0]=="Invoice":
+    #-------------------------------------------------------------------INVOICE IN LEI--------------------------------------------------------------------------------------------------
+            issue_date = pd.to_datetime(df_fact_curenta["Document Date"]).dt.strftime('%Y-%m-%d').iloc[0]
+            data_scadenta=pd.to_datetime(df_fact_curenta["Data scadenta"]).dt.strftime('%Y-%m-%d').iloc[0]
+
+            if str(df_fact_curenta["General ledger currency"].iloc[0])=="RON":    
                 listaCote = list(set(list(df_fact_curenta["Cota"])))
                 subtotalTva = df_fact_curenta.groupby("Cota")["Valoare linia TVA"].sum().reset_index()
-                subtotalBaza=df_fact_curenta.groupby("Cota")["Amount in local ccy"].sum().reset_index()
+                subtotalBaza=df_fact_curenta.groupby("Cota")["General ledger amount"].sum().reset_index()
                 subtotalIDTVA=df_fact_curenta.groupby("ID TVA")["Cota"].sum().reset_index()
                 
                 total_amount = 0
+                tva_total=0
 
                 XML_Header = f'''<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n
                 <Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"\n xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:ns4="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2"\n xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2 http://docs.oasis-open.org/ubl/os-UBL-2.1/xsd/maindoc/UBL-Invoice-2.1.xsd">
                 <cbc:CustomizationID>urn:cen.eu:en16931:2017#compliant#urn:efactura.mfinante.ro:CIUS-RO:1.0.1</cbc:CustomizationID>
-                <cbc:ID>{str(df_fact_curenta["Inv. No"].iloc[0]).replace(".0", "")}</cbc:ID>
+                <cbc:ID>BMD-{str(df_fact_curenta["Reference"].iloc[0]).replace(".0", "")}</cbc:ID>
                 <cbc:IssueDate>{issue_date}</cbc:IssueDate>
                 <cbc:DueDate>{data_scadenta}</cbc:DueDate>
-                <cbc:InvoiceTypeCode>380</cbc:InvoiceTypeCode>
-                <cbc:DocumentCurrencyCode>RON</cbc:DocumentCurrencyCode>
+                <cbc:InvoiceTypeCode>{str(df_fact_curenta["Inv Type code"].iloc[0]).replace(".0", "")[:299]}</cbc:InvoiceTypeCode>
+
+    <cbc:DocumentCurrencyCode>RON</cbc:DocumentCurrencyCode>
+    <cbc:TaxCurrencyCode>RON</cbc:TaxCurrencyCode>
+            
+
                 '''
 
                 AccountingSupplierParty = '''
@@ -360,53 +275,26 @@ def prelucrareDate(fisierDeVanzari):
                     </cac:Party>
                 </cac:AccountingSupplierParty>
                 '''
-                
-                
-                if str(df_fact_curenta["Street"].iloc[0]) == "  ":
-                    AccountingCustomerPartyXML=f'''
-                    <cac:AccountingCustomerParty>
-                        <cac:Party>
-                            <cac:PostalAddress>
-                                <cbc:StreetName>{str(df_fact_curenta["City"].iloc[0])}</cbc:StreetName>
-                                <cbc:CityName>{str(df_fact_curenta["City"].iloc[0])}</cbc:CityName>
-                                <cbc:CountrySubentity>RO-{df_fact_curenta["CodRegiune"].iloc[0]}</cbc:CountrySubentity>
-                                <cac:Country>
-                                    <cbc:IdentificationCode>{str(df_fact_curenta["Country"].iloc[0])}</cbc:IdentificationCode>
-                                </cac:Country>
-                            </cac:PostalAddress>
-                            <cac:PartyTaxScheme>
-                                <cbc:CompanyID>{str(df_fact_curenta["RegNo"].iloc[0])}</cbc:CompanyID>
-                                <cac:TaxScheme>
-                                    <cbc:ID>VAT</cbc:ID>
-                                </cac:TaxScheme>
-                            </cac:PartyTaxScheme>
-                            <cac:PartyLegalEntity>
-                                <cbc:RegistrationName>{str(df_fact_curenta["ClientName"].iloc[0])}</cbc:RegistrationName>
-                                <cbc:CompanyID>{str(df_fact_curenta["RegNo"].iloc[0])}</cbc:CompanyID>
-                            </cac:PartyLegalEntity>
-                        </cac:Party>
-                    </cac:AccountingCustomerParty>'''
-                else:
-                    AccountingCustomerPartyXML=f'''
+                AccountingCustomerPartyXML=f'''
                 <cac:AccountingCustomerParty>
                     <cac:Party>
                         <cac:PostalAddress>
-                            <cbc:StreetName>{str(df_fact_curenta["Street"].iloc[0])}</cbc:StreetName>
-                            <cbc:CityName>{str(df_fact_curenta["City"].iloc[0])}</cbc:CityName>
-                            <cbc:CountrySubentity>RO-{df_fact_curenta["CodRegiune"].iloc[0]}</cbc:CountrySubentity>
+                            <cbc:StreetName>{str(df_fact_curenta["STREET_CLIENT"].iloc[0])}</cbc:StreetName>
+                            <cbc:CityName>{str(df_fact_curenta["CITY_CLIENT"].iloc[0])}</cbc:CityName>
+                            <cbc:CountrySubentity>RO-{df_fact_curenta["REGION"].iloc[0]}</cbc:CountrySubentity>
                             <cac:Country>
-                                <cbc:IdentificationCode>{str(df_fact_curenta["Country"].iloc[0])}</cbc:IdentificationCode>
+                                <cbc:IdentificationCode>{str(df_fact_curenta["COUNTRY_CLIENT"].iloc[0])}</cbc:IdentificationCode>
                             </cac:Country>
                         </cac:PostalAddress>
                         <cac:PartyTaxScheme>
-                            <cbc:CompanyID>{str(df_fact_curenta["RegNo"].iloc[0])}</cbc:CompanyID>
+                            <cbc:CompanyID>{str(df_fact_curenta["CUI_CLIENT"].iloc[0])}</cbc:CompanyID>
                             <cac:TaxScheme>
                                 <cbc:ID>VAT</cbc:ID>
                             </cac:TaxScheme>
                         </cac:PartyTaxScheme>
                         <cac:PartyLegalEntity>
-                            <cbc:RegistrationName>{str(df_fact_curenta["ClientName"].iloc[0])}</cbc:RegistrationName>
-                            <cbc:CompanyID>{str(df_fact_curenta["RegNo"].iloc[0])}</cbc:CompanyID>
+                            <cbc:RegistrationName>{str(df_fact_curenta["Company"].iloc[0])}</cbc:RegistrationName>
+                            <cbc:CompanyID>{str(df_fact_curenta["CUI_CLIENT"].iloc[0])}</cbc:CompanyID>
                         </cac:PartyLegalEntity>
                     </cac:Party>
                 </cac:AccountingCustomerParty>'''
@@ -417,41 +305,31 @@ def prelucrareDate(fisierDeVanzari):
                 total_tva=0
                 # print(subtotalTva)
                 # <cbc:ID>{row["ID TVA"]}</cbc:ID>
+                TAXTOTAL="\n<cac:TaxTotal>\n"
+                TaxTotal =""
                 for index, row in subtotalTva.iterrows():
-                    taxamount=subtotalTva["Valoare linia TVA"].sum()
-                    baza = subtotalBaza["Amount in local ccy"].sum()
-                    taxamount = normal_round(taxamount, decimals=2)
-                    taxamount2 = row["Valoare linia TVA"]
-                    taxamount2 = normal_round(taxamount2, decimals=2)
-                    if subtotalIDTVA["ID TVA"][index]=="S":
-                        TaxTotal = f'''
-                        <cac:TaxTotal>
-                            <cbc:TaxAmount currencyID="RON">{(str(taxamount))}</cbc:TaxAmount>
-                            <cac:TaxSubtotal>
-                                <cbc:TaxableAmount currencyID="RON">{str(round(float(str(baza)),2))}</cbc:TaxableAmount>
-                                <cbc:TaxAmount currencyID="RON">{(str(taxamount2))}</cbc:TaxAmount>
-                                <cac:TaxCategory>
-                                    
-                                    <cbc:ID>{subtotalIDTVA["ID TVA"][index]}</cbc:ID>
-                                    <cbc:Percent>{str(round(float(str(row["Cota"])),2))}</cbc:Percent>
-                                    <cac:TaxScheme>
-                                        <cbc:ID>VAT</cbc:ID>
-                                    </cac:TaxScheme>
-                                </cac:TaxCategory>
-                            </cac:TaxSubtotal>
-                        </cac:TaxTotal>\n'''
-                    else:
-                        TaxExemptionReasonCode="VATEX-EU-AE"
-                        TaxTotal = f'''
-                        <cac:TaxTotal>
-                            <cbc:TaxAmount currencyID="RON">{(str(taxamount))}</cbc:TaxAmount>
-                            <cac:TaxSubtotal>
-                                <cbc:TaxableAmount currencyID="RON">{str(round(float(str(baza)),2))}</cbc:TaxableAmount>
-                                <cbc:TaxAmount currencyID="RON">{(str(taxamount2))}</cbc:TaxAmount>
-                                <cac:TaxCategory>
-                                    
-                                    <cbc:ID>{subtotalIDTVA["ID TVA"][index]}</cbc:ID>
+                    taxamount=subtotalTva["Valoare linia TVA"][index].sum()
+                    taxamounttotal=subtotalTva["Valoare linia TVA"].sum()
+                    taxamounttotal=normal_round(taxamounttotal, decimals=2)
+                    baza = subtotalBaza["General ledger amount"][index].sum()
+                    baza=normal_round(baza, decimals=2)
+                    taxamount=normal_round(taxamount, decimals=2)
 
+                    if str(subtotalIDTVA["ID TVA"][index])!="S":
+
+                        if str(subtotalIDTVA["ID TVA"][index])=="E":
+                            TaxExemptionReasonCode="VATEX-EU-G"
+                        else:
+                            TaxExemptionReasonCode="VATEX-EU-AE"
+
+                        TaxTotal = TaxTotal+f'''
+                        
+                            
+                            <cac:TaxSubtotal>
+                                <cbc:TaxableAmount currencyID="RON">{str(round(float(str(baza)),2))}</cbc:TaxableAmount>
+                                <cbc:TaxAmount currencyID="RON">{str(round(float(str(row["Valoare linia TVA"])),2))}</cbc:TaxAmount>
+                                <cac:TaxCategory>
+                                    <cbc:ID>{subtotalIDTVA["ID TVA"][index]}</cbc:ID>
                                     <cbc:Percent>{str(round(float(str(row["Cota"])),2))}</cbc:Percent>
                                     <cbc:TaxExemptionReasonCode>{TaxExemptionReasonCode}</cbc:TaxExemptionReasonCode>
                                     <cac:TaxScheme>
@@ -459,22 +337,41 @@ def prelucrareDate(fisierDeVanzari):
                                     </cac:TaxScheme>
                                 </cac:TaxCategory>
                             </cac:TaxSubtotal>
-                        </cac:TaxTotal>\n'''
-                        
+                        \n'''
+                    else:
+                            TaxTotal = TaxTotal + f'''
 
-                
+                            <cac:TaxSubtotal>
+                                    <cbc:TaxableAmount currencyID="RON">{str(round(float(str(baza)),2))}</cbc:TaxableAmount>
+                                    <cbc:TaxAmount currencyID="RON">{str(round(float(str(row["Valoare linia TVA"])),2))}</cbc:TaxAmount>
+                                    <cac:TaxCategory>
+                                        <cbc:ID>{subtotalIDTVA["ID TVA"][index]}</cbc:ID>
+                                        <cbc:Percent>{str(round(float(str(row["Cota"])),2))}</cbc:Percent>
+                                        <cac:TaxScheme>
+                                            <cbc:ID>VAT</cbc:ID>
+                                        </cac:TaxScheme>
+                                    </cac:TaxCategory>
+                            </cac:TaxSubtotal>
+                        \n'''
+                        # print("abc")
+                TAXTOTAL = TAXTOTAL + '<cbc:TaxAmount currencyID="RON">' + str(round(float(str(taxamounttotal)),2)) +'</cbc:TaxAmount>' + TaxTotal + "\n</cac:TaxTotal>\n"
                 for index, row in df_fact_curenta.iterrows():
-                    line_amount = row["Amount in local ccy"]
+                    line_amount = row["General ledger amount"]
+                    # line_amount=normal_round(line_amount, decimals=2)
                     val_cu_tva = row["Valoare linie cu TVA"]
+                    tva = row["Valoare linia TVA"]
+                    # tva = normal_round(tva, decimals=2)
                     
                     total_tva += val_cu_tva
+                    tva_total += tva
                     total_amount += line_amount
+                    # total_amount=normal_round(total_amount, decimals=2)
                     invoiceLine += f'''<cac:InvoiceLine>
                             <cbc:ID>{line_count}</cbc:ID>
                             <cbc:InvoicedQuantity unitCode="{row["Cod Unitate Masura"]}">{row["Quantity"]}</cbc:InvoicedQuantity>
-                            <cbc:LineExtensionAmount currencyID="RON">{str(round(float(str(row["Amount in local ccy"])),2))}</cbc:LineExtensionAmount>
+                            <cbc:LineExtensionAmount currencyID="RON">{str(round(float(str(row["General ledger amount"])),2))}</cbc:LineExtensionAmount>
                             <cac:Item>
-                                <cbc:Name>{row["Description"]}</cbc:Name>
+                                <cbc:Name>{row["Material Description"]}</cbc:Name>
                                 <cac:ClassifiedTaxCategory>
                                     <cbc:ID>{row["ID TVA"]}</cbc:ID>
                                     <cbc:Percent>{str(round(float(str(row["Cota"])),2))}</cbc:Percent>
@@ -484,7 +381,7 @@ def prelucrareDate(fisierDeVanzari):
                                 </cac:ClassifiedTaxCategory>
                             </cac:Item>
                             <cac:Price>
-                                <cbc:PriceAmount currencyID="RON">{str(round(float(str(row["UnitPrice"])),2))}</cbc:PriceAmount>
+                                <cbc:PriceAmount currencyID="RON">{str(abs(round(float(str(row["Unit Price"])),2)))}</cbc:PriceAmount>
                             </cac:Price>
                         </cac:InvoiceLine>'''
                         
@@ -492,18 +389,17 @@ def prelucrareDate(fisierDeVanzari):
                     
                     # Incrementați numărul elementului pentru următoarea linie din factură
                     line_count += 1
-                # total_amount_with_vat = total_amount * (1 + row["Cota"] / 100)
-                total_amount_with_vat=normal_round(total_amount, decimals=2)+normal_round(taxamount2, decimals=2)
-                # total_amount_with_vat=normal_round(total_amount_with_vat,)
-                # print(row["Inv. No"], total_tva)
-                # print(str(df_fact_curenta["Inv. No"].iloc[0]).replace(".0", "") ,total_amount_without_vat)
-                
+                total_amount_with_vat = total_amount + tva_total
+                # total_amount_with_vat=normal_round(total_amount_with_vat, decimals=2)
+                # print(row["Reference"], total_tva)
+                # print(str(df_fact_curenta["Reference"].iloc[0]).replace(".0", "") ,total_amount_without_vat)
+
                 PaymentMeans = f'''
                 <cac:PaymentMeans>
                     <cbc:PaymentMeansCode>10</cbc:PaymentMeansCode>
                 </cac:PaymentMeans>'''
 
-                
+
                 LegalMonetary = f'''
                 <cac:LegalMonetaryTotal>
                     <cbc:LineExtensionAmount currencyID="RON">{str(round(float(str(total_amount)),2))}</cbc:LineExtensionAmount>
@@ -515,14 +411,252 @@ def prelucrareDate(fisierDeVanzari):
                     <cbc:PayableRoundingAmount currencyID="RON">0.00</cbc:PayableRoundingAmount>
                     <cbc:PayableAmount currencyID="RON">{str(round(float(str(total_amount_with_vat)),2))}</cbc:PayableAmount>
                 </cac:LegalMonetaryTotal>'''
-            else:
-                listaCote = list(set(list(df_fact_curenta["Cota"])))
-                subtotalTva = df_fact_curenta.groupby("Cota")["Valoare linia TVA"].sum().reset_index()
-                subtotalBaza=df_fact_curenta.groupby("Cota")["Amount in local ccy"].sum().reset_index()
-                subtotalIDTVA=df_fact_curenta.groupby("ID TVA")["Cota"].sum().reset_index()
 
+
+                # print(total_amount)
+                # eFacturaXML = meta + XML_Header + AccountingSupplierParty + AccountingCustomerPartyXML + " TAX TOTAL " + " LEGAL MONETARY TOOL " + invoiceLine +"</Invoice>"
+                # Scrieți fișierul XML pentru fiecare factură în parte
+                eFacturaXML = XML_Header + AccountingSupplierParty + AccountingCustomerPartyXML + TAXTOTAL + LegalMonetary + invoiceLine +"\n</Invoice>"
+                def remove_diacritics(input_str):
+                    nfkd_form = unicodedata.normalize('NFKD', input_str)
+                    return ''.join([c for c in nfkd_form if not unicodedata.combining(c)])
+
+                eFacturaXML = remove_diacritics(eFacturaXML)
+                eFacturaXML=eFacturaXML.replace("&"," ")
+
+                # Scrie conținutul în fișierul XML
+                with open(f"C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed/outs/SalesInvoice_{str(listaNumarFact[i]).replace('.0', '').replace(':', '')}.xml", "w", encoding="utf-8") as f:
+                    f.write(eFacturaXML)
+
+                print("A PRELUCRAT DATELE")
+        #-------------------------------------------------------------------INVOICE IN VALUTA--------------------------------------------------------------------------------------------------
+            else:
+                df_fact_curenta = Sales_EFACTURA.groupby(["Reference"]).get_group(listaNumarFact[i])
+                issue_date = pd.to_datetime(df_fact_curenta["Document Date"]).dt.strftime('%Y-%m-%d').iloc[0]
+                data_scadenta=pd.to_datetime(df_fact_curenta["Data scadenta"]).dt.strftime('%Y-%m-%d').iloc[0]
+
+                currency=str(df_fact_curenta["General ledger currency"].iloc[0])
+                
+                listaCote = list(set(list(df_fact_curenta["Cota"])))
+                subtotalTvaLEI=df_fact_curenta.groupby("Cota")["Valoare linia TVA"].sum().reset_index()
+                subtotalTva = df_fact_curenta.groupby("Cota")["Valoare linia TVA (Valuta)"].sum().reset_index()
+                subtotalBaza=df_fact_curenta.groupby("Cota")["General ledger amount"].sum().reset_index()
+                subtotalBazaValuta=df_fact_curenta.groupby("Cota")["General ledger amount"].sum().reset_index()
+                subtotalTvaValuta=df_fact_curenta.groupby("Cota")["Valoare linia TVA (Valuta)"].sum().reset_index()
+                subtotalIDTVA=df_fact_curenta.groupby("ID TVA")["Cota"].sum().reset_index()
                 
                 total_amount = 0
+                tva_total=0
+
+                XML_Header = f'''<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n
+                <Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"\n xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:ns4="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2"\n xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2 http://docs.oasis-open.org/ubl/os-UBL-2.1/xsd/maindoc/UBL-Invoice-2.1.xsd">
+                <cbc:CustomizationID>urn:cen.eu:en16931:2017#compliant#urn:efactura.mfinante.ro:CIUS-RO:1.0.1</cbc:CustomizationID>
+                <cbc:ID>BMD-{str(df_fact_curenta["Reference"].iloc[0]).replace(".0", "")}</cbc:ID>
+                <cbc:IssueDate>{issue_date}</cbc:IssueDate>
+                <cbc:DueDate>{data_scadenta}</cbc:DueDate>
+                <cbc:InvoiceTypeCode>{str(df_fact_curenta["Inv Type code"].iloc[0]).replace(".0", "")[:299]}</cbc:InvoiceTypeCode>
+                <cbc:DocumentCurrencyCode>{str(df_fact_curenta['General ledger currency'].iloc[0])}</cbc:DocumentCurrencyCode>
+                <cbc:TaxCurrencyCode>RON</cbc:TaxCurrencyCode>
+                '''
+
+                AccountingSupplierParty = '''
+                <cac:AccountingSupplierParty>
+                    <cac:Party>
+                        <cac:PostalAddress>
+                            <cbc:StreetName>'''+str(strada)+'''</cbc:StreetName>
+                            <cbc:CityName>'''+str(oras)+'''</cbc:CityName>
+                            <cbc:CountrySubentity>'''+str(countrySubentity)+'''</cbc:CountrySubentity>
+                            <cac:Country>
+                                <cbc:IdentificationCode>'''+str(country)+'''</cbc:IdentificationCode>
+                            </cac:Country>
+                        </cac:PostalAddress>
+                        <cac:PartyTaxScheme>
+                            <cbc:CompanyID>'''+str(vatID)+'''</cbc:CompanyID>
+                            <cac:TaxScheme>
+                                <cbc:ID>VAT</cbc:ID>
+                            </cac:TaxScheme>
+                        </cac:PartyTaxScheme>
+                        <cac:PartyLegalEntity>
+                            <cbc:RegistrationName>'''+str(numeCompanie)+'''</cbc:RegistrationName>
+                            <cbc:CompanyID>'''+str(vatID)+'''</cbc:CompanyID>
+                        </cac:PartyLegalEntity>
+                    </cac:Party>
+                </cac:AccountingSupplierParty>
+                '''
+                AccountingCustomerPartyXML=f'''
+                <cac:AccountingCustomerParty>
+                    <cac:Party>
+                        <cac:PostalAddress>
+                            <cbc:StreetName>{str(df_fact_curenta["STREET_CLIENT"].iloc[0])}</cbc:StreetName>
+                            <cbc:CityName>{str(df_fact_curenta["CITY_CLIENT"].iloc[0])}</cbc:CityName>
+                            <cbc:CountrySubentity>RO-{df_fact_curenta["REGION"].iloc[0]}</cbc:CountrySubentity>
+                            <cac:Country>
+                                <cbc:IdentificationCode>{str(df_fact_curenta["COUNTRY_CLIENT"].iloc[0])}</cbc:IdentificationCode>
+                            </cac:Country>
+                        </cac:PostalAddress>
+                        <cac:PartyTaxScheme>
+                            <cbc:CompanyID>{str(df_fact_curenta["CUI_CLIENT"].iloc[0])}</cbc:CompanyID>
+                            <cac:TaxScheme>
+                                <cbc:ID>VAT</cbc:ID>
+                            </cac:TaxScheme>
+                        </cac:PartyTaxScheme>
+                        <cac:PartyLegalEntity>
+                            <cbc:RegistrationName>{str(df_fact_curenta["Company"].iloc[0])}</cbc:RegistrationName>
+                            <cbc:CompanyID>{str(df_fact_curenta["CUI_CLIENT"].iloc[0])}</cbc:CompanyID>
+                        </cac:PartyLegalEntity>
+                    </cac:Party>
+                </cac:AccountingCustomerParty>'''
+                # invoiceLine += xml_efactura + AccountingCustomerPartyXML 
+                # Variabilă pentru a număra elementele din fiecare factură
+                invoiceLine = ""
+                line_count = 1
+                total_tva=0
+                # print(subtotalTva)
+                # <cbc:ID>{row["ID TVA"]}</cbc:ID>
+                TAXTOTAL="\n<cac:TaxTotal>\n"
+                TaxTotal =""
+                for index, row in subtotalTva.iterrows():
+                    taxamount=subtotalTvaValuta["Valoare linia TVA (Valuta)"][index].sum()
+                    taxamounttotal=subtotalTvaValuta["Valoare linia TVA (Valuta)"].sum()
+                    taxamounttotalLEI=subtotalTvaLEI["Valoare linia TVA"].sum()
+                    taxamounttotal=normal_round(taxamounttotal, decimals=2)
+                    taxamounttotalLEI=normal_round(taxamounttotalLEI, decimals=2)
+                    bazaV = subtotalBazaValuta["General ledger amount"][index].sum()
+                    baza= subtotalBaza["General ledger amount"][index].sum()
+                    baza=normal_round(baza, decimals=2)
+                    bazaV=normal_round(bazaV, decimals=2)
+                    taxamount=normal_round(taxamount, decimals=2)
+
+                    if str(subtotalIDTVA["ID TVA"][index])!="S":
+
+                        if str(subtotalIDTVA["ID TVA"][index])=="E":
+                            TaxExemptionReasonCode="VATEX-EU-G"
+                        else:
+                            TaxExemptionReasonCode="VATEX-EU-AE"
+                        TaxTotal = TaxTotal+f'''
+                        
+                            
+                            <cac:TaxSubtotal>
+                                <cbc:TaxableAmount currencyID="{str(currency)}">{str(round(float(str(bazaV)),2))}</cbc:TaxableAmount>
+                                <cbc:TaxAmount currencyID="{str(currency)}">{str(round(float(str(row["Valoare linia TVA (Valuta)"])),2))}</cbc:TaxAmount>
+                                <cac:TaxCategory>
+                                    <cbc:ID>{subtotalIDTVA["ID TVA"][index]}</cbc:ID>
+                                    <cbc:Percent>{str(round(float(str(row["Cota"])),2))}</cbc:Percent>
+                                    <cbc:TaxExemptionReasonCode>{TaxExemptionReasonCode}</cbc:TaxExemptionReasonCode>
+                                    <cac:TaxScheme>
+                                        <cbc:ID>VAT</cbc:ID>
+                                    </cac:TaxScheme>
+                                </cac:TaxCategory>
+                            </cac:TaxSubtotal>
+                        \n'''
+                    else:
+                            TaxTotal = TaxTotal + f'''
+
+                            <cac:TaxSubtotal>
+                                    <cbc:TaxableAmount currencyID="{str(currency)}">{str(round(float(str(bazaV)),2))}</cbc:TaxableAmount>
+                                    <cbc:TaxAmount currencyID="{str(currency)}">{str(round(float(str(row["Valoare linia TVA (Valuta)"])),2))}</cbc:TaxAmount>
+                                    <cac:TaxCategory>
+                                        <cbc:ID>{subtotalIDTVA["ID TVA"][index]}</cbc:ID>
+                                        <cbc:Percent>{str(round(float(str(row["Cota"])),2))}</cbc:Percent>
+                                        <cac:TaxScheme>
+                                            <cbc:ID>VAT</cbc:ID>
+                                        </cac:TaxScheme>
+                                    </cac:TaxCategory>
+                            </cac:TaxSubtotal>
+                        \n'''
+                        # print("abc")
+                TAXTOTAL = TAXTOTAL + '<cbc:TaxAmount currencyID="RON">' + str(round(float(str(taxamounttotalLEI)),2)) +'</cbc:TaxAmount>' + "\n</cac:TaxTotal>\n"+ TAXTOTAL + '<cbc:TaxAmount currencyID="'+str(currency)+'">' + str(round(float(str(taxamounttotal)),2)) +'</cbc:TaxAmount>' + TaxTotal + "\n</cac:TaxTotal>\n"
+                for index, row in df_fact_curenta.iterrows():
+                    line_amount = row["General ledger amount"]
+                    currency=row["General ledger currency"]
+                    # line_amount=normal_round(line_amount, decimals=2)
+                    val_cu_tva = row["Valoare linie cu TVA (Valuta)"]
+                    tva = row["Valoare linia TVA (Valuta)"]
+                    # tva = normal_round(tva, decimals=2)
+                    
+                    total_tva += val_cu_tva
+                    tva_total += tva
+                    total_amount += line_amount
+                    # total_amount=normal_round(total_amount, decimals=2)
+                    invoiceLine += f'''<cac:InvoiceLine>
+                            <cbc:ID>{line_count}</cbc:ID>
+                            <cbc:InvoicedQuantity unitCode="{row["Cod Unitate Masura"]}">{row["Quantity"]}</cbc:InvoicedQuantity>
+                            <cbc:LineExtensionAmount currencyID="{str(row["General ledger currency"])}">{str(round(float(str(row["General ledger amount"])),2))}</cbc:LineExtensionAmount>
+                            <cac:Item>
+                                <cbc:Name>{row["Material Description"]}</cbc:Name>
+                                <cac:ClassifiedTaxCategory>
+                                    <cbc:ID>{row["ID TVA"]}</cbc:ID>
+                                    <cbc:Percent>{str(round(float(str(row["Cota"])),2))}</cbc:Percent>
+                                    <cac:TaxScheme>
+                                        <cbc:ID>VAT</cbc:ID>
+                                    </cac:TaxScheme>
+                                </cac:ClassifiedTaxCategory>
+                            </cac:Item>
+                            <cac:Price>
+                                <cbc:PriceAmount currencyID="{str(row["General ledger currency"])}">{str(abs(round(float(str(row["Unit Price"])),2)))}</cbc:PriceAmount>
+                            </cac:Price>
+                        </cac:InvoiceLine>'''
+                        
+                    
+                    
+                    # Incrementați numărul elementului pentru următoarea linie din factură
+                    line_count += 1
+                total_amount_with_vat = total_amount + tva_total
+                # total_amount_with_vat=normal_round(total_amount_with_vat, decimals=2)
+                # print(row["Reference"], total_tva)
+                # print(str(df_fact_curenta["Reference"].iloc[0]).replace(".0", "") ,total_amount_without_vat)
+
+                PaymentMeans = f'''
+                <cac:PaymentMeans>
+                    <cbc:PaymentMeansCode>10</cbc:PaymentMeansCode>
+                </cac:PaymentMeans>'''
+
+
+                LegalMonetary = f'''
+                <cac:LegalMonetaryTotal>
+                    <cbc:LineExtensionAmount currencyID="{str(currency)}">{str(round(float(str(total_amount)),2))}</cbc:LineExtensionAmount>
+                    <cbc:TaxExclusiveAmount currencyID="{str(currency)}">{str(round(float(str(total_amount)),2))}</cbc:TaxExclusiveAmount>
+                    <cbc:TaxInclusiveAmount currencyID="{str(currency)}">{str(round(float(str(total_amount_with_vat)),2))}</cbc:TaxInclusiveAmount>
+                    <cbc:AllowanceTotalAmount currencyID="{str(currency)}">0.00</cbc:AllowanceTotalAmount>
+                    <cbc:ChargeTotalAmount currencyID="{str(currency)}">0.00</cbc:ChargeTotalAmount>
+                    <cbc:PrepaidAmount currencyID="{str(currency)}">0.00</cbc:PrepaidAmount>
+                    <cbc:PayableRoundingAmount currencyID="{str(currency)}">0.00</cbc:PayableRoundingAmount>
+                    <cbc:PayableAmount currencyID="{str(currency)}">{str(round(float(str(total_amount_with_vat)),2))}</cbc:PayableAmount>
+                </cac:LegalMonetaryTotal>'''
+
+
+                # print(total_amount)
+                # eFacturaXML = meta + XML_Header + AccountingSupplierParty + AccountingCustomerPartyXML + " TAX TOTAL " + " LEGAL MONETARY TOOL " + invoiceLine +"</Invoice>"
+                # Scrieți fișierul XML pentru fiecare factură în parte
+                eFacturaXML = XML_Header + AccountingSupplierParty + AccountingCustomerPartyXML + TAXTOTAL + LegalMonetary + invoiceLine +"\n</Invoice>"
+                def remove_diacritics(input_str):
+                    nfkd_form = unicodedata.normalize('NFKD', input_str)
+                    return ''.join([c for c in nfkd_form if not unicodedata.combining(c)])
+
+                eFacturaXML = remove_diacritics(eFacturaXML)
+                eFacturaXML=eFacturaXML.replace("&"," ")
+
+                # Scrie conținutul în fișierul XML
+                with open(f"C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed/outs/SalesInvoiceValuta_{str(listaNumarFact[i]).replace('.0', '').replace(':', '')}.xml", "w", encoding="utf-8") as f:
+                    f.write(eFacturaXML)
+
+                print("A PRELUCRAT DATELE")
+    #------------------------------CREDIT NOTE LEI--------------------------------------------------------------------------------------------------------------------------------
+
+        else:
+        # else:
+            df_fact_curenta = Sales_EFACTURA.groupby(["Reference"]).get_group(listaNumarFact[i])
+            issue_date = pd.to_datetime(df_fact_curenta["Document Date"]).dt.strftime('%Y-%m-%d').iloc[0]
+            data_scadenta=pd.to_datetime(df_fact_curenta["Data scadenta"]).dt.strftime('%Y-%m-%d').iloc[0]
+            if str(df_fact_curenta["General ledger currency"].iloc[0])=="RON":
+
+                listaCote = list(set(list(df_fact_curenta["Cota"])))
+                subtotalTva = df_fact_curenta.groupby("Cota")["Valoare linia TVA"].sum().reset_index()
+                subtotalBaza=df_fact_curenta.groupby("Cota")["General ledger amount"].sum().reset_index()
+                subtotalIDTVA=df_fact_curenta.groupby("ID TVA")["Cota"].sum().reset_index()
+
+                total_amount = 0
+                tva_total=0
 
                 XML_Header = f'''<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n
                 <CreditNote\nxmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" 
@@ -530,10 +664,10 @@ def prelucrareDate(fisierDeVanzari):
             xmlns="urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2">
             
             <cbc:CustomizationID>urn:cen.eu:en16931:2017#compliant#urn:efactura.mfinante.ro:CIUS-RO:1.0.1</cbc:CustomizationID>
-                <cbc:ID>{str(df_fact_curenta["Inv. No"].iloc[0]).replace(".0", "")}</cbc:ID>
+                <cbc:ID>BMD-{str(df_fact_curenta["Reference"].iloc[0]).replace(".0", "")}</cbc:ID>
                 <cbc:IssueDate>{issue_date}</cbc:IssueDate>
                 
-                <cbc:CreditNoteTypeCode>381</cbc:CreditNoteTypeCode>
+                <cbc:CreditNoteTypeCode>{str(df_fact_curenta["Inv Type code"].iloc[0]).replace(".0", "")}</cbc:CreditNoteTypeCode>
                 <cbc:DocumentCurrencyCode>RON</cbc:DocumentCurrencyCode>
                 '''
 
@@ -561,97 +695,59 @@ def prelucrareDate(fisierDeVanzari):
                     </cac:Party>
                 </cac:AccountingSupplierParty>
                 '''
-                
-                if str(df_fact_curenta["Street"].iloc[0]) == "  ":
-                    AccountingCustomerPartyXML=f'''
+                AccountingCustomerPartyXML=f'''
                 <cac:AccountingCustomerParty>
                     <cac:Party>
                         <cac:PostalAddress>
-                            <cbc:StreetName>{str(df_fact_curenta["City"].iloc[0])}</cbc:StreetName>
-                            <cbc:CityName>{str(df_fact_curenta["City"].iloc[0])}</cbc:CityName>
-                            <cbc:CountrySubentity>RO-{df_fact_curenta["CodRegiune"].iloc[0]}</cbc:CountrySubentity>
+                            <cbc:StreetName>{str(df_fact_curenta["STREET_CLIENT"].iloc[0])}</cbc:StreetName>
+                            <cbc:CityName>{str(df_fact_curenta["CITY_CLIENT"].iloc[0])}</cbc:CityName>
+                            <cbc:CountrySubentity>RO-{df_fact_curenta["REGION"].iloc[0]}</cbc:CountrySubentity>
                             <cac:Country>
-                                <cbc:IdentificationCode>{str(df_fact_curenta["Country"].iloc[0])}</cbc:IdentificationCode>
+                                <cbc:IdentificationCode>{str(df_fact_curenta["COUNTRY_CLIENT"].iloc[0])}</cbc:IdentificationCode>
                             </cac:Country>
                         </cac:PostalAddress>
                         <cac:PartyTaxScheme>
-                            <cbc:CompanyID>{str(df_fact_curenta["RegNo"].iloc[0])}</cbc:CompanyID>
+                            <cbc:CompanyID>{str(df_fact_curenta["CUI_CLIENT"].iloc[0])}</cbc:CompanyID>
                             <cac:TaxScheme>
                                 <cbc:ID>VAT</cbc:ID>
                             </cac:TaxScheme>
                         </cac:PartyTaxScheme>
                         <cac:PartyLegalEntity>
-                            <cbc:RegistrationName>{str(df_fact_curenta["ClientName"].iloc[0])}</cbc:RegistrationName>
-                            <cbc:CompanyID>{str(df_fact_curenta["RegNo"].iloc[0])}</cbc:CompanyID>
+                            <cbc:RegistrationName>{str(df_fact_curenta["Company"].iloc[0])}</cbc:RegistrationName>
+                            <cbc:CompanyID>{str(df_fact_curenta["CUI_CLIENT"].iloc[0])}</cbc:CompanyID>
                         </cac:PartyLegalEntity>
                     </cac:Party>
                 </cac:AccountingCustomerParty>'''
-                else:
-                    AccountingCustomerPartyXML=f'''
-                    <cac:AccountingCustomerParty>
-                        <cac:Party>
-                            <cac:PostalAddress>
-                                <cbc:StreetName>{str(df_fact_curenta["Street"].iloc[0])}</cbc:StreetName>
-                                <cbc:CityName>{str(df_fact_curenta["City"].iloc[0])}</cbc:CityName>
-                                <cbc:CountrySubentity>RO-{df_fact_curenta["CodRegiune"].iloc[0]}</cbc:CountrySubentity>
-                                <cac:Country>
-                                    <cbc:IdentificationCode>{str(df_fact_curenta["Country"].iloc[0])}</cbc:IdentificationCode>
-                                </cac:Country>
-                            </cac:PostalAddress>
-                            <cac:PartyTaxScheme>
-                                <cbc:CompanyID>{str(df_fact_curenta["RegNo"].iloc[0])}</cbc:CompanyID>
-                                <cac:TaxScheme>
-                                    <cbc:ID>VAT</cbc:ID>
-                                </cac:TaxScheme>
-                            </cac:PartyTaxScheme>
-                            <cac:PartyLegalEntity>
-                                <cbc:RegistrationName>{str(df_fact_curenta["ClientName"].iloc[0])}</cbc:RegistrationName>
-                                <cbc:CompanyID>{str(df_fact_curenta["RegNo"].iloc[0])}</cbc:CompanyID>
-                            </cac:PartyLegalEntity>
-                        </cac:Party>
-                    </cac:AccountingCustomerParty>'''
                 # invoiceLine += xml_efactura + AccountingCustomerPartyXML 
                 # Variabilă pentru a număra elementele din fiecare factură
                 invoiceLine = ""
                 line_count = 1
                 total_tva=0
+
                 # print(subtotalTva)
                 # <cbc:ID>{row["ID TVA"]}</cbc:ID>
+                TAXTOTAL="\n<cac:TaxTotal>\n"
+                TaxTotal =""
                 for index, row in subtotalTva.iterrows():
-                    taxamount=subtotalTva["Valoare linia TVA"].sum()
-                    baza = subtotalBaza["Amount in local ccy"].sum()
-                    taxamount = normal_round(taxamount, decimals=2)
-                    taxamount2 = row["Valoare linia TVA"]
-                    taxamount2 = normal_round(taxamount2, decimals=2)
-                    if subtotalIDTVA["ID TVA"][index]=="S":
-                        TaxTotal = f'''
-                        <cac:TaxTotal>
-                            <cbc:TaxAmount currencyID="RON">{(str(abs(taxamount)))}</cbc:TaxAmount>
+                    taxamount=subtotalTva["Valoare linia TVA"][index].sum()
+                    taxamounttotal=subtotalTva["Valoare linia TVA"].sum()
+                    # taxamounttotal=normal_round(taxamounttotal, decimals=2)
+                    baza = subtotalBaza["General ledger amount"][index].sum()
+                    baza=normal_round(baza, decimals=2)
+                    # taxamount=normal_round(taxamount, decimals=2)
+                    if str(subtotalIDTVA["ID TVA"][index])!="S":
+                        if str(subtotalIDTVA["ID TVA"][index])=="E":
+                            TaxExemptionReasonCode="VATEX-EU-G"
+                        else:
+                            TaxExemptionReasonCode="VATEX-EU-AE"
+                        TaxTotal = TaxTotal+f'''
+                        
+                            
                             <cac:TaxSubtotal>
-                                <cbc:TaxableAmount currencyID="RON">{str(abs(round(float(str(baza)),2)))}</cbc:TaxableAmount>
-                                <cbc:TaxAmount currencyID="RON">{(str(abs(taxamount2)))}</cbc:TaxAmount>
+                                <cbc:TaxableAmount currencyID="RON">{str(round(float(str(baza)),2))}</cbc:TaxableAmount>
+                                <cbc:TaxAmount currencyID="RON">{str(round(float(str(row["Valoare linia TVA"])),2))}</cbc:TaxAmount>
                                 <cac:TaxCategory>
-                                    
                                     <cbc:ID>{subtotalIDTVA["ID TVA"][index]}</cbc:ID>
-                                    <cbc:Percent>{str(round(float(str(row["Cota"])),2))}</cbc:Percent>
-                                    <cac:TaxScheme>
-                                        <cbc:ID>VAT</cbc:ID>
-                                    </cac:TaxScheme>
-                                </cac:TaxCategory>
-                            </cac:TaxSubtotal>
-                        </cac:TaxTotal>\n'''
-                    else:
-                        TaxExemptionReasonCode="VATEX-EU-AE"
-                        TaxTotal = f'''
-                        <cac:TaxTotal>
-                            <cbc:TaxAmount currencyID="RON">{(str(abs(taxamount)))}</cbc:TaxAmount>
-                            <cac:TaxSubtotal>
-                                <cbc:TaxableAmount currencyID="RON">{str(abs(round(float(str(baza)),2)))}</cbc:TaxableAmount>
-                                <cbc:TaxAmount currencyID="RON">{(str(taxamount2))}</cbc:TaxAmount>
-                                <cac:TaxCategory>
-                                    
-                                    <cbc:ID>{subtotalIDTVA["ID TVA"][index]}</cbc:ID>
-
                                     <cbc:Percent>{str(round(float(str(row["Cota"])),2))}</cbc:Percent>
                                     <cbc:TaxExemptionReasonCode>{TaxExemptionReasonCode}</cbc:TaxExemptionReasonCode>
                                     <cac:TaxScheme>
@@ -659,21 +755,46 @@ def prelucrareDate(fisierDeVanzari):
                                     </cac:TaxScheme>
                                 </cac:TaxCategory>
                             </cac:TaxSubtotal>
-                        </cac:TaxTotal>\n'''
+                        \n'''
                     
-                
+                    else:
+                        TaxTotal = TaxTotal + f'''
+                        
+                            
+                            <cac:TaxSubtotal>
+                                <cbc:TaxableAmount currencyID="RON">{str(round(float(str(baza)),2))}</cbc:TaxableAmount>
+                                <cbc:TaxAmount currencyID="RON">{str(round(float(str(row["Valoare linia TVA"])),2))}</cbc:TaxAmount>
+                                <cac:TaxCategory>
+                                    <cbc:ID>{subtotalIDTVA["ID TVA"][index]}</cbc:ID>
+                                    <cbc:Percent>{str(round(float(str(row["Cota"])),2))}</cbc:Percent>
+                                    <cac:TaxScheme>
+                                        <cbc:ID>VAT</cbc:ID>
+                                    </cac:TaxScheme>
+                                </cac:TaxCategory>
+                            </cac:TaxSubtotal>
+                        \n'''
+                TAXTOTAL=TAXTOTAL+'<cbc:TaxAmount currencyID="RON">'+str(round(float(str(taxamounttotal)),2))+'</cbc:TaxAmount>'+TaxTotal+"\n</cac:TaxTotal>\n"
+
                 for index, row in df_fact_curenta.iterrows():
-                    line_amount = row["Amount in local ccy"]
+                    line_amount = row["General ledger amount"]
+                    # line_amount=normal_round(line_amount, decimals=2)
                     val_cu_tva = row["Valoare linie cu TVA"]
+                    tva=row["Valoare linia TVA"]
+                    # tva=normal_round(tva, decimals=2)
+                    # val_cu_tva=normal_round(val_cu_tva, decimals=2)
                     
                     total_tva += val_cu_tva
+                    tva_total+=tva
                     total_amount += line_amount
+                    # total_amount=normal_round(total_amount, decimals=2)
+                    # tva_total=normal_round(tva_total, decimals=2)
+
                     invoiceLine += f'''<cac:CreditNoteLine>
                             <cbc:ID>{line_count}</cbc:ID>
-                            <cbc:CreditedQuantity unitCode="{row["Cod Unitate Masura"]}">{abs(row["Quantity"])}</cbc:CreditedQuantity>
-                            <cbc:LineExtensionAmount currencyID="RON">{str(abs(round(float(str(row["Amount in local ccy"])),2)))}</cbc:LineExtensionAmount>
+                            <cbc:CreditedQuantity unitCode="{row["Cod Unitate Masura"]}">{row["Quantity"]}</cbc:CreditedQuantity>
+                            <cbc:LineExtensionAmount currencyID="RON">{str(round(float(str(row["General ledger amount"])),2))}</cbc:LineExtensionAmount>
                             <cac:Item>
-                                <cbc:Name>{row["Description"]}</cbc:Name>
+                                <cbc:Name>{row["Material Description"]}</cbc:Name>
                                 <cac:ClassifiedTaxCategory>
                                     <cbc:ID>{row["ID TVA"]}</cbc:ID>
                                     <cbc:Percent>{str(round(float(str(row["Cota"])),2))}</cbc:Percent>
@@ -683,7 +804,217 @@ def prelucrareDate(fisierDeVanzari):
                                 </cac:ClassifiedTaxCategory>
                             </cac:Item>
                             <cac:Price>
-                                <cbc:PriceAmount currencyID="RON">{str(abs(round(float(str(row["UnitPrice"])),2)))}</cbc:PriceAmount>
+                                <cbc:PriceAmount currencyID="RON">{str(abs(round(float(str(row["Unit Price"])),2)))}</cbc:PriceAmount>
+                            </cac:Price>
+                        </cac:CreditNoteLine>'''
+
+                    # Incrementați numărul elementului pentru următoarea linie din factură
+                    line_count += 1
+                total_amount_with_vat =total_amount +tva_total
+                # total_amount_with_vat=normal_round(total_amount_with_vat, decimals=2)
+                # total_amount_with_vat=normal_round(total_amount_with_vat, decimals=2) 
+
+
+                PaymentMeans = f'''
+                <cac:PaymentMeans>
+                    <cbc:PaymentMeansCode>10</cbc:PaymentMeansCode>
+                </cac:PaymentMeans>'''
+
+                LegalMonetary = f'''
+                <cac:LegalMonetaryTotal>
+                    <cbc:LineExtensionAmount currencyID="RON">{str(round(float(str(total_amount)),2))}</cbc:LineExtensionAmount>
+                    <cbc:TaxExclusiveAmount currencyID="RON">{str(round(float(str(total_amount)),2))}</cbc:TaxExclusiveAmount>
+                    <cbc:TaxInclusiveAmount currencyID="RON">{str(round(float(str(total_amount_with_vat)),2))}</cbc:TaxInclusiveAmount>
+                    <cbc:AllowanceTotalAmount currencyID="RON">0.00</cbc:AllowanceTotalAmount>
+                    <cbc:ChargeTotalAmount currencyID="RON">0.00</cbc:ChargeTotalAmount>
+                    <cbc:PrepaidAmount currencyID="RON">0.00</cbc:PrepaidAmount>
+                    <cbc:PayableRoundingAmount currencyID="RON">0.00</cbc:PayableRoundingAmount>
+                    <cbc:PayableAmount currencyID="RON">{str(round(float(str(total_amount_with_vat)),2))}</cbc:PayableAmount>
+                </cac:LegalMonetaryTotal>'''
+
+                eFacturaXML = XML_Header + AccountingSupplierParty + AccountingCustomerPartyXML + TAXTOTAL + LegalMonetary + invoiceLine +"\n</CreditNote>"
+                eFacturaXML=eFacturaXML.replace("&"," ")
+                def remove_diacritics(input_str):
+                    nfkd_form = unicodedata.normalize('NFKD', input_str)
+                    return ''.join([c for c in nfkd_form if not unicodedata.combining(c)])
+
+                eFacturaXML = remove_diacritics(eFacturaXML)
+
+                # Scrie conținutul în fișierul XML
+                with open(f"C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed/outs/SalesCreditNote_{str(listaNumarFact[i]).replace('.0', '').replace(':', '')}.xml", "w", encoding="utf-8") as f:
+                    f.write(eFacturaXML)
+
+                print("A PRELUCRAT DATELE")
+
+
+    #------------------------------CREDIT NOTE VALUTA--------------------------------------------------------------------------------------------------------------------------------
+            else:
+                df_fact_curenta = Sales_EFACTURA.groupby(["Reference"]).get_group(listaNumarFact[i])
+                issue_date = pd.to_datetime(df_fact_curenta["Document Date"]).dt.strftime('%Y-%m-%d').iloc[0]
+                data_scadenta=pd.to_datetime(df_fact_curenta["Data scadenta"]).dt.strftime('%Y-%m-%d').iloc[0]
+                currency=str(df_fact_curenta["General ledger currency"].iloc[0])
+                
+                listaCote = list(set(list(df_fact_curenta["Cota"])))
+                subtotalTvaLEI=df_fact_curenta.groupby("Cota")["Valoare linia TVA"].sum().reset_index()
+                subtotalTva = df_fact_curenta.groupby("Cota")["Valoare linia TVA (Valuta)"].sum().reset_index()
+                subtotalBaza=df_fact_curenta.groupby("Cota")["General ledger amount"].sum().reset_index()
+                subtotalBazaValuta=df_fact_curenta.groupby("Cota")["General ledger amount"].sum().reset_index()
+                subtotalTvaValuta=df_fact_curenta.groupby("Cota")["Valoare linia TVA (Valuta)"].sum().reset_index()
+                subtotalIDTVA=df_fact_curenta.groupby("ID TVA")["Cota"].sum().reset_index()
+                
+                total_amount = 0
+                tva_total=0
+
+                XML_Header = f'''<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n
+                <CreditNote\nxmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" 
+            xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
+            xmlns="urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2">
+            
+            <cbc:CustomizationID>urn:cen.eu:en16931:2017#compliant#urn:efactura.mfinante.ro:CIUS-RO:1.0.1</cbc:CustomizationID>
+                <cbc:ID>BMD-{str(df_fact_curenta["Reference"].iloc[0]).replace(".0", "")}</cbc:ID>
+                <cbc:IssueDate>{issue_date}</cbc:IssueDate>
+            
+                <cbc:CreditNoteTypeCode>{str(df_fact_curenta["Inv Type code"].iloc[0]).replace(".0", "")}</cbc:CreditNoteTypeCode>
+                <cbc:DocumentCurrencyCode>{str(df_fact_curenta['General ledger currency'].iloc[0])}</cbc:DocumentCurrencyCode>
+                <cbc:TaxCurrencyCode>RON</cbc:TaxCurrencyCode>
+                '''
+
+                AccountingSupplierParty = '''
+                <cac:AccountingSupplierParty>
+                    <cac:Party>
+                        <cac:PostalAddress>
+                            <cbc:StreetName>'''+str(strada)+'''</cbc:StreetName>
+                            <cbc:CityName>'''+str(oras)+'''</cbc:CityName>
+                            <cbc:CountrySubentity>'''+str(countrySubentity)+'''</cbc:CountrySubentity>
+                            <cac:Country>
+                                <cbc:IdentificationCode>'''+str(country)+'''</cbc:IdentificationCode>
+                            </cac:Country>
+                        </cac:PostalAddress>
+                        <cac:PartyTaxScheme>
+                            <cbc:CompanyID>'''+str(vatID)+'''</cbc:CompanyID>
+                            <cac:TaxScheme>
+                                <cbc:ID>VAT</cbc:ID>
+                            </cac:TaxScheme>
+                        </cac:PartyTaxScheme>
+                        <cac:PartyLegalEntity>
+                            <cbc:RegistrationName>'''+str(numeCompanie)+'''</cbc:RegistrationName>
+                            <cbc:CompanyID>'''+str(vatID)+'''</cbc:CompanyID>
+                        </cac:PartyLegalEntity>
+                    </cac:Party>
+                </cac:AccountingSupplierParty>
+                '''
+                AccountingCustomerPartyXML=f'''
+                <cac:AccountingCustomerParty>
+                    <cac:Party>
+                        <cac:PostalAddress>
+                            <cbc:StreetName>{str(df_fact_curenta["STREET_CLIENT"].iloc[0])}</cbc:StreetName>
+                            <cbc:CityName>{str(df_fact_curenta["CITY_CLIENT"].iloc[0])}</cbc:CityName>
+                            <cbc:CountrySubentity>RO-{df_fact_curenta["REGION"].iloc[0]}</cbc:CountrySubentity>
+                            <cac:Country>
+                                <cbc:IdentificationCode>{str(df_fact_curenta["COUNTRY_CLIENT"].iloc[0])}</cbc:IdentificationCode>
+                            </cac:Country>
+                        </cac:PostalAddress>
+                        <cac:PartyTaxScheme>
+                            <cbc:CompanyID>{str(df_fact_curenta["CUI_CLIENT"].iloc[0])}</cbc:CompanyID>
+                            <cac:TaxScheme>
+                                <cbc:ID>VAT</cbc:ID>
+                            </cac:TaxScheme>
+                        </cac:PartyTaxScheme>
+                        <cac:PartyLegalEntity>
+                            <cbc:RegistrationName>{str(df_fact_curenta["Company"].iloc[0])}</cbc:RegistrationName>
+                            <cbc:CompanyID>{str(df_fact_curenta["CUI_CLIENT"].iloc[0])}</cbc:CompanyID>
+                        </cac:PartyLegalEntity>
+                    </cac:Party>
+                </cac:AccountingCustomerParty>'''
+                # invoiceLine += xml_efactura + AccountingCustomerPartyXML 
+                # Variabilă pentru a număra elementele din fiecare factură
+                invoiceLine = ""
+                line_count = 1
+                total_tva=0
+                # print(subtotalTva)
+                # <cbc:ID>{row["ID TVA"]}</cbc:ID>
+                TAXTOTAL="\n<cac:TaxTotal>\n"
+                TaxTotal =""
+                for index, row in subtotalTva.iterrows():
+                    taxamount=subtotalTvaValuta["Valoare linia TVA (Valuta)"][index].sum()
+                    taxamounttotal=subtotalTvaValuta["Valoare linia TVA (Valuta)"].sum()
+                    taxamounttotalLEI=subtotalTvaLEI["Valoare linia TVA"].sum()
+                    taxamounttotal=normal_round(taxamounttotal, decimals=2)
+                    taxamount=normal_round(taxamount, decimals=2)
+                    taxamounttotalLEI=normal_round(taxamounttotalLEI, decimals=2)
+                    bazaV = subtotalBazaValuta["General ledger amount"][index].sum()
+                    baza= subtotalBaza["General ledger amount"][index].sum()
+                    # baza=normal_round(baza, decimals=2)
+                    # bazaV=normal_round(bazaV, decimals=2)
+
+                    if str(subtotalIDTVA["ID TVA"][index])!="S":
+
+                        if str(subtotalIDTVA["ID TVA"][index])=="E":
+                            TaxExemptionReasonCode="VATEX-EU-G"
+                        else:
+                            TaxExemptionReasonCode="VATEX-EU-AE"
+                        TaxTotal = TaxTotal+f'''
+                        
+                            
+                            <cac:TaxSubtotal>
+                                <cbc:TaxableAmount currencyID="{str(currency)}">{str(round(float(str(bazaV)),2))}</cbc:TaxableAmount>
+                                <cbc:TaxAmount currencyID="{str(currency)}">{str(round(float(str(row["Valoare linia TVA (Valuta)"])),2))}</cbc:TaxAmount>
+                                <cac:TaxCategory>
+                                    <cbc:ID>{subtotalIDTVA["ID TVA"][index]}</cbc:ID>
+                                    <cbc:Percent>{str(round(float(str(row["Cota"])),2))}</cbc:Percent>
+                                    <cbc:TaxExemptionReasonCode>{TaxExemptionReasonCode}</cbc:TaxExemptionReasonCode>
+                                    <cac:TaxScheme>
+                                        <cbc:ID>VAT</cbc:ID>
+                                    </cac:TaxScheme>
+                                </cac:TaxCategory>
+                            </cac:TaxSubtotal>
+                        \n'''
+                    else:
+                            TaxTotal = TaxTotal + f'''
+
+                            <cac:TaxSubtotal>
+                                    <cbc:TaxableAmount currencyID="{str(currency)}">{str(round(float(str(bazaV)),2))}</cbc:TaxableAmount>
+                                    <cbc:TaxAmount currencyID="{str(currency)}">{str(round(float(str(row["Valoare linia TVA (Valuta)"])),2))}</cbc:TaxAmount>
+                                    <cac:TaxCategory>
+                                        <cbc:ID>{subtotalIDTVA["ID TVA"][index]}</cbc:ID>
+                                        <cbc:Percent>{str(round(float(str(row["Cota"])),2))}</cbc:Percent>
+                                        <cac:TaxScheme>
+                                            <cbc:ID>VAT</cbc:ID>
+                                        </cac:TaxScheme>
+                                    </cac:TaxCategory>
+                            </cac:TaxSubtotal>
+                        \n'''
+                        # print("abc")
+                TAXTOTAL = TAXTOTAL + '<cbc:TaxAmount currencyID="RON">' + str(round(float(str(taxamounttotalLEI)),2)) +'</cbc:TaxAmount>' + "\n</cac:TaxTotal>\n"+ TAXTOTAL + '<cbc:TaxAmount currencyID="'+str(currency)+'">' + str(round(float(str(taxamounttotal)),2)) +'</cbc:TaxAmount>' + TaxTotal + "\n</cac:TaxTotal>\n"
+                for index, row in df_fact_curenta.iterrows():
+                    line_amount = row["General ledger amount"]
+                    currency=row["General ledger currency"]
+                    # line_amount=normal_round(line_amount, decimals=2)
+                    val_cu_tva = row["Valoare linie cu TVA (Valuta)"]
+                    tva = row["Valoare linia TVA (Valuta)"]
+                    # tva = normal_round(tva, decimals=2)
+                    
+                    total_tva += val_cu_tva
+                    tva_total += tva
+                    total_amount += line_amount
+                    total_tva=normal_round(total_tva, decimals=2)
+                    # total_amount=normal_round(total_amount, decimals=2)
+                    invoiceLine += f'''<cac:CreditNoteLine>
+                            <cbc:ID>{line_count}</cbc:ID>
+                            <cbc:CreditedQuantity unitCode="{row["Cod Unitate Masura"]}">{row["Quantity"]}</cbc:CreditedQuantity>
+                            <cbc:LineExtensionAmount currencyID="{str(row["General ledger currency"])}">{str(round(float(str(row["General ledger amount"])),2))}</cbc:LineExtensionAmount>
+                            <cac:Item>
+                                <cbc:Name>{row["Material Description"]}</cbc:Name>
+                                <cac:ClassifiedTaxCategory>
+                                    <cbc:ID>{row["ID TVA"]}</cbc:ID>
+                                    <cbc:Percent>{str(round(float(str(row["Cota"])),2))}</cbc:Percent>
+                                    <cac:TaxScheme>
+                                        <cbc:ID>VAT</cbc:ID>
+                                    </cac:TaxScheme>
+                                </cac:ClassifiedTaxCategory>
+                            </cac:Item>
+                            <cac:Price>
+                                <cbc:PriceAmount currencyID="{str(row["General ledger currency"])}">{str(abs(round(float(str(row["Unit Price"])),2)))}</cbc:PriceAmount>
                             </cac:Price>
                         </cac:CreditNoteLine>'''
                         
@@ -691,84 +1022,47 @@ def prelucrareDate(fisierDeVanzari):
                     
                     # Incrementați numărul elementului pentru următoarea linie din factură
                     line_count += 1
-                # total_amount_with_vat = total_amount * (1 + row["Cota"] / 100)
-                # total_amount_with_vat=normal_round(total_amount_with_vat,)
-                total_amount_with_vat=normal_round(total_amount, decimals=2)+normal_round(taxamount2, decimals=2)
-                # print(row["Inv. No"], total_tva)
-                # print(str(df_fact_curenta["Inv. No"].iloc[0]).replace(".0", "") ,total_amount_without_vat)
-                
+                total_amount_with_vat = total_amount + tva_total
+                # total_amount_with_vat=normal_round(total_amount_with_vat, decimals=2)
+                # print(row["Reference"], total_tva)
+                # print(str(df_fact_curenta["Reference"].iloc[0]).replace(".0", "") ,total_amount_without_vat)
+
                 PaymentMeans = f'''
                 <cac:PaymentMeans>
                     <cbc:PaymentMeansCode>10</cbc:PaymentMeansCode>
                 </cac:PaymentMeans>'''
 
-                
+
                 LegalMonetary = f'''
                 <cac:LegalMonetaryTotal>
-                    <cbc:LineExtensionAmount currencyID="RON">{str(abs(round(float(str(total_amount)),2)))}</cbc:LineExtensionAmount>
-                    <cbc:TaxExclusiveAmount currencyID="RON">{str(abs(round(float(str(total_amount)),2)))}</cbc:TaxExclusiveAmount>
-                    <cbc:TaxInclusiveAmount currencyID="RON">{str(abs(round(float(str(total_amount_with_vat)),2)))}</cbc:TaxInclusiveAmount>
-                    <cbc:AllowanceTotalAmount currencyID="RON">0.00</cbc:AllowanceTotalAmount>
-                    <cbc:ChargeTotalAmount currencyID="RON">0.00</cbc:ChargeTotalAmount>
-                    <cbc:PrepaidAmount currencyID="RON">0.00</cbc:PrepaidAmount>
-                    <cbc:PayableRoundingAmount currencyID="RON">0.00</cbc:PayableRoundingAmount>
-                    <cbc:PayableAmount currencyID="RON">{str(abs(round(float(str(total_amount_with_vat)),2)))}</cbc:PayableAmount>
+                    <cbc:LineExtensionAmount currencyID="{str(currency)}">{str(round(float(str(total_amount)),2))}</cbc:LineExtensionAmount>
+                    <cbc:TaxExclusiveAmount currencyID="{str(currency)}">{str(round(float(str(total_amount)),2))}</cbc:TaxExclusiveAmount>
+                    <cbc:TaxInclusiveAmount currencyID="{str(currency)}">{str(round(float(str(total_amount_with_vat)),2))}</cbc:TaxInclusiveAmount>
+                    <cbc:AllowanceTotalAmount currencyID="{str(currency)}">0.00</cbc:AllowanceTotalAmount>
+                    <cbc:ChargeTotalAmount currencyID="{str(currency)}">0.00</cbc:ChargeTotalAmount>
+                    <cbc:PrepaidAmount currencyID="{str(currency)}">0.00</cbc:PrepaidAmount>
+                    <cbc:PayableRoundingAmount currencyID="{str(currency)}">0.00</cbc:PayableRoundingAmount>
+                    <cbc:PayableAmount currencyID="{str(currency)}">{str(round(float(str(total_amount_with_vat)),2))}</cbc:PayableAmount>
                 </cac:LegalMonetaryTotal>'''
 
-            # print(total_amount)
-            # eFacturaXML = meta + XML_Header + AccountingSupplierParty + AccountingCustomerPartyXML + " TAX TOTAL " + " LEGAL MONETARY TOOL " + invoiceLine +"</Invoice>"
-            # Scrieți fișierul XML pentru fiecare factură în parte
-            if "CreditNote" in XML_Header:
-                eFacturaXML = XML_Header + AccountingSupplierParty + AccountingCustomerPartyXML + TaxTotal + LegalMonetary + invoiceLine +"\n</CreditNote>"
+
+                # print(total_amount)
+                # eFacturaXML = meta + XML_Header + AccountingSupplierParty + AccountingCustomerPartyXML + " TAX TOTAL " + " LEGAL MONETARY TOOL " + invoiceLine +"</Invoice>"
+                # Scrieți fișierul XML pentru fiecare factură în parte
+                eFacturaXML = XML_Header + AccountingSupplierParty + AccountingCustomerPartyXML + TAXTOTAL + LegalMonetary + invoiceLine +"\n</CreditNote>"
                 def remove_diacritics(input_str):
                     nfkd_form = unicodedata.normalize('NFKD', input_str)
                     return ''.join([c for c in nfkd_form if not unicodedata.combining(c)])
 
                 eFacturaXML = remove_diacritics(eFacturaXML)
+                eFacturaXML=eFacturaXML.replace("&"," ")
 
                 # Scrie conținutul în fișierul XML
-                with open(f"C:/Dezvoltare/E-Factura/2023/eFactura/Ferro/eFacturaFerro local/outs/CreditNote{str(listaNumarFact[i]).replace('.0', '')}.xml", "w", encoding="utf-8") as f:
-                # with open(f"/home/efactura/efactura_ferro/outs/SalesInvoice_{str(listaNumarFact[i]).replace('.0', '')}.xml", "w", encoding="utf-8") as f:
-                    f.write(eFacturaXML)
-            else:
-                eFacturaXML = XML_Header + AccountingSupplierParty + AccountingCustomerPartyXML + TaxTotal + LegalMonetary + invoiceLine +"\n</Invoice>"
-                def remove_diacritics(input_str):
-                    nfkd_form = unicodedata.normalize('NFKD', input_str)
-                    return ''.join([c for c in nfkd_form if not unicodedata.combining(c)])
-
-                eFacturaXML = remove_diacritics(eFacturaXML)
-
-                # Scrie conținutul în fișierul XML
-                with open(f"C:/Dezvoltare/E-Factura/2023/eFactura/Ferro/eFacturaFerro local/outs/SalesInvoice{str(listaNumarFact[i]).replace('.0', '')}.xml", "w", encoding="utf-8") as f:
-                # with open(f"/home/efactura/efactura_ferro/outs/SalesInvoice_{str(listaNumarFact[i]).replace('.0', '')}.xml", "w", encoding="utf-8") as f:
+                with open(f"C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed/outs/SalesCreditNoteValuta_{str(listaNumarFact[i]).replace('.0', '').replace(':', '')}.xml", "w", encoding="utf-8") as f:
                     f.write(eFacturaXML)
 
-            
-
-            # print("A PRELUCRAT DATELE")
-        return primaFactura, ultimaFactura, totalFactura, nrFacturiTrimise, facturiNuleUnice
-    except:
-        print("avem erori")
-    if os.path.exists(fisierDeVanzari):
-        os.remove(fisierDeVanzari)
-    out_folder = "C:/Dezvoltare/E-Factura/2023/Baze de vanzari/outs"
-    # out_folder = "/home/efactura/efactura_ferro/outs"
-    for file in os.listdir(out_folder):
-        if file.endswith(".xml"):
-            os.remove(os.path.join(out_folder, file))        
-
-def generare_fisier_text(mesaj, informatii):
-        # Generare conținut fișier text
-        text_content = f"\n{mesaj}\n"
-        for info in informatii:
-            text_content += f"{info}, "
-        text_content += "\n"  # Adăugare linie goală între secțiuni
-
-        # Salvare fișier text
-        log_folder = "C:/Dezvoltare/E-Factura/2023/eFactura/Ferro/eFacturaFerro local/logs"
-        # log_folder = "/home/efactura/efactura_ferro/logs"
-        log_path = os.path.join(log_folder, "informatii.txt")
-        with open(log_path, "a", encoding="utf-8") as text_file:  # Utilizăm "a" pentru a adăuga la fișier
-            text_file.write(text_content)
-                   
+                print("A PRELUCRAT DATELE")
+    print("AVEM ACEST NUMERE VIVIFIANTE: ", primaFactura, ultimaFactura, totalFactura, nrFacturiTrimise, facturiNuleUnice)
+    
+    return primaFactura, ultimaFactura, totalFactura, nrFacturiTrimise, facturiNuleUnice
 # prelucrareDate(fisierDeVanzari)

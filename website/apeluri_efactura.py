@@ -21,7 +21,9 @@ dateFirma = config['dateFirma']
 
 current_datetime = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 cif = dateFirma['cui']
-headers = dateFirma['header']
+headers = {'Authorization': dateFirma['header']}
+
+print("ASTA E header", headers)
 
 listaIndexIncarcare = []
 listaIdDescarcare = []
@@ -44,15 +46,15 @@ def eFactura():
         except Exception as e:
             print(f"Eroare la stergerea fișierelor: {str(e)}")
 
-    stergeFisiere('C:/Dezvoltare/E-Factura/2023/eFactura/Ferro/eFacturaFerro local/output conversie', '.xml')
-    stergeFisiere('C:/Dezvoltare/E-Factura/2023/eFactura/Ferro/eFacturaFerro local/output zip api', '.zip')
-    stergeFisiere('C:/Dezvoltare/E-Factura/2023/eFactura/Ferro/eFacturaFerro local/output conversie PDF', '.pdf')
-    stergeFisiere('C:/Dezvoltare/E-Factura/2023/eFactura/Ferro/eFacturaFerro local/output conversie PDF', '.txt')
+    # stergeFisiere('C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed/output conversie', '.xml')
+    # stergeFisiere('C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed/output zip api', '.zip')
+    # stergeFisiere('C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed/output conversie PDF', '.pdf')
+    # stergeFisiere('C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed/output conversie PDF', '.txt')
     
-    # stergeFisiere('/home/efactura/efactura_ferro/outputConversie', '.xml')
-    # stergeFisiere('/home/efactura/efactura_ferro/outputZipAPI', '.zip')
-    # stergeFisiere('/home/efactura/efactura_ferro/outputConversiePDF', '.pdf')
-    # stergeFisiere('/home/efactura/efactura_ferro/outputConversiePDF', '.txt')
+    stergeFisiere('/home/efactura/efactura_bimed/outputConversie', '.xml')
+    stergeFisiere('/home/efactura/efactura_bimed/outputZipAPI', '.zip')
+    stergeFisiere('/home/efactura/efactura_bimed/outputConversiePDF', '.pdf')
+    stergeFisiere('/home/efactura/efactura_bimed/outputConversiePDF', '.txt')
 
     def lista_fisiere_xml(director_xml):
         fisiere_xml = []
@@ -83,7 +85,8 @@ def eFactura():
                 else:
                     apiDepunere = 'https://api.anaf.ro/test/FCTEL/rest/upload?standard=UBL&cif='+str(cif)
                     
-                response = requests.post(apiDepunere, headers=headers, data=xml, timeout=30)
+                response = requests.post(apiDepunere, headers=headers, data=xml)
+                print('AICI AVEM RESPONSE',response)
 
                 if response.status_code == 200:
                     resp = response.text
@@ -96,7 +99,7 @@ def eFactura():
                     namespaces = {"cbc": "urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"}
                     root = ET.fromstring(xml)
                     factura = root.find(".//cbc:ID", namespaces=namespaces).text
-                    data = {'Factura': int(factura), 'Index': index_incarcare}
+                    data = {'Factura': str(factura), 'Index': index_incarcare}
                     facturaIndex.append(data)
                     dictionarFacturi["mesaje"] = facturaIndex
             except Exception as e:
@@ -104,14 +107,14 @@ def eFactura():
                 print("Eroare:", str(e))
                 message = "fisier cu probleme----------------->" + str(fisier_xml)
                 listaMesajeEroare.append(message)
-                with open('C:/Dezvoltare/E-Factura/2023/eFactura/Ferro/eFacturaFerro local/output conversie PDF/log.txt', 'a', encoding='utf-8') as log_file:
-                # with open('/home/efactura/efactura_ferro/outputConversiePDF/log.txt', 'a', encoding='utf-8') as log_file:
+                # with open('C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed/output conversie PDF/log.txt', 'a', encoding='utf-8') as log_file:
+                with open('/home/efactura/efactura_bimed/outputConversiePDF/log.txt', 'a', encoding='utf-8') as log_file:
                     log_file.write("Eroare validare fisier: "+str(fisier_xml)+" \n")
                     log_file.write("Eroare la efectuarea cererii HTTP: "+str(response.status_code)+"\n")
 
     # Lista fișierelor XML se obține în afara funcției
-    director_xml = "C:/Dezvoltare/E-Factura/2023/eFactura/Ferro/eFacturaFerro local/outs/"
-    # director_xml = "/home/efactura/efactura_ferro/outs"
+    # director_xml = "C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed/outs/"
+    director_xml = "/home/efactura/efactura_bimed/outs"
     fisiere_xml = lista_fisiere_xml(director_xml)
 
     # Apelarea funcției trimitereAnaf cu lista de fișiere XML
@@ -135,9 +138,8 @@ def eFactura():
     def mesajeanaf():
         
         time.sleep(15)
-        cif = 901512
-        # headers = {'Authorization': 'Bearer eb49f112573be69ce0e2f115810eca776bb9f44b5f1434defb652c24f6cd1183'}
-        headers = {'Authorization': 'Bearer f323b048924db389ebe6a26c41e9a6a5a4b8b58b358bb051e9d6f074f2ade292'}
+        cif = dateFirma['cui']
+        headers = {'Authorization': dateFirma['header']}
         # val1 = 1699426800000  # 2023-11-08 09:00:00
         # X = 40
         # result = datetime.datetime.now() - datetime.timedelta(seconds=X)
@@ -234,8 +236,8 @@ def eFactura():
 
             if descarcare.status_code == 200:
                 # print("Cererea a fost efectuata cu succes!")
-                with open('C:/Dezvoltare/E-Factura/2023/eFactura/Ferro/eFacturaFerro local/output zip api/fisier'+str(listaIdDescarcare[i])+'.zip', 'wb') as file:
-                # with open("/home/efactura/efactura_ferro/outputZipAPI/fisier"+str(listaIdDescarcare[i])+'.zip', 'wb') as file:
+                # with open('C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed/output zip api/fisier'+str(listaIdDescarcare[i])+'.zip', 'wb') as file:
+                with open("/home/efactura/efactura_bimed/outputZipAPI/fisier"+str(listaIdDescarcare[i])+'.zip', 'wb') as file:
                     file.write(descarcare.content)
                     print('Descarcat cu success')
                 
@@ -246,12 +248,12 @@ def eFactura():
     print("aici descarcam folosind id_descarcare")
     descarcare()
 
-    directory_path = 'C:/Dezvoltare/E-Factura/2023/eFactura/Ferro/eFacturaFerro local/output zip api'
-    # directory_path = "/home/efactura/efactura_ferro/outputZipAPI"
+    # directory_path = 'C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed/output zip api'
+    directory_path = "/home/efactura/efactura_bimed/outputZipAPI"
 
-    output_directory = 'C:/Dezvoltare/E-Factura/2023/eFactura/Ferro/eFacturaFerro local/output conversie'
-    # output_directory = "/home/efactura/efactura_ferro/outputConversie"
-    # arhiveANAF = "/home/efactura/efactura_ferro/arhiveANAF"
+    # output_directory = 'C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed/output conversie'
+    output_directory = "/home/efactura/efactura_bimed/outputConversie"
+    arhiveANAF = "/home/efactura/efactura_bimed/arhiveANAF"
 
     os.makedirs(output_directory, exist_ok=True)
 
@@ -302,8 +304,8 @@ def eFactura():
     #             filename=filename.replace(".xml","")
 
     #             if response.status_code == 200:
-    #                 with open(f'C:/Dezvoltare/E-Factura/2023/eFactura/Ferro/eFacturaFerro local/output conversie PDF/{filename}.pdf', 'wb') as file:
-    #                 # with open('/home/efactura/efactura_ferro/outputConversiePDF/'+filename+'.pdf', 'wb') as file:
+    #                 with open(f'C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed/output conversie PDF/{filename}.pdf', 'wb') as file:
+    #                 # with open('/home/efactura/efactura_bimed/outputConversiePDF/'+filename+'.pdf', 'wb') as file:
     #                     file.write(response.content)
     #                     print(f'Fisierul {filename} a fost convertit cu success')
     #             else:
@@ -315,11 +317,11 @@ def eFactura():
     # print('aici facem conversia si stocarea PDF in BD')
 
 
-    # pdf_directory = 'C:/Dezvoltare/E-Factura/2023/eFactura/Ferro/eFacturaFerro local/output conversie PDF'
-    # # pdf_directory = '/home/efactura/efactura_ferro/outputConversiePDF'
-    # # zip_file_path = '/home/efactura/efactura_ferro/outputArhiveConversiePDF/rezultat'+str(current_datetime)+'.zip'
-    # # zip_file_path = '/home/efactura/efactura_ferro/outputArhiveConversiePDF/rezultatArhiveConversie.zip'
-    # zip_file_path = 'C:/Dezvoltare/E-Factura/2023/eFactura/Ferro/eFacturaFerro local/output arhive conversie PDF/rezultatArhiveConversie.zip'
+    # pdf_directory = 'C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed/output conversie PDF'
+    # # pdf_directory = '/home/efactura/efactura_bimed/outputConversiePDF'
+    # # zip_file_path = '/home/efactura/efactura_bimed/outputArhiveConversiePDF/rezultat'+str(current_datetime)+'.zip'
+    # # zip_file_path = '/home/efactura/efactura_bimed/outputArhiveConversiePDF/rezultatArhiveConversie.zip'
+    # zip_file_path = 'C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed/output arhive conversie PDF/rezultatArhiveConversie.zip'
     # make_archive(directory_path, os.path.join(pdf_directory, 'rezultat.zip'))   
 
     # with zipfile.ZipFile(zip_file_path, 'w', zipfile.ZIP_DEFLATED) as zip_file:
@@ -328,7 +330,7 @@ def eFactura():
     #         zip_file.write(pdf_file_path, os.path.basename(pdf_file))
     
     def conversie():
-        output_directory = 'C:/Dezvoltare/E-Factura/2023/eFactura/Ferro/eFacturaFerro local/output conversie'
+        # output_directory = 'C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed/output conversie'
         headerss = {"Content-Type": "text/plain"}
 
         # Creează un nou workbook Excel
@@ -374,7 +376,7 @@ def eFactura():
 
                     if response and response.status_code == 200:
                         filename_no_extension = os.path.splitext(filename)[0]
-                        with open(f'C:/Dezvoltare/E-Factura/2023/eFactura/Ferro/eFacturaFerro local/output conversie PDF/{filename_no_extension}.pdf', 'wb') as file:
+                        with open(f'C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed/output conversie PDF/{filename_no_extension}.pdf', 'wb') as file:
                             file.write(response.content)
                             print(f'Fisierul {filename} a fost convertit cu succes')
                     else:
@@ -396,10 +398,10 @@ def eFactura():
     print('aici facem conversia in PDF')
 
 
-    pdf_directory = 'C:/Dezvoltare/E-Factura/2023/eFactura/Ferro/eFacturaFerro local/output conversie PDF'
-    # pdf_directory = '/home/efactura/efactura_ferro/outputConversiePDF'
-    # zip_file_path = '/home/efactura/efactura_ferro/outputArhiveConversiePDF/rezultatArhiveConversie.zip'
-    zip_file_path = 'C:/Dezvoltare/E-Factura/2023/eFactura/Ferro/eFacturaFerro local/output arhive conversie PDF/rezultatArhiveConversie.zip'
+    # pdf_directory = 'C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed/output conversie PDF'
+    pdf_directory = '/home/efactura/efactura_bimed/outputConversiePDF'
+    zip_file_path = '/home/efactura/efactura_bimed/outputArhiveConversiePDF/rezultatArhiveConversie.zip'
+    # zip_file_path = 'C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed/output arhive conversie PDF/rezultatArhiveConversie.zip'
     make_archive(directory_path, os.path.join(pdf_directory, 'rezultat.zip'))   
 
     with zipfile.ZipFile(zip_file_path, 'w', zipfile.ZIP_DEFLATED) as zip_file:
