@@ -375,7 +375,7 @@ def descarcarepdf(idSelectate):
     print(idSelectate, 'ASTEA AICI SUNT IN STOCARE.PY')
     # downlXMLbaza = 'C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed/download pdf baza de date'
     # destinatie = "C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed/destinatie/"
-    downlPDFbaza = '/home/efactura/efactura_bimed/downloadPdfBazaDate'
+    downlXMLbaza = '/home/efactura/efactura_bimed/downloadPdfBazaDate'
     destinatie = '/home/efactura/efactura_bimed/destinatie/'
     idSelectate=idSelectate[1:]
 
@@ -422,7 +422,8 @@ def descarcarepdf(idSelectate):
 
         def conversie():
                 # xmlANAF = 'C:/Dezvoltare/E-Factura/2023/eFactura/Expeditors/eFacturaExpeditors local/output conversie'
-                cale_fisier = 'C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed/download pdf baza de date'
+                # cale_fisier = 'C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed/download pdf baza de date'
+                cale_fisier = '/home/efactura/efactura_bimed/downloadPdfBazaDate'
                 headerss = {"Content-Type": "text/plain"}
 
                 # Creează un nou workbook Excel
@@ -468,7 +469,8 @@ def descarcarepdf(idSelectate):
 
                             if response and response.status_code == 200:
                                 filename_no_extension = os.path.splitext(filename)[0]
-                                with open(f'C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed/download pdf baza de date/{filename_no_extension}.pdf', 'wb') as file:
+                                # with open(f'C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed/download pdf baza de date/{filename_no_extension}.pdf', 'wb') as file:
+                                with open(f'/home/efactura/efactura_bimed/downloadPdfBazaDate/{filename_no_extension}.pdf', 'wb') as file:
                                     # file.write(response.content)
                                     print(f'Fisierul {filename} a fost convertit cu succes')
                             else:
