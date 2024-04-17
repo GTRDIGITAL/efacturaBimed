@@ -190,7 +190,7 @@ def eFactura():
                 time.sleep(10)
         
     print('aici vedem mesajele anaf')
-    mesajeanaf()
+    # mesajeanaf()
     
             
             # time.sleep(1)
