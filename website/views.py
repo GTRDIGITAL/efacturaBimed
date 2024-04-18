@@ -531,7 +531,7 @@ def save_edited_client():
 def refresh():
     def mesajeanafRefresh(headers, val1, val2):
         time.sleep(15)
-        cif = 901512
+        cif = dateFirma['cui']
 
         current_time = datetime.datetime.now()
         start_time = current_time - datetime.timedelta(days=60)
