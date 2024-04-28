@@ -273,7 +273,7 @@ def stocarePDF():
     cursor = connection.cursor()
     
     # director_fisiere = "C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed/output conversie PDF/"
-    director_fisiere = '/home/efactura/efactura_bimed/outputConversie/'
+    director_fisiere = '/home/efactura/efactura_bimed/outputConversie'
 
 # Parcurgerea fișierelor din director și inserarea în baza de date
     for nume_fisier in os.listdir(director_fisiere):
