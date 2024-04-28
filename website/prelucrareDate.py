@@ -174,7 +174,7 @@ def prelucrareDate(fisierDeVanzari):
     Sales_EFACTURA=Sales_EFACTURA.loc[Sales_EFACTURA["COUNTRY_CLIENT"]=="RO"]
     # Sales_EFACTURA["CITY_CLIENT"]=Sales_EFACTURA["GCI"].str.lstrip("0").str.replace(r'\.0$', '', regex=True).map(dictClients_City)
     # Sales_EFACTURA["STREET_CLIENT"]=Sales_EFACTURA["GCI"].str.lstrip("0").str.replace(r'\.0$', '', regex=True).map(dictClients_Street)
-    dictTaxCode={"A1":"S", 'B0':"AE", 'Y8':'E'}
+    dictTaxCode={"A1":"S", 'B0':"AE", 'Y8':'E', 'A9':'S'} 
     Sales_EFACTURA["ID TVA"]=Sales_EFACTURA["Tax Code"].map(dictTaxCode)
     dictCota={"AE":0, "S":19.00, "E":0 }
     # Sales_EFACTURA.to_excel("C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed/Baza de date vanzari/out/Sales initial.xlsx")
@@ -233,7 +233,11 @@ def prelucrareDate(fisierDeVanzari):
                 listaCote = list(set(list(df_fact_curenta["Cota"])))
                 subtotalTva = df_fact_curenta.groupby("Cota")["Valoare linia TVA"].sum().reset_index()
                 subtotalBaza=df_fact_curenta.groupby("Cota")["General ledger amount"].sum().reset_index()
-                subtotalIDTVA=df_fact_curenta.groupby("ID TVA")["Cota"].sum().reset_index()
+                # subtotalIDTVA=df_fact_curenta.groupby("ID TVA")["Cota"].sum().reset_index()
+                if df_fact_curenta["Inv Type code"].iloc[0]!=389: #aici modif cristi
+                    subtotalIDTVA=df_fact_curenta.groupby("ID TVA")["Cota"].sum().reset_index()
+                else:
+                    subtotalIDTVA=df_fact_curenta.groupby(["ID TVA", 'Cota']).size().reset_index(name='Count')
                 
                 total_amount = 0
                 tva_total=0
@@ -445,7 +449,11 @@ def prelucrareDate(fisierDeVanzari):
                 subtotalBaza=df_fact_curenta.groupby("Cota")["General ledger amount"].sum().reset_index()
                 subtotalBazaValuta=df_fact_curenta.groupby("Cota")["General ledger amount"].sum().reset_index()
                 subtotalTvaValuta=df_fact_curenta.groupby("Cota")["Valoare linia TVA (Valuta)"].sum().reset_index()
-                subtotalIDTVA=df_fact_curenta.groupby("ID TVA")["Cota"].sum().reset_index()
+                # subtotalIDTVA=df_fact_curenta.groupby("ID TVA")["Cota"].sum().reset_index()
+                if df_fact_curenta["Inv Type code"].iloc[0]!=389: #aici modif cristi
+                    subtotalIDTVA=df_fact_curenta.groupby("ID TVA")["Cota"].sum().reset_index()
+                else:
+                    subtotalIDTVA=df_fact_curenta.groupby(["ID TVA", 'Cota']).size().reset_index(name='Count')
                 
                 total_amount = 0
                 tva_total=0
@@ -656,7 +664,13 @@ def prelucrareDate(fisierDeVanzari):
                 listaCote = list(set(list(df_fact_curenta["Cota"])))
                 subtotalTva = df_fact_curenta.groupby("Cota")["Valoare linia TVA"].sum().reset_index()
                 subtotalBaza=df_fact_curenta.groupby("Cota")["General ledger amount"].sum().reset_index()
-                subtotalIDTVA=df_fact_curenta.groupby("ID TVA")["Cota"].sum().reset_index()
+                # subtotalIDTVA=df_fact_curenta.groupby("ID TVA")["Cota"].sum().reset_index()
+                if df_fact_curenta["Inv Type code"].iloc[0]!=389: #aici modif cristi
+                    subtotalIDTVA=df_fact_curenta.groupby("ID TVA")["Cota"].sum().reset_index()
+                else:
+                    subtotalIDTVA=df_fact_curenta.groupby(["ID TVA", 'Cota']).size().reset_index(name='Count')
+
+
 
                 total_amount = 0
                 tva_total=0
@@ -864,7 +878,14 @@ def prelucrareDate(fisierDeVanzari):
                 subtotalBaza=df_fact_curenta.groupby("Cota")["General ledger amount"].sum().reset_index()
                 subtotalBazaValuta=df_fact_curenta.groupby("Cota")["General ledger amount"].sum().reset_index()
                 subtotalTvaValuta=df_fact_curenta.groupby("Cota")["Valoare linia TVA (Valuta)"].sum().reset_index()
-                subtotalIDTVA=df_fact_curenta.groupby("ID TVA")["Cota"].sum().reset_index()
+                # subtotalIDTVA=df_fact_curenta.groupby("ID TVA")["Cota"].sum().reset_index()
+                if df_fact_curenta["Inv Type code"].iloc[0]!=389: #aici modif cristi
+                    subtotalIDTVA=df_fact_curenta.groupby("ID TVA")["Cota"].sum().reset_index()
+                else:
+                    subtotalIDTVA=df_fact_curenta.groupby(["ID TVA", 'Cota']).size().reset_index(name='Count')
+			
+                
+                
                 
                 total_amount = 0
                 tva_total=0
