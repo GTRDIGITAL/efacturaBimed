@@ -335,7 +335,7 @@
             </form>
         </div>-->
 
-        <div class="procent-container">
+        <!--<div class="procent-container">
           <div><p id="facturi-total">Total facturi transmise: 0%</p></div>
           <div>
             <p id="facturi-total-validate">Total facturi validate: 0%</p>
@@ -348,7 +348,7 @@
             <p id="facturi-fara-eroare">Procent facturi fără erori: 0%</p>
           </div>
         </div>
-      </div>
+      </div>-->
 
       <div id="toolbar1" class="select">
         <form id="download-form" action="/refresh" method="GET">
@@ -691,12 +691,12 @@
         var procentFacturiFaraEroare = 100 - procentFacturiCuEroare;
         var factValidate=numarFacturiUltimaRulare-numarFacturiCuEroare
 
-        $('#facturi-total').text('Total facturi transmise la ultima transmitere: ' + numarFacturiUltimaRulare );
+        /*$('#facturi-total').text('Total facturi transmise la ultima transmitere: ' + numarFacturiUltimaRulare );
         $('#facturi-total-validate').text('Total facturi validate la ultima transmitere:' + numarFacturiValideUltimaRulare);
         $('#facturi-total-erori').text('Total facturi erori la ultima transmitere:' + numarFacturiCuEroare);
         $('#facturi-eroare').text('Procent facturi cu erori la ultima transmitere:' + procentFacturiCuEroare.toFixed(2) + '%');
         $('#facturi-fara-eroare').text('Procent facturi fără erori la ultima transmitere:' + procentFacturiFaraEroare.toFixed(2) + '%');
-
+        */
     /*
         $('#facturi-total').text('Total facturi transmise la ultima transmitere: 20' );
         $('#facturi-total-validate').text('Total facturi validate la ultima transmitere: 19' );
