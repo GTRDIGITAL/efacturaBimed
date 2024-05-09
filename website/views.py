@@ -169,14 +169,14 @@ def summary():
         numarFacturiCorecte = numarFacturiTrimise - facturiNuleUnice
         print(facturiNuleUnice, "facturi corecte")
         session['ultimaFactura'] = ultimaFactura
-        parts = ultimaFactura.split(":")
-        ultimaFactura = parts[1].strip()
-        if ultimaFactura.isdigit():
-            # Dacă este doar cifre, convertim valoarea la int pentru a fi folosită în JavaScript
-            numar_ultima_factura_js = int(ultimaFactura)
-        else:
-            # Dacă nu conține doar cifre, lăsăm valoarea neschimbată
-            numar_ultima_factura_js = ultimaFactura
+        # parts = ultimaFactura.split(":")
+        # ultimaFactura = parts[1].strip()
+        # if ultimaFactura.isdigit():
+        #     # Dacă este doar cifre, convertim valoarea la int pentru a fi folosită în JavaScript
+        #     numar_ultima_factura_js = int(ultimaFactura)
+        # else:
+        #     # Dacă nu conține doar cifre, lăsăm valoarea neschimbată
+        #     numar_ultima_factura_js = ultimaFactura
             
         if primaFactura.isdigit():
             # Dacă este doar cifre, convertim valoarea la int pentru a fi folosită în JavaScript
@@ -186,7 +186,7 @@ def summary():
             primaFactura_js = primaFactura
         
         print(primaFactura, ultimaFactura, totalFactura, numarFacturiCorecte)
-        return render_template('summary.html', primaFactura=primaFactura_js, ultimaFactura=numar_ultima_factura_js, totalFactura=totalFactura, nrFacturiTrimise=numarFacturiTrimise, numarFacturiCorecte=numarFacturiCorecte, facturiNuleUnice=facturiNuleUnice)
+        return render_template('summary.html', primaFactura=primaFactura, ultimaFactura=ultimaFactura, totalFactura=totalFactura, nrFacturiTrimise=numarFacturiTrimise, numarFacturiCorecte=numarFacturiCorecte, facturiNuleUnice=facturiNuleUnice)
     else:
         return render_template('auth.html')
 
@@ -544,7 +544,7 @@ def refresh():
         print("val1 ", val1)
         print("val2 ", val2)
 
-        apiListaFacturi = f'https://api.anaf.ro/prod/FCTEL/rest/listaMesajePaginatieFactura'
+        apiListaFacturi = f'https://api.anaf.ro/test/FCTEL/rest/listaMesajePaginatieFactura'
 
         params = {
             'startTime': val1,
@@ -589,7 +589,7 @@ def refresh():
     def stareMesajRefresh():
         listaIdDescarcare.clear()
         for i in range(0, len(listaIndexIncarcare)):
-            apiStareMesaj = 'https://api.anaf.ro/prod/FCTEL/rest/stareMesaj?id_incarcare='+str(listaIndexIncarcare[i])
+            apiStareMesaj = 'https://api.anaf.ro/test/FCTEL/rest/stareMesaj?id_incarcare='+str(listaIndexIncarcare[i])
             
             while True:  
                 stare = requests.get(apiStareMesaj, headers=headers)
