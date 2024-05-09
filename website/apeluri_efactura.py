@@ -79,7 +79,7 @@ def eFactura():
                 with open(fisier_xml, 'r', encoding='utf-8') as file:
                     xml = file.read()
 
-                if "<cbc:InvoiceTypeCode>389</cbc:InvoiceTypeCode>":
+                if "<cbc:InvoiceTypeCode>389</cbc:InvoiceTypeCode>" in fisier_xml:
                     print("asta e AUTOFACTURA")
                     apiDepunere = f'https://api.anaf.ro/test/FCTEL/rest/upload?standard=UBL&cif={cif}&extern=DA&autofactura=DA'
                 elif "CreditNote" in fisier_xml:
