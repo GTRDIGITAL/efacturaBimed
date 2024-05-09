@@ -471,7 +471,7 @@ def descarcarepdf(idSelectate):
                                 filename_no_extension = os.path.splitext(filename)[0]
                                 # with open(f'C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed/download pdf baza de date/{filename_no_extension}.pdf', 'wb') as file:
                                 with open(f'/home/efactura/efactura_bimed/downloadPdfBazaDate/{filename_no_extension}.pdf', 'wb') as file:
-                                    # file.write(response.content)
+                                    file.write(response.content)
                                     print(f'Fisierul {filename} a fost convertit cu succes')
                             else:
                                 print("Eroare la efectuarea cererii HTTP:", response.status_code)
