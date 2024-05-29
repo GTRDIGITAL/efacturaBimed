@@ -46,10 +46,10 @@ def eFactura():
         except Exception as e:
             print(f"Eroare la stergerea fișierelor: {str(e)}")
 
-    # stergeFisiere('C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed/output conversie', '.xml')
-    # stergeFisiere('C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed/output zip api', '.zip')
-    # stergeFisiere('C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed/output conversie PDF', '.pdf')
-    # stergeFisiere('C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed/output conversie PDF', '.txt')
+    # stergeFisiere('C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/efacturaBimed local/output conversie', '.xml')
+    # stergeFisiere('C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/efacturaBimed local/output zip api', '.zip')
+    # stergeFisiere('C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/efacturaBimed local/output conversie PDF', '.pdf')
+    # stergeFisiere('C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/efacturaBimed local/output conversie PDF', '.txt')
     
     stergeFisiere('/home/efactura/efactura_bimed/outputConversie', '.xml')
     stergeFisiere('/home/efactura/efactura_bimed/outputZipAPI', '.zip')
@@ -79,7 +79,12 @@ def eFactura():
                 with open(fisier_xml, 'r', encoding='utf-8') as file:
                     xml = file.read()
 
-                if "<cbc:InvoiceTypeCode>389</cbc:InvoiceTypeCode>" in fisier_xml:
+                # if "CreditNote" in fisier_xml:
+                #     print('asta e credit note')
+                #     apiDepunere = 'https://api.anaf.ro/test/FCTEL/rest/upload?standard=CN&cif='+str(cif)
+                # else:
+                #     apiDepunere = 'https://api.anaf.ro/test/FCTEL/rest/upload?standard=UBL&cif='+str(cif)
+                if "<cbc:InvoiceTypeCode>389</cbc:InvoiceTypeCode>" in xml:
                     print("asta e AUTOFACTURA")
                     apiDepunere = f'https://api.anaf.ro/test/FCTEL/rest/upload?standard=UBL&cif={cif}&extern=DA&autofactura=DA'
                 elif "CreditNote" in fisier_xml:
@@ -110,13 +115,13 @@ def eFactura():
                 print("Eroare:", str(e))
                 message = "fisier cu probleme----------------->" + str(fisier_xml)
                 listaMesajeEroare.append(message)
-                # with open('C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed/output conversie PDF/log.txt', 'a', encoding='utf-8') as log_file:
+                # with open('C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local/output conversie PDF/log.txt', 'a', encoding='utf-8') as log_file:
                 with open('/home/efactura/efactura_bimed/outputConversiePDF/log.txt', 'a', encoding='utf-8') as log_file:
                     log_file.write("Eroare validare fisier: "+str(fisier_xml)+" \n")
                     log_file.write("Eroare la efectuarea cererii HTTP: "+str(response.status_code)+"\n")
 
     # Lista fișierelor XML se obține în afara funcției
-    # director_xml = "C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed/outs/"
+    # director_xml = "C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local/outs/"
     director_xml = "/home/efactura/efactura_bimed/outs"
     fisiere_xml = lista_fisiere_xml(director_xml)
 
@@ -183,7 +188,7 @@ def eFactura():
                         
                         listaMesaje = requests.get(api_url_updated, headers=headers, timeout=30)
                         raspunsMesajeFacturi = json.loads(listaMesaje.text)
-                        # stocareMesajeAnaf(raspunsMesajeFacturi)
+                        stocareMesajeAnaf(raspunsMesajeFacturi)
                         print('stocare a mesajelor cu success')
                         break 
                         # print("MESAJEEEEEEEEEEEE FACTURIIIIIIIIIIIIIIIIIIIII", raspunsMesajeFacturi)
@@ -239,7 +244,7 @@ def eFactura():
 
             if descarcare.status_code == 200:
                 # print("Cererea a fost efectuata cu succes!")
-                # with open('C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed/output zip api/fisier'+str(listaIdDescarcare[i])+'.zip', 'wb') as file:
+                # with open('C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local/output zip api/fisier'+str(listaIdDescarcare[i])+'.zip', 'wb') as file:
                 with open("/home/efactura/efactura_bimed/outputZipAPI/fisier"+str(listaIdDescarcare[i])+'.zip', 'wb') as file:
                     file.write(descarcare.content)
                     print('Descarcat cu success')
@@ -251,12 +256,12 @@ def eFactura():
     print("aici descarcam folosind id_descarcare")
     descarcare()
 
-    # directory_path = 'C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed/output zip api'
+    # directory_path = 'C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local/output zip api'
     directory_path = "/home/efactura/efactura_bimed/outputZipAPI"
 
-    # output_directory = 'C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed/output conversie'
+    # output_directory = 'C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local/output conversie'
     output_directory = "/home/efactura/efactura_bimed/outputConversie"
-    arhiveANAF = "/home/efactura/efactura_bimed/arhiveANAF"
+    # arhiveANAF = "/home/efactura/efactura_bimed/arhiveANAF"
 
     os.makedirs(output_directory, exist_ok=True)
 
@@ -402,10 +407,10 @@ def eFactura():
     print('aici facem conversia in PDF')
 
 
-    # pdf_directory = 'C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed/output conversie PDF'
+    # pdf_directory = 'C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local/output conversie PDF'
     pdf_directory = '/home/efactura/efactura_bimed/outputConversiePDF'
     zip_file_path = '/home/efactura/efactura_bimed/outputArhiveConversiePDF/rezultatArhiveConversie.zip'
-    # zip_file_path = 'C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed/output arhive conversie PDF/rezultatArhiveConversie.zip'
+    # zip_file_path = 'C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local/output arhive conversie PDF/rezultatArhiveConversie.zip'
     make_archive(directory_path, os.path.join(pdf_directory, 'rezultat.zip'))   
 
     with zipfile.ZipFile(zip_file_path, 'w', zipfile.ZIP_DEFLATED) as zip_file:

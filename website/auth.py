@@ -10,6 +10,11 @@ import datetime
 import pyotp
 import smtplib, ssl
 import base64
+from .trimitereCodOTP import trimitereOTPMail
+from . import refreshToken
+import json
+from datetime import timedelta
+
 
 auth = Blueprint('auth', __name__)
 def trimitereMail():
@@ -90,6 +95,14 @@ def login():
         password = request.form.get('password')
         print("trece pe aici")
         
+        def citeste_configurare(file_path):
+            with open(file_path, 'r') as file:
+                config = json.load(file)
+            return config
+
+        config = citeste_configurare('config.json')
+        appData = config['dateFirma']
+        
         user = Users.query.filter_by(username=email).first()
         
         if user:
@@ -101,9 +114,28 @@ def login():
                 totp = pyotp.TOTP(key)
                 cod = totp.now()
                 print("ACESTA ESTE CODUL: ", cod)
-                session['cod'] = cod   
+                session['cod'] = cod
+                trimitereOTPMail(cod, email)   
+                data_acum = datetime.datetime.now()
+                data_acum_formatata = data_acum.strftime("%Y-%m-%d")
                 
-                return redirect(url_for('views.verify', cod=cod))
+                token_time = config["dateFirma"]["data_token"]
+                token_time_obiect = datetime.datetime.strptime(token_time, "%Y-%m-%d %H:%M:%S")
+
+                token_time_formatata = token_time_obiect.strftime("%Y-%m-%d")
+                
+                data_acum_obiect = datetime.datetime.strptime(data_acum_formatata, "%Y-%m-%d")
+                token_time_obiect = datetime.datetime.strptime(token_time_formatata, "%Y-%m-%d")
+
+                # Calcularea diferenței de timp
+                diferenta = data_acum_obiect - token_time_obiect
+                print('diferenta ', diferenta)
+
+                # Verificarea dacă diferența este mai mare de 70 de zile. pentru test punem -1
+                if diferenta > timedelta(days=70):  
+                    refreshToken.refreshToken()   
+                
+                return redirect(url_for('views.verify'))
             
             else:
                 flash('incorrect password', category='error')

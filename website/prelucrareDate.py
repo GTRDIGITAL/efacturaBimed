@@ -53,7 +53,7 @@ def prelucrareDate(fisierDeVanzari):
         except Exception as e:
             print(f"Eroare la stergerea fișierelor: {str(e)}")
     
-    # stergeFisiere('C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed/outs', '.xml')
+    # stergeFisiere('C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local/outs', '.xml')
     stergeFisiere('/home/efactura/efactura_bimed/outs', '.xml')
     facturiNumeUnice = 0
     date=datetime.now().date()
@@ -171,6 +171,9 @@ def prelucrareDate(fisierDeVanzari):
     Sales_EFACTURA["General ledger amount"]=Sales_EFACTURA["General ledger amount"]*-1
     Sales_EFACTURA["Amount in local currency"]=Sales_EFACTURA["Amount in local currency"]*-1
     # Sales_EFACTURA.to_excel("C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed/Baza de date vanzari/out/Sales initial.xlsx")
+    Sales_EFACTURA.loc[Sales_EFACTURA["Reference"].astype(str).str.startswith("BMD"), "Customer"]="BIMED"
+    Sales_EFACTURA.loc[Sales_EFACTURA["Reference"].astype(str).str.startswith("BMD"), "Name 1"]=numeCompanie
+    Sales_EFACTURA.loc[Sales_EFACTURA["Reference"].astype(str).str.startswith("BMD"), "Country"]="RO"
     Sales_EFACTURA=Sales_EFACTURA.loc[Sales_EFACTURA["COUNTRY_CLIENT"]=="RO"]
     # Sales_EFACTURA["CITY_CLIENT"]=Sales_EFACTURA["GCI"].str.lstrip("0").str.replace(r'\.0$', '', regex=True).map(dictClients_City)
     # Sales_EFACTURA["STREET_CLIENT"]=Sales_EFACTURA["GCI"].str.lstrip("0").str.replace(r'\.0$', '', regex=True).map(dictClients_Street)
@@ -217,7 +220,7 @@ def prelucrareDate(fisierDeVanzari):
     ultimaFactura=list(Sales_EFACTURA["Reference"])[-1]
     print(totalFactura, primaFactura, ultimaFactura)
     print("asta e prima factura in prelucrare_date.py ",primaFactura)
-    # Sales_EFACTURA.to_excel("C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed/Baza de date vanzari/out/Sales.xlsx")
+    # Sales_EFACTURA.to_excel("C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local/Baza de date vanzari/out/Sales.xlsx")
 
     issue_date = pd.to_datetime(Sales_EFACTURA["Document Date"]).dt.strftime('%Y-%m-%d').iloc[0]
     nrFacturiTrimise = len(listaNumarFact)
@@ -233,11 +236,11 @@ def prelucrareDate(fisierDeVanzari):
                 listaCote = list(set(list(df_fact_curenta["Cota"])))
                 subtotalTva = df_fact_curenta.groupby("Cota")["Valoare linia TVA"].sum().reset_index()
                 subtotalBaza=df_fact_curenta.groupby("Cota")["General ledger amount"].sum().reset_index()
-                # subtotalIDTVA=df_fact_curenta.groupby("ID TVA")["Cota"].sum().reset_index()
                 if df_fact_curenta["Inv Type code"].iloc[0]!=389: #aici modif cristi
                     subtotalIDTVA=df_fact_curenta.groupby("ID TVA")["Cota"].sum().reset_index()
                 else:
                     subtotalIDTVA=df_fact_curenta.groupby(["ID TVA", 'Cota']).size().reset_index(name='Count')
+                print(subtotalIDTVA, ' ------------------')
                 
                 total_amount = 0
                 tva_total=0
@@ -253,34 +256,60 @@ def prelucrareDate(fisierDeVanzari):
     <cbc:DocumentCurrencyCode>RON</cbc:DocumentCurrencyCode>
     <cbc:TaxCurrencyCode>RON</cbc:TaxCurrencyCode>
             
+                
 
                 '''
-
+                
                 AccountingSupplierParty = '''
-                <cac:AccountingSupplierParty>
-                    <cac:Party>
-                        <cac:PostalAddress>
-                            <cbc:StreetName>'''+str(strada)+'''</cbc:StreetName>
-                            <cbc:CityName>'''+str(oras)+'''</cbc:CityName>
-                            <cbc:CountrySubentity>'''+str(countrySubentity)+'''</cbc:CountrySubentity>
-                            <cac:Country>
-                                <cbc:IdentificationCode>'''+str(country)+'''</cbc:IdentificationCode>
-                            </cac:Country>
-                        </cac:PostalAddress>
-                        <cac:PartyTaxScheme>
-                            <cbc:CompanyID>'''+str(vatID)+'''</cbc:CompanyID>
-                            <cac:TaxScheme>
-                                <cbc:ID>VAT</cbc:ID>
-                            </cac:TaxScheme>
-                        </cac:PartyTaxScheme>
-                        <cac:PartyLegalEntity>
-                            <cbc:RegistrationName>'''+str(numeCompanie)+'''</cbc:RegistrationName>
-                            <cbc:CompanyID>'''+str(vatID)+'''</cbc:CompanyID>
-                        </cac:PartyLegalEntity>
-                    </cac:Party>
-                </cac:AccountingSupplierParty>
-                '''
-                AccountingCustomerPartyXML=f'''
+                    <cac:AccountingSupplierParty>
+                        <cac:Party>
+                            <cac:PostalAddress>
+                                <cbc:StreetName>'''+str(strada)+'''</cbc:StreetName>
+                                <cbc:CityName>'''+str(oras)+'''</cbc:CityName>
+                                <cbc:CountrySubentity>'''+str(countrySubentity)+'''</cbc:CountrySubentity>
+                                <cac:Country>
+                                    <cbc:IdentificationCode>'''+str(country)+'''</cbc:IdentificationCode>
+                                </cac:Country>
+                            </cac:PostalAddress>
+                            <cac:PartyTaxScheme>
+                                <cbc:CompanyID>'''+str(vatID)+'''</cbc:CompanyID>
+                                <cac:TaxScheme>
+                                    <cbc:ID>VAT</cbc:ID>
+                                </cac:TaxScheme>
+                            </cac:PartyTaxScheme>
+                            <cac:PartyLegalEntity>
+                                <cbc:RegistrationName>'''+str(numeCompanie)+'''</cbc:RegistrationName>
+                                <cbc:CompanyID>'''+str(vatID)+'''</cbc:CompanyID>
+                            </cac:PartyLegalEntity>
+                        </cac:Party>
+                    </cac:AccountingSupplierParty>
+                    '''
+                if str(df_fact_curenta["STREET_CLIENT"].iloc[0]) == "  ":
+                    AccountingCustomerPartyXML=f'''
+                    <cac:AccountingCustomerParty>
+                        <cac:Party>
+                            <cac:PostalAddress>
+                                <cbc:StreetName>{str(df_fact_curenta["CITY_CLIENT"].iloc[0])}</cbc:StreetName>
+                                <cbc:CityName>{str(df_fact_curenta["CITY_CLIENT"].iloc[0])}</cbc:CityName>
+                                <cbc:CountrySubentity>RO-{df_fact_curenta["REGION"].iloc[0]}</cbc:CountrySubentity>
+                                <cac:Country>
+                                    <cbc:IdentificationCode>{str(df_fact_curenta["COUNTRY_CLIENT"].iloc[0])}</cbc:IdentificationCode>
+                                </cac:Country>
+                            </cac:PostalAddress>
+                            <cac:PartyTaxScheme>
+                                <cbc:CompanyID>{str(df_fact_curenta["CUI_CLIENT"].iloc[0])}</cbc:CompanyID>
+                                <cac:TaxScheme>
+                                    <cbc:ID>VAT</cbc:ID>
+                                </cac:TaxScheme>
+                            </cac:PartyTaxScheme>
+                            <cac:PartyLegalEntity>
+                                <cbc:RegistrationName>{str(df_fact_curenta["Company"].iloc[0])}</cbc:RegistrationName>
+                                <cbc:CompanyID>{str(df_fact_curenta["CUI_CLIENT"].iloc[0])}</cbc:CompanyID>
+                            </cac:PartyLegalEntity>
+                        </cac:Party>
+                    </cac:AccountingCustomerParty>'''
+                else:
+                    AccountingCustomerPartyXML=f'''
                 <cac:AccountingCustomerParty>
                     <cac:Party>
                         <cac:PostalAddress>
@@ -430,7 +459,7 @@ def prelucrareDate(fisierDeVanzari):
                 eFacturaXML=eFacturaXML.replace("&"," ")
 
                 # Scrie conținutul în fișierul XML
-                # with open(f"C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed/outs/SalesInvoice_{str(listaNumarFact[i]).replace('.0', '').replace(':', '')}.xml", "w", encoding="utf-8") as f:
+                # with open(f"C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local/outs/SalesInvoice_{str(listaNumarFact[i]).replace('.0', '').replace(':', '')}.xml", "w", encoding="utf-8") as f:
                 with open(f"/home/efactura/efactura_bimed/outs/SalesInvoice_{str(listaNumarFact[i]).replace('.0', '').replace(':', '')}.xml", "w", encoding="utf-8") as f:
                     f.write(eFacturaXML)
 
@@ -454,7 +483,7 @@ def prelucrareDate(fisierDeVanzari):
                     subtotalIDTVA=df_fact_curenta.groupby("ID TVA")["Cota"].sum().reset_index()
                 else:
                     subtotalIDTVA=df_fact_curenta.groupby(["ID TVA", 'Cota']).size().reset_index(name='Count')
-                
+			
                 total_amount = 0
                 tva_total=0
 
@@ -493,7 +522,33 @@ def prelucrareDate(fisierDeVanzari):
                     </cac:Party>
                 </cac:AccountingSupplierParty>
                 '''
-                AccountingCustomerPartyXML=f'''
+                
+                if str(df_fact_curenta["STREET_CLIENT"].iloc[0]) == "  ":
+                    AccountingCustomerPartyXML=f'''
+                    <cac:AccountingCustomerParty>
+                        <cac:Party>
+                            <cac:PostalAddress>
+                                <cbc:StreetName>{str(df_fact_curenta["CITY_CLIENT"].iloc[0])}</cbc:StreetName>
+                                <cbc:CityName>{str(df_fact_curenta["CITY_CLIENT"].iloc[0])}</cbc:CityName>
+                                <cbc:CountrySubentity>RO-{df_fact_curenta["REGION"].iloc[0]}</cbc:CountrySubentity>
+                                <cac:Country>
+                                    <cbc:IdentificationCode>{str(df_fact_curenta["COUNTRY_CLIENT"].iloc[0])}</cbc:IdentificationCode>
+                                </cac:Country>
+                            </cac:PostalAddress>
+                            <cac:PartyTaxScheme>
+                                <cbc:CompanyID>{str(df_fact_curenta["CUI_CLIENT"].iloc[0])}</cbc:CompanyID>
+                                <cac:TaxScheme>
+                                    <cbc:ID>VAT</cbc:ID>
+                                </cac:TaxScheme>
+                            </cac:PartyTaxScheme>
+                            <cac:PartyLegalEntity>
+                                <cbc:RegistrationName>{str(df_fact_curenta["Company"].iloc[0])}</cbc:RegistrationName>
+                                <cbc:CompanyID>{str(df_fact_curenta["CUI_CLIENT"].iloc[0])}</cbc:CompanyID>
+                            </cac:PartyLegalEntity>
+                        </cac:Party>
+                    </cac:AccountingCustomerParty>'''
+                else:
+                    AccountingCustomerPartyXML=f'''
                 <cac:AccountingCustomerParty>
                     <cac:Party>
                         <cac:PostalAddress>
@@ -647,7 +702,7 @@ def prelucrareDate(fisierDeVanzari):
                 eFacturaXML=eFacturaXML.replace("&"," ")
 
                 # Scrie conținutul în fișierul XML
-                # with open(f"C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed/outs/SalesInvoiceValuta_{str(listaNumarFact[i]).replace('.0', '').replace(':', '')}.xml", "w", encoding="utf-8") as f:
+                # with open(f"C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local/outs/SalesInvoiceValuta_{str(listaNumarFact[i]).replace('.0', '').replace(':', '')}.xml", "w", encoding="utf-8") as f:
                 with open(f"/home/efactura/efactura_bimed/outs/SalesInvoiceValuta_{str(listaNumarFact[i]).replace('.0', '').replace(':', '')}.xml", "w", encoding="utf-8") as f:  
                     f.write(eFacturaXML)
 
@@ -669,8 +724,6 @@ def prelucrareDate(fisierDeVanzari):
                     subtotalIDTVA=df_fact_curenta.groupby("ID TVA")["Cota"].sum().reset_index()
                 else:
                     subtotalIDTVA=df_fact_curenta.groupby(["ID TVA", 'Cota']).size().reset_index(name='Count')
-
-
 
                 total_amount = 0
                 tva_total=0
@@ -712,7 +765,32 @@ def prelucrareDate(fisierDeVanzari):
                     </cac:Party>
                 </cac:AccountingSupplierParty>
                 '''
-                AccountingCustomerPartyXML=f'''
+                if str(df_fact_curenta["STREET_CLIENT"].iloc[0]) == "  ":
+                    AccountingCustomerPartyXML=f'''
+                    <cac:AccountingCustomerParty>
+                        <cac:Party>
+                            <cac:PostalAddress>
+                                <cbc:StreetName>{str(df_fact_curenta["CITY_CLIENT"].iloc[0])}</cbc:StreetName>
+                                <cbc:CityName>{str(df_fact_curenta["CITY_CLIENT"].iloc[0])}</cbc:CityName>
+                                <cbc:CountrySubentity>RO-{df_fact_curenta["REGION"].iloc[0]}</cbc:CountrySubentity>
+                                <cac:Country>
+                                    <cbc:IdentificationCode>{str(df_fact_curenta["COUNTRY_CLIENT"].iloc[0])}</cbc:IdentificationCode>
+                                </cac:Country>
+                            </cac:PostalAddress>
+                            <cac:PartyTaxScheme>
+                                <cbc:CompanyID>{str(df_fact_curenta["CUI_CLIENT"].iloc[0])}</cbc:CompanyID>
+                                <cac:TaxScheme>
+                                    <cbc:ID>VAT</cbc:ID>
+                                </cac:TaxScheme>
+                            </cac:PartyTaxScheme>
+                            <cac:PartyLegalEntity>
+                                <cbc:RegistrationName>{str(df_fact_curenta["Company"].iloc[0])}</cbc:RegistrationName>
+                                <cbc:CompanyID>{str(df_fact_curenta["CUI_CLIENT"].iloc[0])}</cbc:CompanyID>
+                            </cac:PartyLegalEntity>
+                        </cac:Party>
+                    </cac:AccountingCustomerParty>'''
+                else:
+                    AccountingCustomerPartyXML=f'''
                 <cac:AccountingCustomerParty>
                     <cac:Party>
                         <cac:PostalAddress>
@@ -858,7 +936,7 @@ def prelucrareDate(fisierDeVanzari):
                 eFacturaXML = remove_diacritics(eFacturaXML)
 
                 # Scrie conținutul în fișierul XML
-                # with open(f"C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed/outs/SalesCreditNote_{str(listaNumarFact[i]).replace('.0', '').replace(':', '')}.xml", "w", encoding="utf-8") as f:
+                # with open(f"C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local/outs/SalesCreditNote_{str(listaNumarFact[i]).replace('.0', '').replace(':', '')}.xml", "w", encoding="utf-8") as f:
                 with open(f"/home/efactura/efactura_bimed/outs/SalesCreditNote_{str(listaNumarFact[i]).replace('.0', '').replace(':', '')}.xml", "w", encoding="utf-8") as f:
                     f.write(eFacturaXML)
 
@@ -884,8 +962,6 @@ def prelucrareDate(fisierDeVanzari):
                 else:
                     subtotalIDTVA=df_fact_curenta.groupby(["ID TVA", 'Cota']).size().reset_index(name='Count')
 			
-                
-                
                 
                 total_amount = 0
                 tva_total=0
@@ -927,8 +1003,34 @@ def prelucrareDate(fisierDeVanzari):
                         </cac:PartyLegalEntity>
                     </cac:Party>
                 </cac:AccountingSupplierParty>
+                
                 '''
-                AccountingCustomerPartyXML=f'''
+                if str(df_fact_curenta["STREET_CLIENT"].iloc[0]) == "  ":
+                    AccountingCustomerPartyXML=f'''
+                    <cac:AccountingCustomerParty>
+                        <cac:Party>
+                            <cac:PostalAddress>
+                                <cbc:StreetName>{str(df_fact_curenta["CITY_CLIENT"].iloc[0])}</cbc:StreetName>
+                                <cbc:CityName>{str(df_fact_curenta["CITY_CLIENT"].iloc[0])}</cbc:CityName>
+                                <cbc:CountrySubentity>RO-{df_fact_curenta["REGION"].iloc[0]}</cbc:CountrySubentity>
+                                <cac:Country>
+                                    <cbc:IdentificationCode>{str(df_fact_curenta["COUNTRY_CLIENT"].iloc[0])}</cbc:IdentificationCode>
+                                </cac:Country>
+                            </cac:PostalAddress>
+                            <cac:PartyTaxScheme>
+                                <cbc:CompanyID>{str(df_fact_curenta["CUI_CLIENT"].iloc[0])}</cbc:CompanyID>
+                                <cac:TaxScheme>
+                                    <cbc:ID>VAT</cbc:ID>
+                                </cac:TaxScheme>
+                            </cac:PartyTaxScheme>
+                            <cac:PartyLegalEntity>
+                                <cbc:RegistrationName>{str(df_fact_curenta["Company"].iloc[0])}</cbc:RegistrationName>
+                                <cbc:CompanyID>{str(df_fact_curenta["CUI_CLIENT"].iloc[0])}</cbc:CompanyID>
+                            </cac:PartyLegalEntity>
+                        </cac:Party>
+                    </cac:AccountingCustomerParty>'''
+                else:
+                    AccountingCustomerPartyXML=f'''
                 <cac:AccountingCustomerParty>
                     <cac:Party>
                         <cac:PostalAddress>
@@ -1083,7 +1185,7 @@ def prelucrareDate(fisierDeVanzari):
                 eFacturaXML=eFacturaXML.replace("&"," ")
 
                 # Scrie conținutul în fișierul XML
-                # with open(f"C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed/outs/SalesCreditNoteValuta_{str(listaNumarFact[i]).replace('.0', '').replace(':', '')}.xml", "w", encoding="utf-8") as f:
+                # with open(f"C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local/outs/SalesCreditNoteValuta_{str(listaNumarFact[i]).replace('.0', '').replace(':', '')}.xml", "w", encoding="utf-8") as f:
                 with open(f"/home/efactura/efactura_bimed/outs/SalesCreditNoteValuta_{str(listaNumarFact[i]).replace('.0', '').replace(':', '')}.xml", "w", encoding="utf-8") as f:   
                     f.write(eFacturaXML)
 

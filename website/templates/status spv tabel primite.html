@@ -313,7 +313,7 @@
                   class="nav-link font-roboto"
                   style="float: right; color: white"
                   href="/raport_client"
-                  >Modul transmitere facturi</a
+                  >Raport încărcare date</a
                 >
               </li>
 
@@ -322,13 +322,13 @@
                   class="nav-link font-roboto"
                   style="float: right; color: white"
                   href="/status"
-                  >Raport încărcare date</a
+                  >Modul transmitere facturi</a
                 >
               </li>
             </ul>
           </div>
         </nav>
-        <h1>Istoric primire SPV</h1>
+        <h1>Istoric Primire SPV</h1>
         <!--<div class="button-container">
             <form id="login-form" class="login-form" action="/main" method="POST">
                 <button type="submit">Pagina principală</button>
@@ -338,12 +338,12 @@
       
 
       <div id="toolbar1" class="select">
-        <form id="download-form" action="/refresh" method="GET">
+        <form id="download-form" action="/refreshReceived" method="GET">
           <button class="btn btn-default refresh" title="Refresh">
             <i class="glyphicon glyphicon-refresh"></i> Refresh Data
           </button>
         </form>
-        <form id="download-form" action="/download" method="GET">
+        <form id="download-form" action="/downloadPrimite" method="GET">
           <input type="hidden" name="iduri_selectate" id="iduri_selectate" />
           <button
             class="btn btn-default download"
@@ -377,7 +377,6 @@
       >
         <thead style="background-color: #2b144d; color: white; opacity: 80%">
           <tr>
-            <th data-field="factura" data-sortable="true">Factura</th>
             <th data-field="data_creare" data-sortable="true">data_creare</th>
             <th data-field="cif" data-sortable="true">cif</th>
             <th data-field="id_solicitare" data-sortable="true">
@@ -386,8 +385,7 @@
             <th data-field="detalii" data-sortable="true">detalii</th>
             <th data-field="tip" data-sortable="true">tip</th>
             <th data-field="id" data-sortable="true">id</th>
-            <th data-field="user_id" data-sortable="true">User</th>
-            <th data-field="descarcata" data-sortable="true">Descarcata</th>
+            <th data-field="descarcata" data-sortable="true">Descărcată</th>
             <th data-field="state" data-checkbox="true"></th>
             <!--<th data-field="download" data-sortable="true"> Download</th>-->
           </tr>
@@ -395,14 +393,12 @@
         <tbody>
           {% for mesaj in mesaje %}
           <tr>
-            <td>{{ mesaj["factura"] }}</td>
             <td>{{ mesaj["data_creare"] }}</td>
             <td>{{ mesaj["cif"] }}</td>
             <td>{{ mesaj["id_solicitare"] }}</td>
             <td>{{ mesaj["detalii"] }}</td>
             <td>{{ mesaj["tip"] }}</td>
             <td>{{ mesaj["id_factura"] }}</td>
-            <td>{{ mesaj["user_id"] }}</td>
             <td>{{ mesaj["descarcata"] }}</td>
             <td></td>
             <!--<form id="download-form" class="download-form"  method="POST">
@@ -500,12 +496,12 @@
                 columns: [
                     {
                         field: 'factura',
-                        title: 'Factura',
+                        title: 'Invoice',
                         sortable: true
                     },
                     {
                         field: 'data_creare',
-                        title: 'Data',
+                        title: 'Date',
                         sortable: true,
                         order: 'desc',
                         formatter: function (value) {
@@ -523,22 +519,22 @@
                     },
                     {
                         field: 'cif',
-                        title: 'CIF',
+                        title: 'VAT Reg. No',
                         sortable: true
                     },
                     {
                         field: 'id_solicitare',
-                        title: 'ID Solicitare',
+                        title: 'Request ID',
                         sortable: true
                     },
                     {
                         field: 'detalii',
-                        title: 'Detalii',
+                        title: 'Details',
                         sortable: true
                     },
                     {
                         field: 'tip',
-                        title: 'Tip',
+                        title: 'Type',
                         sortable: true
                     },
                     {
@@ -568,7 +564,7 @@
             for (var i = 0; i < rows.length; i++) {
                 if (rows[i].classList.contains('selected')) {
                     var cells = rows[i].getElementsByTagName('td');
-                    selectedIds.push(cells[3].innerText); // Modifică indexul conform coloanei "id_descarcare"
+                    selectedIds.push(cells[2].innerText); // Modifică indexul conform coloanei "id_descarcare"
                 }
             }
             document.getElementById('iduri_selectate').value = selectedIds;
@@ -602,7 +598,7 @@
     }
     // Obține toate celulele din coloana "TIP" și setează culoarea textului
     $table.find('tbody tr').each(function () {
-        var cell = $(this).find('td:eq(5)'); // Obține celula din coloana "TIP"
+        var cell = $(this).find('td:eq(4)'); // Obține celula din coloana "TIP"
         var value = cell.text(); // Obține valoarea din celulă
         setCellTextColor(value, cell); // Setează culoarea textului în funcție de valoare
     });
@@ -659,7 +655,7 @@
 
        var tipCelula = $primaLinie.find('td:eq(0)').text();
         $table.find('tbody tr').each(function () {
-            var celule = $(this).find('td:eq(3)').text();
+            var celule = $(this).find('td:eq(5)').text();
             // alert(celule)
             var statusCelule = $(this).find('td:eq(5)').text(); // Obține valoarea din coloana "TIP"
             if (listaUltimaRulare.includes(celule)) {
@@ -678,11 +674,11 @@
         var procentFacturiFaraEroare = 100 - procentFacturiCuEroare;
         var factValidate=numarFacturiUltimaRulare-numarFacturiCuEroare
 
-        $('#facturi-total').text('Total facturi transmise la ultima transmitere: ' + numarFacturiUltimaRulare );
-        $('#facturi-total-validate').text('Total facturi validate la ultima transmitere:' + numarFacturiValideUltimaRulare);
-        $('#facturi-total-erori').text('Total facturi erori la ultima transmitere:' + numarFacturiCuEroare);
-        $('#facturi-eroare').text('Procent facturi cu erori la ultima transmitere:' + procentFacturiCuEroare.toFixed(2) + '%');
-        $('#facturi-fara-eroare').text('Procent facturi fără erori la ultima transmitere:' + procentFacturiFaraEroare.toFixed(2) + '%');
+        $('#facturi-total').text('Total invoices sent in the last submission: ' + numarFacturiUltimaRulare );
+        $('#facturi-total-validate').text('Total valid invoices in the last submission:' + numarFacturiValideUltimaRulare);
+        $('#facturi-total-erori').text('Total invalid invoices in the last submission:' + numarFacturiCuEroare);
+        $('#facturi-eroare').text('Percentage of invoices with errors in the last submission:' + procentFacturiCuEroare.toFixed(2) + '%');
+        $('#facturi-fara-eroare').text('Percentage of valid invoices in the last transmission:' + procentFacturiFaraEroare.toFixed(2) + '%');
 
     /*
         $('#facturi-total').text('Total facturi transmise la ultima transmitere: 20' );
