@@ -23,7 +23,7 @@ def trimitereMail():
     sender_email = "cristian.iordache@ro.gt.com"
     password = "Bucuresti_123321+"
     context = ssl.create_default_context()
-    message_text = "Yaaaaay\n\nThank you,\nGTRDigital"
+    message_text = "Otp code\n\nThank you,\nGTRDigital"
     
     date = datetime.datetime.now().strftime("%d/%m/%Y %H:%M")
     subj = "Cod OTP " + str(date)
