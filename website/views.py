@@ -812,7 +812,7 @@ def sincronizareAPIvsBD():
             if descarcare.status_code == 200:
                 # print("Cererea a fost efectuata cu succes!")
                 # with open('C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local/output zip api/fisier'+str(listaDiferente[i])+'.zip', 'wb') as file:
-                with open("/home/efactura/efactura_bimed/outputZipAPI/fisier"+str(listaIdDescarcare[i])+'.zip', 'wb') as file:
+                with open("/home/efactura/efactura_bimed/outputZipAPI/fisier"+str(listaDiferente[i])+'.zip', 'wb') as file:
                     file.write(descarcare.content)
                     print('Descarcat cu success')
                 
@@ -821,7 +821,10 @@ def sincronizareAPIvsBD():
                 print("Eroare la efectuarea cererii HTTP:", descarcare.status_code)
                 print(descarcare.text)
     print("aici descarcam folosind id_descarcare")
-    descarcare()
+    try:
+        descarcare()
+    except:
+        print("nu a mers descarcarea")
 
     # directory_path = 'C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local/output zip api'
     directory_path = "/home/efactura/efactura_bimed/outputZipAPI"
