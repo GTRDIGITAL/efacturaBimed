@@ -102,6 +102,8 @@ def stocareMesajeAnaf(data):
     # Adaugă datele în tabela dict2
     dict2 = data
     for item in dict2["mesaje"]:
+        if item["tip"] == 'FACTURA PRIMITA':
+            continue
         data_creare = item["data_creare"]
         cif = item["cif"]
         id_solicitare = str(item["id_solicitare"])
