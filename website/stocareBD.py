@@ -692,6 +692,23 @@ def descarcarepdfPrimite(idSelectate):
         # update_query = "UPDATE trimiterefacturi SET descarcata = 'Da' WHERE index_incarcare IN (" + stringID + ")"
         # print(update_query, '-------------------------------------')
         # cursor.execute(update_query)
+        if stringID:
+            try:
+                sqlSafeUpdates = "SET sql_safe_updates = 0"
+                cursor.execute(sqlSafeUpdates)
+                
+                update_query = f"UPDATE statusmesaje SET descarcata = 'Da' WHERE id_solicitare IN ({stringID})"
+                print(update_query, '-------------------------------------')
+                cursor.execute(update_query)
+                
+                connection.commit()  # Commit the transaction
+            except Exception as e:
+                print(f"An error occurred: {e}")
+            finally:
+                cursor.close()
+                connection.close()
+        else:
+            print("No IDs provided to update.")
         make_archive(downlXMLbaza, destinatie + 'rezultat.zip')
         
     except:
