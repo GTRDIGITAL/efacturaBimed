@@ -159,6 +159,9 @@ def prelucrareDate(fisierDeVanzari):
 
     # Sales_EFACTURA=Sales_EFACTURA.loc[~Sales_EFACTURA["GL Cat"].astype(str).str.contains("Currency Adjustment Factor")]
     # Sales_EFACTURA.to_excel("D:/Projects/27. Efactura/E-Factura Expeditors/out/RJ GRUPAT.xlsx")
+    Sales_EFACTURA.loc[Sales_EFACTURA["Reference"].astype(str).str.startswith("BMD"), "Customer"]="BIMED"
+    Sales_EFACTURA.loc[Sales_EFACTURA["Reference"].astype(str).str.startswith("BMD"), "Name 1"]=numeCompanie
+    Sales_EFACTURA.loc[Sales_EFACTURA["Reference"].astype(str).str.startswith("BMD"), "Country"]="RO"
     Sales_EFACTURA["Cod Unitate Masura"]=Sales_EFACTURA["Base Unit of Measure"].map(dictUM)
     Sales_EFACTURA["Base Unit of Measure"]=Sales_EFACTURA["Base Unit of Measure"].fillna("PC")
     Sales_EFACTURA["Cod Unitate Masura"]=Sales_EFACTURA["Cod Unitate Masura"].fillna("H87")
@@ -171,9 +174,7 @@ def prelucrareDate(fisierDeVanzari):
     Sales_EFACTURA["General ledger amount"]=Sales_EFACTURA["General ledger amount"]*-1
     Sales_EFACTURA["Amount in local currency"]=Sales_EFACTURA["Amount in local currency"]*-1
     # Sales_EFACTURA.to_excel("C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed/Baza de date vanzari/out/Sales initial.xlsx")
-    Sales_EFACTURA.loc[Sales_EFACTURA["Reference"].astype(str).str.startswith("BMD"), "Customer"]="BIMED"
-    Sales_EFACTURA.loc[Sales_EFACTURA["Reference"].astype(str).str.startswith("BMD"), "Name 1"]=numeCompanie
-    Sales_EFACTURA.loc[Sales_EFACTURA["Reference"].astype(str).str.startswith("BMD"), "Country"]="RO"
+    
     Sales_EFACTURA=Sales_EFACTURA.loc[Sales_EFACTURA["COUNTRY_CLIENT"]=="RO"]
     # Sales_EFACTURA["CITY_CLIENT"]=Sales_EFACTURA["GCI"].str.lstrip("0").str.replace(r'\.0$', '', regex=True).map(dictClients_City)
     # Sales_EFACTURA["STREET_CLIENT"]=Sales_EFACTURA["GCI"].str.lstrip("0").str.replace(r'\.0$', '', regex=True).map(dictClients_Street)
