@@ -573,7 +573,7 @@ def refresh():
         print("val1 ", val1)
         print("val2 ", val2)
 
-        apiListaFacturi = f'https://api.anaf.ro/test/FCTEL/rest/listaMesajePaginatieFactura'
+        apiListaFacturi = f'https://api.anaf.ro/prod/FCTEL/rest/listaMesajePaginatieFactura'
 
         params = {
             'startTime': val1,
@@ -618,7 +618,7 @@ def refresh():
     def stareMesajRefresh():
         listaIdDescarcare.clear()
         for i in range(0, len(listaIndexIncarcare)):
-            apiStareMesaj = 'https://api.anaf.ro/test/FCTEL/rest/stareMesaj?id_incarcare='+str(listaIndexIncarcare[i])
+            apiStareMesaj = 'https://api.anaf.ro/prod/FCTEL/rest/stareMesaj?id_incarcare='+str(listaIndexIncarcare[i])
             
             while True:  
                 stare = requests.get(apiStareMesaj, headers=headers)

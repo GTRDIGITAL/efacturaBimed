@@ -72,7 +72,7 @@ def eFactura():
     def trimitereAnaf(fisiere_xml):
         listaIndexIncarcare.clear()  
         facturaIndex.clear()
-        # apiDepunere = 'https://api.anaf.ro/test/FCTEL/rest/upload?standard=UBL&cif='+str(cif)
+        # apiDepunere = 'https://api.anaf.ro/prod/FCTEL/rest/upload?standard=UBL&cif='+str(cif)
 
         for fisier_xml in fisiere_xml:
             try:
@@ -81,17 +81,17 @@ def eFactura():
 
                 # if "CreditNote" in fisier_xml:
                 #     print('asta e credit note')
-                #     apiDepunere = 'https://api.anaf.ro/test/FCTEL/rest/upload?standard=CN&cif='+str(cif)
+                #     apiDepunere = 'https://api.anaf.ro/prod/FCTEL/rest/upload?standard=CN&cif='+str(cif)
                 # else:
-                #     apiDepunere = 'https://api.anaf.ro/test/FCTEL/rest/upload?standard=UBL&cif='+str(cif)
+                #     apiDepunere = 'https://api.anaf.ro/prod/FCTEL/rest/upload?standard=UBL&cif='+str(cif)
                 if "<cbc:InvoiceTypeCode>389</cbc:InvoiceTypeCode>" in xml:
                     print("asta e AUTOFACTURA")
-                    apiDepunere = f'https://api.anaf.ro/test/FCTEL/rest/upload?standard=UBL&cif={cif}&extern=DA&autofactura=DA'
+                    apiDepunere = f'https://api.anaf.ro/prod/FCTEL/rest/upload?standard=UBL&cif={cif}&extern=DA&autofactura=DA'
                 elif "CreditNote" in fisier_xml:
                     print('asta e credit note')
-                    apiDepunere = 'https://api.anaf.ro/test/FCTEL/rest/upload?standard=CN&cif='+str(cif)
+                    apiDepunere = 'https://api.anaf.ro/prod/FCTEL/rest/upload?standard=CN&cif='+str(cif)
                 else:
-                    apiDepunere = 'https://api.anaf.ro/test/FCTEL/rest/upload?standard=UBL&cif='+str(cif)
+                    apiDepunere = 'https://api.anaf.ro/prod/FCTEL/rest/upload?standard=UBL&cif='+str(cif)
                     
                 response = requests.post(apiDepunere, headers=headers, data=xml)
                 print('AICI AVEM RESPONSE',response)
@@ -162,8 +162,8 @@ def eFactura():
         val2 = int(datetime.datetime.timestamp(result) * 1000)
         print("val1 ", val1)
         print("val2 ", val2)
-        # apiListaFacturi = f'https://api.anaf.ro/test/FCTEL/rest/listaMesajePaginatieFactura?startTime={val1}&endTime={val2}&cif={cif}&pagina={6}'
-        apiListaFacturi = f'https://api.anaf.ro/test/FCTEL/rest/listaMesajePaginatieFactura'
+        # apiListaFacturi = f'https://api.anaf.ro/prod/FCTEL/rest/listaMesajePaginatieFactura?startTime={val1}&endTime={val2}&cif={cif}&pagina={6}'
+        apiListaFacturi = f'https://api.anaf.ro/prod/FCTEL/rest/listaMesajePaginatieFactura'
         
         params = {
         'startTime': val1,
@@ -207,7 +207,7 @@ def eFactura():
     def stareMesaj():
         listaIdDescarcare.clear()
         for i in range(0, len(listaIndexIncarcare)):
-            apiStareMesaj = 'https://api.anaf.ro/test/FCTEL/rest/stareMesaj?id_incarcare='+str(listaIndexIncarcare[i])
+            apiStareMesaj = 'https://api.anaf.ro/prod/FCTEL/rest/stareMesaj?id_incarcare='+str(listaIndexIncarcare[i])
             
             while True:  # buclă infinită
                 stare = requests.get(apiStareMesaj, headers=headers, timeout=30)
@@ -238,7 +238,7 @@ def eFactura():
     time.sleep(30)
     def descarcare():
         for i in range(0, len(listaIdDescarcare)):
-            apiDescarcare = 'https://api.anaf.ro/test/FCTEL/rest/descarcare?id='+str(listaIdDescarcare[i])
+            apiDescarcare = 'https://api.anaf.ro/prod/FCTEL/rest/descarcare?id='+str(listaIdDescarcare[i])
 
             descarcare = requests.get(apiDescarcare, headers=headers, timeout=30)
 
@@ -359,9 +359,9 @@ def eFactura():
                         xml_data = xml_file.read()
 
                     if 'CreditNote' in str(xml_data):
-                        convert = 'https://webservicesp.anaf.ro/test/FCTEL/rest/transformare/FCN/DA'
+                        convert = 'https://webservicesp.anaf.ro/prod/FCTEL/rest/transformare/FCN/DA'
                     else:
-                        convert = 'https://webservicesp.anaf.ro/test/FCTEL/rest/transformare/FACT1/DA'
+                        convert = 'https://webservicesp.anaf.ro/prod/FCTEL/rest/transformare/FACT1/DA'
 
                     start_time = time.time()  # Momentul de start al procesării
  
