@@ -53,7 +53,7 @@ def prelucrareDate(fisierDeVanzari):
         except Exception as e:
             print(f"Eroare la stergerea fișierelor: {str(e)}")
     
-    # stergeFisiere('C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local/outs', '.xml')
+    # stergeFisiere('C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local V2/outs', '.xml')
     stergeFisiere('/home/efactura/efactura_bimed/outs', '.xml')
     facturiNumeUnice = 0
     date=datetime.now().date()
@@ -116,10 +116,10 @@ def prelucrareDate(fisierDeVanzari):
     # dictClients_Street=Clients.set_index('Customer').to_dict()['FORMATTED_LINE_2']
     dictUM={'PAC':'AB','CM2':'CMK','EA':'EA','PC':'H87','KG':'KGM','L':'LTR','M':'MTR','ROL':'XRO',}
 
-    # Clients.to_excel("C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed/Baza de date vanzari/out/Clients.xlsx")
+    # Clients.to_excel("C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local V2/Baza de date vanzari/out/Clients.xlsx")
 
     file_path = fisierDeVanzari
-    # Sales_EFACTURA=pd.read_excel("C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed/Baza de date vanzari/Sales invoices _credit note_NA MARTIE 2023-FEB 2024.XLSX")
+    # Sales_EFACTURA=pd.read_excel("C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local V2/Baza de date vanzari/Sales invoices _credit note_NA MARTIE 2023-FEB 2024.XLSX")
     Sales_EFACTURA = pd.read_excel(file_path)
 
     # Se actualizează moneda pentru liniile cu contul 704 folosind dicționarul creat
@@ -159,12 +159,12 @@ def prelucrareDate(fisierDeVanzari):
 
     # Sales_EFACTURA=Sales_EFACTURA.loc[~Sales_EFACTURA["GL Cat"].astype(str).str.contains("Currency Adjustment Factor")]
     # Sales_EFACTURA.to_excel("D:/Projects/27. Efactura/E-Factura Expeditors/out/RJ GRUPAT.xlsx")
-    Sales_EFACTURA.loc[Sales_EFACTURA["Reference"].astype(str).str.startswith("BMD"), "Customer"]="BIMED"
-    Sales_EFACTURA.loc[Sales_EFACTURA["Reference"].astype(str).str.startswith("BMD"), "Name 1"]=numeCompanie
-    Sales_EFACTURA.loc[Sales_EFACTURA["Reference"].astype(str).str.startswith("BMD"), "Country"]="RO"
     Sales_EFACTURA["Cod Unitate Masura"]=Sales_EFACTURA["Base Unit of Measure"].map(dictUM)
     Sales_EFACTURA["Base Unit of Measure"]=Sales_EFACTURA["Base Unit of Measure"].fillna("PC")
     Sales_EFACTURA["Cod Unitate Masura"]=Sales_EFACTURA["Cod Unitate Masura"].fillna("H87")
+    Sales_EFACTURA.loc[Sales_EFACTURA["Reference"].astype(str).str.startswith("BMD"), "Customer"]="BIMED"
+    Sales_EFACTURA.loc[Sales_EFACTURA["Reference"].astype(str).str.startswith("BMD"), "Name 1"]=numeCompanie
+    Sales_EFACTURA.loc[Sales_EFACTURA["Reference"].astype(str).str.startswith("BMD"), "Country"]="RO"
     Sales_EFACTURA["CUI_CLIENT"]=Sales_EFACTURA["Customer"].astype(str).str.lstrip("0").str.replace(r'\.0$', '', regex=True).map(dictClients_CUI)
     Sales_EFACTURA["COUNTRY_CLIENT"]=Sales_EFACTURA["Customer"].astype(str).str.lstrip("0").str.replace(r'\.0$', '', regex=True).map(dictClients_Country)
     Sales_EFACTURA["STREET_CLIENT"]=Sales_EFACTURA["Customer"].astype(str).str.lstrip("0").str.replace(r'\.0$', '', regex=True).map(dictClients_Street)
@@ -173,7 +173,7 @@ def prelucrareDate(fisierDeVanzari):
     Sales_EFACTURA["Company"]=Sales_EFACTURA["Customer"].astype(str).str.lstrip("0").str.replace(r'\.0$', '', regex=True).map(dictClients_Company)
     Sales_EFACTURA["General ledger amount"]=Sales_EFACTURA["General ledger amount"]*-1
     Sales_EFACTURA["Amount in local currency"]=Sales_EFACTURA["Amount in local currency"]*-1
-    # Sales_EFACTURA.to_excel("C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed/Baza de date vanzari/out/Sales initial.xlsx")
+    # Sales_EFACTURA.to_excel("C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local V2/Baza de date vanzari/out/Sales initial.xlsx")
     
     Sales_EFACTURA=Sales_EFACTURA.loc[Sales_EFACTURA["COUNTRY_CLIENT"]=="RO"]
     # Sales_EFACTURA["CITY_CLIENT"]=Sales_EFACTURA["GCI"].str.lstrip("0").str.replace(r'\.0$', '', regex=True).map(dictClients_City)
@@ -181,7 +181,7 @@ def prelucrareDate(fisierDeVanzari):
     dictTaxCode={"A1":"S", 'B0':"AE", 'Y8':'E', 'A9':'S'} 
     Sales_EFACTURA["ID TVA"]=Sales_EFACTURA["Tax Code"].map(dictTaxCode)
     dictCota={"AE":0, "S":19.00, "E":0 }
-    # Sales_EFACTURA.to_excel("C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed/Baza de date vanzari/out/Sales initial.xlsx")
+    # Sales_EFACTURA.to_excel("C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local V2/Baza de date vanzari/out/Sales initial.xlsx")
     Sales_EFACTURA["Valoare linia TVA (Valuta)"]=Sales_EFACTURA["General ledger amount"]*(Sales_EFACTURA["Tax Propotion"]/100)
     Sales_EFACTURA["Cota"]=Sales_EFACTURA["Tax Propotion"]
     Sales_EFACTURA["Valoare linia TVA"]=Sales_EFACTURA["Amount in local currency"]*(Sales_EFACTURA["Tax Propotion"]/100)
@@ -189,7 +189,7 @@ def prelucrareDate(fisierDeVanzari):
     Sales_EFACTURA["Valoare linie cu TVA"]=Sales_EFACTURA["Amount in local currency"] + Sales_EFACTURA["Valoare linia TVA"]
     total_factura=Sales_EFACTURA.groupby("Reference")["Amount in local currency"].transform('sum')
     Sales_EFACTURA["Total Factura"]=total_factura
-    # Sales_EFACTURA.to_excel("C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed/Baza de date vanzari/out/Sales initial.xlsx")
+    # Sales_EFACTURA.to_excel("C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local V2/Baza de date vanzari/out/Sales initial.xlsx")
     Sales_EFACTURA['flagInvoiceCreditNote'] = Sales_EFACTURA['Total Factura'] >= 0
     Sales_EFACTURA['flagInvoiceCreditNote']=Sales_EFACTURA['flagInvoiceCreditNote'].astype(str).str.replace("True","Invoice")
     Sales_EFACTURA['flagInvoiceCreditNote']=Sales_EFACTURA['flagInvoiceCreditNote'].astype(str).str.replace("False","CreditNote")
@@ -221,7 +221,7 @@ def prelucrareDate(fisierDeVanzari):
     ultimaFactura=list(Sales_EFACTURA["Reference"])[-1]
     print(totalFactura, primaFactura, ultimaFactura)
     print("asta e prima factura in prelucrare_date.py ",primaFactura)
-    # Sales_EFACTURA.to_excel("C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local/Baza de date vanzari/out/Sales.xlsx")
+    Sales_EFACTURA.to_excel("C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local V2/Baza de date vanzari\out/Sales.xlsx")
 
     issue_date = pd.to_datetime(Sales_EFACTURA["Document Date"]).dt.strftime('%Y-%m-%d').iloc[0]
     nrFacturiTrimise = len(listaNumarFact)
@@ -460,7 +460,7 @@ def prelucrareDate(fisierDeVanzari):
                 eFacturaXML=eFacturaXML.replace("&"," ")
 
                 # Scrie conținutul în fișierul XML
-                # with open(f"C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local/outs/SalesInvoice_{str(listaNumarFact[i]).replace('.0', '').replace(':', '')}.xml", "w", encoding="utf-8") as f:
+                # with open(f"C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local V2/outs/SalesInvoice_{str(listaNumarFact[i]).replace('.0', '').replace(':', '')}.xml", "w", encoding="utf-8") as f:
                 with open(f"/home/efactura/efactura_bimed/outs/SalesInvoice_{str(listaNumarFact[i]).replace('.0', '').replace(':', '')}.xml", "w", encoding="utf-8") as f:
                     f.write(eFacturaXML)
 
@@ -703,7 +703,7 @@ def prelucrareDate(fisierDeVanzari):
                 eFacturaXML=eFacturaXML.replace("&"," ")
 
                 # Scrie conținutul în fișierul XML
-                # with open(f"C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local/outs/SalesInvoiceValuta_{str(listaNumarFact[i]).replace('.0', '').replace(':', '')}.xml", "w", encoding="utf-8") as f:
+                # with open(f"C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local V2/outs/SalesInvoiceValuta_{str(listaNumarFact[i]).replace('.0', '').replace(':', '')}.xml", "w", encoding="utf-8") as f:
                 with open(f"/home/efactura/efactura_bimed/outs/SalesInvoiceValuta_{str(listaNumarFact[i]).replace('.0', '').replace(':', '')}.xml", "w", encoding="utf-8") as f:  
                     f.write(eFacturaXML)
 
@@ -937,7 +937,7 @@ def prelucrareDate(fisierDeVanzari):
                 eFacturaXML = remove_diacritics(eFacturaXML)
 
                 # Scrie conținutul în fișierul XML
-                # with open(f"C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local/outs/SalesCreditNote_{str(listaNumarFact[i]).replace('.0', '').replace(':', '')}.xml", "w", encoding="utf-8") as f:
+                # with open(f"C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local V2/outs/SalesCreditNote_{str(listaNumarFact[i]).replace('.0', '').replace(':', '')}.xml", "w", encoding="utf-8") as f:
                 with open(f"/home/efactura/efactura_bimed/outs/SalesCreditNote_{str(listaNumarFact[i]).replace('.0', '').replace(':', '')}.xml", "w", encoding="utf-8") as f:
                     f.write(eFacturaXML)
 
@@ -1186,12 +1186,12 @@ def prelucrareDate(fisierDeVanzari):
                 eFacturaXML=eFacturaXML.replace("&"," ")
 
                 # Scrie conținutul în fișierul XML
-                # with open(f"C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local/outs/SalesCreditNoteValuta_{str(listaNumarFact[i]).replace('.0', '').replace(':', '')}.xml", "w", encoding="utf-8") as f:
+                # with open(f"C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local V2/outs/SalesCreditNoteValuta_{str(listaNumarFact[i]).replace('.0', '').replace(':', '')}.xml", "w", encoding="utf-8") as f:
                 with open(f"/home/efactura/efactura_bimed/outs/SalesCreditNoteValuta_{str(listaNumarFact[i]).replace('.0', '').replace(':', '')}.xml", "w", encoding="utf-8") as f:   
                     f.write(eFacturaXML)
 
                 print("A PRELUCRAT DATELE")
-    print("AVEM ACEST NUMERE VIVIFIANTE: ", primaFactura, ultimaFactura, totalFactura, nrFacturiTrimise, facturiNuleUnice)
+    print("AVEM ACEST NUMERE VIVIFIANTE: ", primaFactura, ultimaFactura, totalFactura, nrFacturiTrimise, facturiNuleUnice, nrFacturiTrimise)
     
-    return primaFactura, ultimaFactura, totalFactura, nrFacturiTrimise, facturiNuleUnice
+    return primaFactura, ultimaFactura, totalFactura, nrFacturiTrimise, facturiNuleUnice, nrFacturiTrimise
 # prelucrareDate(fisierDeVanzari)

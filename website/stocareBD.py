@@ -2,13 +2,15 @@
 import datetime
 import os
 from flask_login import login_required, current_user
-from flask import session
+from flask import session, send_from_directory
 import json
 import zipfile
 import shutil
 import time
 import pymysql
 import requests
+import xml.etree.ElementTree as ET
+
 
 def citeste_configurare(file_path):
     with open(file_path, 'r') as file:
@@ -17,7 +19,8 @@ def citeste_configurare(file_path):
 
 config = citeste_configurare('config.json')
 mysql_config = config['mysql']
-
+dateFirma = config['dateFirma']
+headers = {'Authorization': dateFirma['header']}
 # Conectează-te la noua bază de date
 
 timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
@@ -26,36 +29,6 @@ print(timestamp)
 
 
 listaFactt = []
-
-# def stocareDictionarFacturi(data):
-    
-#     connection = pymysql.connect(
-#         host=mysql_config['host'],
-#         user=mysql_config['user'],
-#         password=mysql_config['password'],
-#         database=mysql_config['database']
-#     )
-
-#     cursor = connection.cursor()
-    
-    
-    
-#     dictionarFacturi = data
-#     data_trimis = datetime.datetime.now()
-#     for item in dictionarFacturi["mesaje"]:
-#         print(item["Factura"], item["Index"])
-#         factura = item["Factura"]
-#         index_solicitare = item["Index"]
-        
-#         user_id = current_user.id
-        
-        
-#         insert_query = "INSERT ignore INTO trimitereFacturi (factura, index_incarcare, data_trimis, user_id) VALUES (%s, %s, %s, %s)"
-#         values = (factura, index_solicitare, data_trimis, user_id)
-
-#         cursor.execute(insert_query, values)
-#     connection.commit()
-#     cursor.close()
 
 def stocareDictionarFacturi(data):
     
@@ -88,6 +61,8 @@ def stocareDictionarFacturi(data):
     finally:
         cursor.close()    
     # mydb.close()
+    
+
 
 def stocareMesajeAnaf(data):
     
@@ -102,8 +77,6 @@ def stocareMesajeAnaf(data):
     # Adaugă datele în tabela dict2
     dict2 = data
     for item in dict2["mesaje"]:
-        if item["tip"] == 'FACTURA PRIMITA':
-            continue
         data_creare = item["data_creare"]
         cif = item["cif"]
         id_solicitare = str(item["id_solicitare"])
@@ -126,43 +99,116 @@ def stocareMesajeAnaf(data):
     updated_results = cursor.fetchall()
     print("updated results ", updated_results)
     cursor.close()
-
-
-def interogareTabela():
+    
+def stocareMesajeAnafPrimite(data):
+    
     connection = pymysql.connect(
         host=mysql_config['host'],
         user=mysql_config['user'],
         password=mysql_config['password'],
         database=mysql_config['database']
     )
+
     cursor = connection.cursor()
-    
-    selectQuery = "SELECT distinct * FROM JOINDATE WHERE tip IN('ERORI FACTURA', 'FACTURA TRIMISA')"
-    cursor.execute(selectQuery)
-
-    results = []
-
-    for row in cursor.fetchall():
-        if 'ERORI' in row[5]:
-            descarcata = 'Nu'
-        else:
-            descarcata = row[8]
+    # Adaugă datele în tabela dict2
+    dict2 = data
+    for item in dict2["mesaje"]:
+        data_creare = item["data_creare"]
+        cif = item["cif"]
+        id_solicitare = str(item["id_solicitare"])
+        detalii = item["detalii"]
+        tip = item["tip"]
+        id_factura = item["id"]
+ 
+        insert_query = "INSERT IGNORE INTO statusMesaje (data_creare, cif, id_solicitare, detalii, tip, id_factura) VALUES (%s, %s, %s, %s, %s, %s)"
+        values = (data_creare, cif, id_solicitare, detalii, tip, id_factura)
+ 
+        cursor.execute(insert_query, values)
         
-        result_dict = {
-            "factura": row[0],
-            "data_creare": row[1],
-            "cif": row[2],
-            "id_solicitare": row[3],
-            "detalii": row[4],
-            "tip": row[5],
-            "id_factura": row[6],
-            "user_id": row[7],
-            "descarcata": descarcata  
-        }
-        results.append(result_dict)
+ 
+    connection.commit()
+    
+ 
+    # Interogare pentru a citi din nou datele actualizate
+    select_query = "SELECT * FROM statusMesaje"
+    cursor.execute(select_query)
+    updated_results = cursor.fetchall()
+    print("updated results ", updated_results)
     cursor.close()
+    
+    
+# def stocareMesajeAnaf2(data):
+    
+#     connection = pymysql.connect(
+#         host=mysql_config['host'],
+#         user=mysql_config['user'],
+#         password=mysql_config['password'],
+#         database=mysql_config['database']
+#     )
 
-    return results
+#     cursor = connection.cursor()
+#     # Adaugă datele în tabela dict2
+#     dict2 = data
+#     for item in dict2["mesaje"]:
+#         data_creare = item["data_creare"]
+#         cif = item["cif"]
+#         id_solicitare = str(item["id_solicitare"])
+#         detalii = item["detalii"]
+#         tip = item["tip"]
+#         id_factura = item["id"]
+ 
+#         insert_query = "INSERT IGNORE INTO statusMesaje2 (data_creare, cif, id_solicitare, detalii, tip, id_factura) VALUES (%s, %s, %s, %s, %s, %s)"
+#         values = (data_creare, cif, id_solicitare, detalii, tip, id_factura)
+ 
+#         cursor.execute(insert_query, values)
+        
+ 
+#     connection.commit()
+    
+ 
+#     # Interogare pentru a citi din nou datele actualizate
+#     select_query = "SELECT * FROM statusMesaje"
+#     cursor.execute(select_query)
+#     updated_results = cursor.fetchall()
+#     # print("updated results ", updated_results)
+#     cursor.close()
+
+
+# def interogareTabela():
+#     connection = pymysql.connect(
+#         host=mysql_config['host'],
+#         user=mysql_config['user'],
+#         password=mysql_config['password'],
+#         database=mysql_config['database']
+#     )
+#     cursor = connection.cursor()
+    
+#     selectQuery = "SELECT distinct * FROM JOINDATE WHERE tip IN('ERORI FACTURA', 'FACTURA TRIMISA')"
+#     cursor.execute(selectQuery)
+
+#     results = []
+
+#     for row in cursor.fetchall():
+#         if 'ERORI' in row[5]:
+#             descarcata = 'Nu'
+#         else:
+#             descarcata = row[8]
+        
+#         result_dict = {
+#             "factura": row[0],
+#             "data_creare": row[1],
+#             "cif": row[2],
+#             "id_solicitare": row[3],
+#             "detalii": row[4],
+#             "tip": row[5],
+#             "id_factura": row[6],
+#             "user_id": row[7],
+#             "descarcata": descarcata  
+#         }
+#         results.append(result_dict)
+#     cursor.close()
+
+#     return results
 
 
 def interogareTabelaPrimite():
@@ -175,39 +221,51 @@ def interogareTabelaPrimite():
     )
     cursor = connection.cursor()
     
-    selectQuery = "SELECT distinct * FROM statusmesaje WHERE tip ='FACTURA PRIMITA'"
+    # selectQuery = "SELECT distinct * FROM statusmesaje WHERE tip ='FACTURA PRIMITA'"
+    selectQuery = "SELECT distinct * FROM facturiPrimite"
     cursor.execute(selectQuery)
 
     results = []
 
     for row in cursor.fetchall():
         result_dict = {
-            "factura": row[0],
-            "data_creare": row[1],
-            "cif": row[2],
-            "id_solicitare": row[3],
-            "detalii": row[4],
-            "tip": row[5],
-            "id_factura": row[6],
-            "descarcata": row[7]
+            "factura": row[7],
+            "furnizor": row[8],
+            "data_creare": row[0],
+            "cif": row[1],
+            "id_solicitare": row[2],
+            "detalii": row[3],
+            "tip": row[4],
+            "id_factura": row[5],
+            "descarcata": row[6]
         }
-        
-        # result_dict = {
-        #     "factura": row[0],
-        #     "data_creare": row[1],
-        #     "cif": row[2],
-        #     "id_solicitare": row[3],
-        #     "detalii": row[4],
-        #     "tip": row[5],
-        #     "id_factura": row[6],
-        #     "user_id": row[7],
-        #     "descarcata": row[8]
-        # }
+    
         results.append(result_dict)
-        # print(results)
+        # print('REZULTATE ', results)
     cursor.close()
     
     return results
+
+
+def interogareFisierePDFPrimite():
+    
+    connection = pymysql.connect(
+        host=mysql_config['host'],
+        user=mysql_config['user'],
+        password=mysql_config['password'],
+        database=mysql_config['database']
+    )
+    cursor = connection.cursor()
+    
+    selectQuery = "SELECT distinct nume_fisier FROM fisierepdf"
+    cursor.execute(selectQuery)
+    
+    listaPrimite =[]
+    for row in cursor.fetchall():
+        listaPrimite.append(row)
+    listaPrimite = [factura[0] for factura in listaPrimite]
+    # print("FACTURI PRIMITE ", listaPrimite)
+    return listaPrimite
 
 def numarFacturiTrimise():
     connection = pymysql.connect(
@@ -285,7 +343,7 @@ def stocarePDF():
     )
     cursor = connection.cursor()
     
-    # director_fisiere = "C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local/output conversie"
+    # director_fisiere = "C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local V2/output conversie"
     director_fisiere = '/home/efactura/efactura_bimed/outputConversie/'
 
 # Parcurgerea fișierelor din director și inserarea în baza de date
@@ -304,8 +362,8 @@ def stocarePDF():
             cursor.execute(insert_query, values)
     connection.commit()
     cursor.close()
-
-def stocareMesajeAnafPrimite(data):
+    
+def stocarePDFPrimite():
     
     connection = pymysql.connect(
         host=mysql_config['host'],
@@ -313,103 +371,47 @@ def stocareMesajeAnafPrimite(data):
         password=mysql_config['password'],
         database=mysql_config['database']
     )
-
     cursor = connection.cursor()
-    # Adaugă datele în tabela dict2
-    dict2 = data
-    for item in dict2["mesaje"]:
-        if item["tip"] in ['FACTURA TRIMISA', 'ERORI FACTURA']:
-            continue
-        data_creare = item["data_creare"]
-        cif = item["cif"]
-        id_solicitare = str(item["id_solicitare"])
-        detalii = item["detalii"]
-        tip = item["tip"]
-        id_factura = item["id"]
- 
-        insert_query = "INSERT IGNORE INTO statusMesaje (data_creare, cif, id_solicitare, detalii, tip, id_factura) VALUES (%s, %s, %s, %s, %s, %s)"
-        values = (data_creare, cif, id_solicitare, detalii, tip, id_factura)
- 
-        cursor.execute(insert_query, values)
-        
- 
+    
+    # director_fisiere = "C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local V2/output conversie"
+    director_fisiere = '/home/efactura/efactura_bimed/outputConversie/'
+
+    namespaces = {
+                    'cbc': 'urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2',
+                    'cac': 'urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2'
+                }
+# Parcurgerea fișierelor din director și inserarea în baza de date
+    for nume_fisier in os.listdir(director_fisiere):
+        if nume_fisier.endswith('.xml'):
+            cale_absoluta = os.path.join(director_fisiere, nume_fisier)
+            
+            with open(cale_absoluta, 'rb') as file:
+                pdf_content = file.read()
+            nume_fisier=nume_fisier.replace(".xml", "")
+            tree = ET.parse(cale_absoluta)
+            root = tree.getroot()
+
+            numar_factura_element = root.find('.//cbc:ID', namespaces)
+            if numar_factura_element is not None:
+                numar_factura = numar_factura_element.text
+                print('aici avem numarul facturii', numar_factura)
+            else:
+                print(f"Elementul ID nu a fost găsit în fișierul {nume_fisier}.xml")
+                continue
+            
+            nume_furnizor_element = root.find('.//cac:PartyLegalEntity/cbc:RegistrationName', namespaces)
+            if nume_furnizor_element is not None:
+                nume_furnizor = nume_furnizor_element.text
+                print(f'Numele furnizorului din fișierul {nume_fisier}: {nume_furnizor}')
+            else:
+                print(f'Nu am putut găsi numele furnizorului în fișierul {nume_fisier}')
+            
+
+            insert_query = "INSERT INTO FisierePDFPrimite (nume_fisier, numar_factura, nume_furnizor, continut, data_introducere) VALUES (%s, %s, %s, %s, %s)"
+            values = (nume_fisier, numar_factura, nume_furnizor, pdf_content, timestamp)
+            cursor.execute(insert_query, values)
     connection.commit()
-    
- 
-    # Interogare pentru a citi din nou datele actualizate
-    select_query = "SELECT * FROM statusMesaje"
-    cursor.execute(select_query)
-    updated_results = cursor.fetchall()
-    print("updated results ", updated_results)
     cursor.close()
-
-# def descarcarepdf(idSelectate):
-    
-#     connection = pymysql.connect(
-#         host=mysql_config['host'],
-#         user=mysql_config['user'],
-#         password=mysql_config['password'],
-#         database=mysql_config['database']
-#     )
-#     cursor = connection.cursor() 
-    
-#     print(idSelectate, 'ASTEA AICI SUNT IN STOCARE.PY')
-#     downlPDFbaza = 'C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed/download pdf baza de date'
-#     destinatie = "C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed/destinatie/"
-#     # downlPDFbaza = '/home/efactura/efactura_bimed/downloadPdfBazaDate'
-#     # destinatie = '/home/efactura/efactura_bimed/destinatie/'
-#     idSelectate=idSelectate[1:]
-
-#     stringID=""
-#     for i in range(0, len(idSelectate)):
-#         if i == len(idSelectate)-1:
-#             stringID=stringID + str(idSelectate[i])
-#         else:
-#             stringID=stringID + str(idSelectate[i]) +  ','
-#     print(stringID, ' STRINGID')
-    
-#     def stergeFisiere(directory_path, file_extension):
-#         try:
-#             for filename in os.listdir(directory_path):
-#                 file_path = os.path.join(directory_path, filename)
-#                 if filename.endswith(file_extension):
-#                     os.remove(file_path)
-#                     print(f"Fisierul {filename} a fost sters.")
-#         except Exception as e:
-#             print(f"Eroare la stergerea fișierelor: {str(e)}")
-
-#     stergeFisiere(downlPDFbaza, '.pdf')
-    
-#     def make_archive(source, destination):
-#         base = os.path.basename(destination)
-#         name = base.split('.')[0]
-#         format = base.split('.')[1]
-#         archive_from = os.path.dirname(source)
-#         archive_to = os.path.basename(source.strip(os.sep))
-#         shutil.make_archive(name, format, archive_from, archive_to)
-#         shutil.move('%s.%s'%(name,format), destination)
-
-#     try:
-#         query = "SELECT nume_fisier, continut FROM tabelaFisierepdf WHERE nume_fisier IN ("+str(stringID)+")"
-#         print(query)
-#         cursor.execute(query)
-#         for (nume_fisier, continut) in cursor:
-#             cale_fisier = os.path.join(downlPDFbaza, str(nume_fisier) + '.pdf')
-
-#             with open(cale_fisier, 'wb') as file:
-#                 file.write(continut)
-#         # make_archive(downlPDFbaza, 'C:/Dezvoltare/E-Factura/2023/eFactura/Ferro/eFacturaFerro/destinatie/'+'rezultat.zip')
-#         sqlSafeUpdates="set sql_safe_updates = 0"
-#         cursor.execute(sqlSafeUpdates)
-#         update_query = "UPDATE trimiterefacturi SET descarcata = 'Da' WHERE index_incarcare IN (" + stringID + ")"
-#         print(update_query, '-------------------------------------')
-#         cursor.execute(update_query)
-#         make_archive(downlPDFbaza, destinatie + 'rezultat.zip')
-        
-#     except:
-#         print("nu are valori")
-
-#     cursor.close()
 
 
 def descarcarepdf(idSelectate):
@@ -422,19 +424,20 @@ def descarcarepdf(idSelectate):
     )
     cursor = connection.cursor() 
     
-    print(idSelectate, 'ASTEA AICI SUNT IN STOCARE.PY')
-    # downlXMLbaza = 'C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local/download pdf baza de date'
-    # destinatie = "C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local/destinatie/"
+    # print(idSelectate, 'ASTEA AICI SUNT IN STOCARE.PY')
+    # downlXMLbaza = 'C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local V2/download pdf baza de date'
+    # destinatie = "C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local V2/destinatie/"
     downlXMLbaza = '/home/efactura/efactura_bimed/downloadPdfBazaDate'
     destinatie = '/home/efactura/efactura_bimed/destinatie/'
-    idSelectate=idSelectate[1:]
-
+    # idSelectate=idSelectate[1:]
+    print(idSelectate, 'ASTEA SUNT SELECTATE')
     stringID=""
     for i in range(0, len(idSelectate)):
         if i == len(idSelectate)-1:
             stringID=stringID + str(idSelectate[i])
         else:
             stringID=stringID + str(idSelectate[i]) +  ','
+
     print(stringID, ' STRINGID')
     file_extension =('.pdf', '.xml')
     def stergeFisiere(directory_path, file_extension):
@@ -460,19 +463,22 @@ def descarcarepdf(idSelectate):
         shutil.move('%s.%s'%(name,format), destination)
 
     try:
-        query = "SELECT nume_fisier, continut FROM tabelaFisierepdf WHERE nume_fisier IN ("+str(stringID)+")"
+        query = "SELECT nume_fisier, continut FROM fisierepdf WHERE nume_fisier IN ("+str(stringID)+")"
         print(query)
         cursor.execute(query)
+        # print("ce plm ai")
         for (nume_fisier, continut) in cursor:
             cale_fisier = os.path.join(downlXMLbaza, str(nume_fisier) + '.xml')
+            print(f"am gasit {stringID}")
 
             with open(cale_fisier, 'wb') as file:
                 file.write(continut)
+        print(stringID, 'STRINGGGGGGGGG')
 
 
         def conversie():
-                xmlANAF = 'C:/Dezvoltare/E-Factura/2023/eFactura/Expeditors/eFacturaExpeditors local/output conversie'
-                # cale_fisier = 'C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local/download pdf baza de date'
+                xmlANAF = 'C:/Dezvoltare/E-Factura/2023/eFactura/Expeditors/eFacturaExpeditors local2/output conversie'
+                # cale_fisier = 'C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local V2/download pdf baza de date'
                 cale_fisier = '/home/efactura/efactura_bimed/downloadPdfBazaDate'
                 headerss = {"Content-Type": "text/plain"}
 
@@ -519,7 +525,7 @@ def descarcarepdf(idSelectate):
 
                             if response and response.status_code == 200:
                                 filename_no_extension = os.path.splitext(filename)[0]
-                                # with open(f'C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local/download pdf baza de date/{filename_no_extension}.pdf', 'wb') as file:
+                                # with open(f'C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local V2/download pdf baza de date/{filename_no_extension}.pdf', 'wb') as file:
                                 with open(f'/home/efactura/efactura_bimed/downloadPdfBazaDate/{filename_no_extension}.pdf', 'wb') as file:
                                     file.write(response.content)
                                     print(f'Fisierul {filename} a fost convertit cu succes')
@@ -534,7 +540,7 @@ def descarcarepdf(idSelectate):
                         # Adaugă numele fișierului în coloana INDEX_INCARCARE pentru a înregistra excepția
                         # sheet.append([filename])
                 # Salvează workbook-ul Excel
-                # workbook.save('C:/Dezvoltare/E-Factura/2023/eFactura/Expeditors/eFacturaExpeditors local/output conversie PDF/excepții.xlsx')
+                # workbook.save('C:/Dezvoltare/E-Factura/2023/eFactura/Expeditors/eFacturaExpeditors local2/output conversie PDF/excepții.xlsx')
 
             
         conversie()
@@ -542,11 +548,11 @@ def descarcarepdf(idSelectate):
 
         print('aici facem conversia in PDF')        
         # make_archive(downlPDFbaza, 'C:\\Dezvoltare\\E-Factura\\2023\\eFactura\\Ferro\\eFacturaFerro\\destinatie\\'+'rezultat.zip')
-        sqlSafeUpdates="set sql_safe_updates = 0"
-        cursor.execute(sqlSafeUpdates)
-        update_query = "UPDATE trimiterefacturi SET descarcata = 'Da' WHERE index_incarcare IN (" + stringID + ")"
-        print(update_query, '-------------------------------------')
-        cursor.execute(update_query)
+        # sqlSafeUpdates="set sql_safe_updates = 0"
+        # cursor.execute(sqlSafeUpdates)
+        # update_query = "UPDATE trimiterefacturi SET descarcata = 'Da' WHERE index_incarcare IN (" + stringID + ")"
+        # print(update_query, '-------------------------------------')
+        # cursor.execute(update_query)
         make_archive(downlXMLbaza, destinatie + 'rezultat.zip')
         
     except:
@@ -554,6 +560,16 @@ def descarcarepdf(idSelectate):
 
     cursor.close()
 
+def stergeFisiere(directory_path, file_extension):
+        
+    try:
+        for filename in os.listdir(directory_path):
+            file_path = os.path.join(directory_path, filename)
+            if filename.endswith(file_extension):
+                os.remove(file_path)
+                print(f"Fisierul {filename} a fost sters.")
+    except Exception as e:
+        print(f"Eroare la stergerea fișierelor: {str(e)}")
 
 def descarcarepdfPrimite(idSelectate):
     
@@ -566,8 +582,8 @@ def descarcarepdfPrimite(idSelectate):
     cursor = connection.cursor() 
     
     print(idSelectate, 'ASTEA AICI SUNT IN STOCARE.PY')
-    # downlXMLbaza = 'C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local/download pdf baza de date'
-    # destinatie = "C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local/destinatie/"
+    # downlXMLbaza = 'C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local V2/download pdf baza de date'
+    # destinatie = "C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local V2/destinatie/"
     downlXMLbaza = '/home/efactura/efactura_bimed/downloadPdfBazaDate'
     destinatie = '/home/efactura/efactura_bimed/destinatie/'
     idSelectate=idSelectate[1:]
@@ -580,16 +596,7 @@ def descarcarepdfPrimite(idSelectate):
             stringID=stringID + str(idSelectate[i]) +  ','
     print(stringID, ' STRINGID')
     file_extension =('.pdf', '.xml')
-    def stergeFisiere(directory_path, file_extension):
-        
-        try:
-            for filename in os.listdir(directory_path):
-                file_path = os.path.join(directory_path, filename)
-                if filename.endswith(file_extension):
-                    os.remove(file_path)
-                    print(f"Fisierul {filename} a fost sters.")
-        except Exception as e:
-            print(f"Eroare la stergerea fișierelor: {str(e)}")
+    
 
     stergeFisiere(downlXMLbaza, file_extension)
     
@@ -616,8 +623,8 @@ def descarcarepdfPrimite(idSelectate):
 
 
         def conversie():
-                # xmlANAF = 'C:/Dezvoltare/E-Factura/2023/eFactura/Expeditors/eFacturaExpeditors local/output conversie'
-                # cale_fisier = 'C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local/download pdf baza de date'
+                xmlANAF = 'C:/Dezvoltare/E-Factura/2023/eFactura/Expeditors/eFacturaExpeditors local2/output conversie'
+                # cale_fisier = 'C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local V2/download pdf baza de date'
                 cale_fisier = '/home/efactura/efactura_bimed/downloadPdfBazaDate'
                 headerss = {"Content-Type": "text/plain"}
 
@@ -664,7 +671,7 @@ def descarcarepdfPrimite(idSelectate):
 
                             if response and response.status_code == 200:
                                 filename_no_extension = os.path.splitext(filename)[0]
-                                # with open(f'C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local/download pdf baza de date/{filename_no_extension}.pdf', 'wb') as file:
+                                # with open(f'C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local V2/download pdf baza de date/{filename_no_extension}.pdf', 'wb') as file:
                                 with open(f'/home/efactura/efactura_bimed/downloadPdfBazaDate/{filename_no_extension}.pdf', 'wb') as file:
                                     file.write(response.content)
                                     print(f'Fisierul {filename} a fost convertit cu succes')
@@ -679,19 +686,13 @@ def descarcarepdfPrimite(idSelectate):
                         # Adaugă numele fișierului în coloana INDEX_INCARCARE pentru a înregistra excepția
                         # sheet.append([filename])
                 # Salvează workbook-ul Excel
-                # workbook.save('C:/Dezvoltare/E-Factura/2023/eFactura/Expeditors/eFacturaExpeditors local/output conversie PDF/excepții.xlsx')
+                # workbook.save('C:/Dezvoltare/E-Factura/2023/eFactura/Expeditors/eFacturaExpeditors local2/output conversie PDF/excepții.xlsx')
 
             
         conversie()
         # time.sleep(5)
 
         print('aici facem conversia in PDF')        
-        # make_archive(downlPDFbaza, 'C:\\Dezvoltare\\E-Factura\\2023\\eFactura\\Ferro\\eFacturaFerro\\destinatie\\'+'rezultat.zip')
-        # sqlSafeUpdates="set sql_safe_updates = 0"
-        # cursor.execute(sqlSafeUpdates)
-        # update_query = "UPDATE trimiterefacturi SET descarcata = 'Da' WHERE index_incarcare IN (" + stringID + ")"
-        # print(update_query, '-------------------------------------')
-        # cursor.execute(update_query)
         if stringID:
             try:
                 sqlSafeUpdates = "SET sql_safe_updates = 0"
@@ -715,7 +716,6 @@ def descarcarepdfPrimite(idSelectate):
         print("nu are valori")
 
     cursor.close()
-
 
     
 def interogareTabelaClienti():
@@ -754,39 +754,39 @@ def interogareTabelaClienti():
     return resultsclienti
 
 
-def interogareTabelaClienti10():
+# def interogareTabelaClienti10():
     
-    connection = pymysql.connect(
-        host=mysql_config['host'],
-        user=mysql_config['user'],
-        password=mysql_config['password'],
-        database=mysql_config['database']
-    )
-    cursor = connection.cursor()
+#     connection = pymysql.connect(
+#         host=mysql_config['host'],
+#         user=mysql_config['user'],
+#         password=mysql_config['password'],
+#         database=mysql_config['database']
+#     )
+#     cursor = connection.cursor()
     
-    resultsclienti=[]
-    # selectQuery = "SELECT * FROM CLIENTS where country in ('RO', 'România')"
-    selectQuery = "SELECT * FROM CLIENTS where country not in ('RO', 'România')"
-    cursor.execute(selectQuery)
+#     resultsclienti=[]
+#     # selectQuery = "SELECT * FROM CLIENTS where country in ('RO', 'România')"
+#     selectQuery = "SELECT * FROM CLIENTS where country not in ('RO', 'România')"
+#     cursor.execute(selectQuery)
  
-    resultsclienti = []
+#     resultsclienti = []
  
-    for row in cursor.fetchall():
-        result_dict = {
-            "id":row[0],
-            "name": row[1],
-            "country": row[2],
-            "cust": row[3],
-            "regno": row[4],
-            "city": row[5],
-            "street": row[6],
-            "region": row[8],
-        }
-        resultsclienti.append(result_dict)
-        # print(resultsclienti)
-        cursor.close()
+#     for row in cursor.fetchall():
+#         result_dict = {
+#             "id":row[0],
+#             "name": row[1],
+#             "country": row[2],
+#             "cust": row[3],
+#             "regno": row[4],
+#             "city": row[5],
+#             "street": row[6],
+#             "region": row[8],
+#         }
+#         resultsclienti.append(result_dict)
+#         # print(resultsclienti)
+#         cursor.close()
  
-    return resultsclienti
+#     return resultsclienti
 
 
 def interogareIDprimite():
@@ -805,8 +805,9 @@ def interogareIDprimite():
     connection.close()
     return result_list
 
-def stocarePDFPrimite():
-    
+
+
+def interogareTabelaFacturiTrimise():
     connection = pymysql.connect(
         host=mysql_config['host'],
         user=mysql_config['user'],
@@ -815,22 +816,278 @@ def stocarePDFPrimite():
     )
     cursor = connection.cursor()
     
-    # director_fisiere = "C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local/output conversie"
+    selectQuery = "SELECT distinct * FROM trimiterefacturi"
+    cursor.execute(selectQuery)
+
+    results = []
+
+    for row in cursor.fetchall():
+        
+        result_dict = {
+            "factura": row[1],
+            "index_incarcare": row[2],
+            "data_trimis": row[3],
+            "status_facturi": row[6],
+            "user_id": row[4],
+            "descarcata": row[5]  
+        }
+        results.append(result_dict)
+    cursor.close()
+
+    return results
+
+def interogareIndexIncarcare():
+    connection = pymysql.connect(
+        host=mysql_config['host'],
+        user=mysql_config['user'],
+        password=mysql_config['password'],
+        database=mysql_config['database']
+    )
+    cursor = connection.cursor()
+    
+    # selectQuery = "SELECT index_incarcare FROM trimiterefacturi where status_facturi ='' or status_facturi like '%prelucrare';"
+    selectQuery = "SELECT index_incarcare FROM trimiterefacturi where status_facturi ='' or status_facturi like '%prelucrare%';"
+    cursor.execute(selectQuery)
+
+    results = [int(row[0]) for row in cursor.fetchall()]  # Extracting only the first element from each row
+    
+    cursor.close()
+
+    return results
+
+def stareMesaj(results):
+    connection = pymysql.connect(
+        host=mysql_config['host'],
+        user=mysql_config['user'],
+        password=mysql_config['password'],
+        database=mysql_config['database']
+    )
+    cursor = connection.cursor()
+    
+    for i in range(0, len(results)):
+        try:
+            if str(results[i])[:1] == '5':
+                apiStareMesaj = 'https://api.anaf.ro/prod/FCTEL/rest/stareMesaj?id_incarcare='+str(results[i])
+            else:
+                apiStareMesaj = 'https://api.anaf.ro/prod/FCTEL/rest/stareMesaj?id_incarcare='+str(results[i])
+                
+            print(apiStareMesaj)
+            # while True:  # buclă infinită
+            stare = requests.get(apiStareMesaj, headers=headers, timeout=30)
+            if stare.status_code == 200:
+                resp = stare.text
+                print('RESP ',resp)
+                root = ET.fromstring(resp)
+                staree = str(root.attrib['stare'])
+                
+                updateQuery = f'update trimiterefacturi set status_facturi = "{staree}" where index_incarcare = {results[i]}'
+                print(updateQuery)
+                cursor.execute(updateQuery)
+                connection.commit()
+            print(results[i])
+        except:
+            print("eroare la ", results[i])
+    
+            
+
+def statusStareMesajBD():
+    connection = pymysql.connect(
+        host=mysql_config['host'],
+        user=mysql_config['user'],
+        password=mysql_config['password'],
+        database=mysql_config['database']
+    )
+
+    cursor = connection.cursor()
+        
+    dictionarFacturi = interogareIndexIncarcare()
+    print(dictionarFacturi)
+    stareMesaj(dictionarFacturi)
+    cursor.close()    
+
+def updateFacturi(stringID):
+    try:
+        connection = pymysql.connect(
+            host=mysql_config['host'],
+            user=mysql_config['user'],
+            password=mysql_config['password'],
+            database=mysql_config['database']
+        )
+        
+        cursor = connection.cursor()
+        sqlSafeUpdates="SET sql_safe_updates = 0"
+        cursor.execute(sqlSafeUpdates)
+        
+        for i in stringID:
+            update_query = f"UPDATE trimiterefacturi SET descarcata = 'Da' WHERE index_incarcare = {i}"
+            cursor.execute(update_query)
+            print(update_query, '-------------------------------------')
+            
+        connection.commit()  # Commit pentru a salva schimbările în baza de date
+        
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        
+    finally:
+        if 'connection' in locals() and connection.open:
+            cursor.close()
+            connection.close() 
+    
+def raspunsANAF(id_selectate):
+        # --------------------------------STARE MESAj -----------------------------------
+    # try:
+        # stergeFisiere('C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local V2/output zip api', '.zip')
+        stergeFisiere('/home/efactura/efactura_bimed/outputZipAPI', '.zip')
+        listaIdDescarcare = []
+        string_value = id_selectate[0]
+
+        # Split șirul de caractere folosind virgula ca separator
+        string_list = string_value.split(',')
+
+        # Convertește fiecare element la int
+        number_list = [int(x) for x in string_list]
+
+        print(number_list)
+        # print(id_selectate)
+        def stareMesaj():
+            listaIdDescarcare.clear()
+            for i in range(0, len(number_list)):
+                print('in for ',number_list[i])
+                apiStareMesaj = 'https://api.anaf.ro/prod/FCTEL/rest/stareMesaj?id_incarcare='+str(number_list[i])
+                
+                while True:  # buclă infinită
+                    stare = requests.get(apiStareMesaj, headers=headers, timeout=30)
+                    if stare.status_code == 200:
+                        resp = stare.text
+                        root = ET.fromstring(resp)
+                        print(resp)
+                        staree = str(root.attrib['stare'])
+                        if staree != 'in prelucrare':  # dacă starea nu mai este 'in prelucrare', se iese din buclă
+                            break
+                        time.sleep(5)  # așteaptă 5 secunde înainte de a interoga din nou API-ul
+                    else:
+                        print('Eroare la interogarea API-ului')
+                        break  # dacă există o eroare la interogarea API-ului, se iese din buclă
+
+                try:
+                    id_descarcare = int(root.attrib['id_descarcare']) 
+                    listaIdDescarcare.append(id_descarcare)
+                    # print('id descarcare',id_descarcare, id_selectate[i])   
+                except:
+                    print(resp) 
+        # print("aici am facut starea mesajului")                 
+        stareMesaj()
+        print(listaIdDescarcare)
+
+
+
+        # --------------------- DESCARCARE -------------------
+        time.sleep(10)
+        def descarcare():
+            for i in range(0, len(listaIdDescarcare)):
+                apiDescarcare = 'https://api.anaf.ro/prod/FCTEL/rest/descarcare?id='+str(listaIdDescarcare[i])
+
+                descarcare = requests.get(apiDescarcare, headers=headers, timeout=30)
+
+                if descarcare.status_code == 200:
+                    # print("Cererea a fost efectuata cu succes!")
+                    # with open('C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local V2/output zip api/fisier'+str(listaIdDescarcare[i])+'.zip', 'wb') as file:
+                    with open("/home/efactura/efactura_bimed/outputZipAPI/fisier"+str(listaIdDescarcare[i])+'.zip', 'wb') as file:
+                        file.write(descarcare.content)
+                        print('Descarcat cu success')
+                    
+                # print(descarcare.text)
+                else:
+                    print("Eroare la efectuarea cererii HTTP:", descarcare.status_code)
+                    print(descarcare.text)
+        # print("aici descarcam folosind id_descarcare")
+        descarcare()
+
+        # directory_path = 'C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local V2/output zip api'
+        directory_path = "/home/efactura/efactura_bimed/outputZipAPI"
+
+        # output_directory = 'C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local V2/output conversie'
+        output_directory = "/home/efactura/efactura_bimed/outputConversie"
+        # arhiveANAF = "/home/efactura/efactura_bimed/arhiveANAF"
+
+        os.makedirs(output_directory, exist_ok=True)
+
+        for filename in os.listdir(directory_path):
+            # break
+            if filename.endswith('.zip'):
+                zip_file_path = os.path.join(directory_path, filename)
+                with zipfile.ZipFile(zip_file_path, 'r') as zip_file:
+                    xml_files = [name for name in zip_file.namelist() if name.endswith('.xml') and "semnatura" not in name.lower()]
+                    for xml_file in xml_files:
+                        with zip_file.open(xml_file) as file:
+                            xml_data = file.read()
+                            output_path = os.path.join(output_directory, xml_file)
+                            with open(output_path, 'wb') as output_file:
+                                output_file.write(xml_data)
+                                
+                                
+        def make_archive(source, destination):
+            base = os.path.basename(destination)
+            name = base.split('.')[0]
+            format = base.split('.')[1]
+            archive_from = os.path.dirname(source)
+            archive_to = os.path.basename(source.strip(os.sep))
+            shutil.make_archive(name, format, archive_from, archive_to)
+            shutil.move('%s.%s'%(name,format), destination)   
+            
+        stocarePDF()
+        # stergeFisiere('C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local V2/output conversie', '.xml')
+        print("facem stocarea pdf")
+        # print("aici stocam XML in BD")
+        # for i in range(0, len(number_list)):
+        #     print(number_list[i])
+        #     updateFacturi(number_list[i])
+        
+        updateFacturi(number_list) 
+        print("plmmm ", number_list)                 
+        
+
+
+        # pdf_directory = 'C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local V2/output conversie PDF'
+        pdf_directory = '/home/efactura/efactura_bimed/outputConversiePDF'
+        zip_file_path = '/home/efactura/efactura_bimed/outputArhiveConversiePDF/rezultatArhiveConversie.zip'
+        # zip_file_path = 'C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local V2/output arhive conversie PDF/rezultatArhiveConversie.zip'
+        make_archive(directory_path, os.path.join(pdf_directory, 'rezultat.zip'))   
+
+        with zipfile.ZipFile(zip_file_path, 'w', zipfile.ZIP_DEFLATED) as zip_file:
+            for pdf_file in os.listdir(pdf_directory):
+                pdf_file_path = os.path.join(pdf_directory, pdf_file)
+                zip_file.write(pdf_file_path, os.path.basename(pdf_file)) 
+    # except:
+    #     print('nu a ales nimic din lista')
+
+def stocareZIPAnaf():
+    connection = pymysql.connect(
+        host=mysql_config['host'],
+        user=mysql_config['user'],
+        password=mysql_config['password'],
+        database=mysql_config['database']
+    )
+    cursor = connection.cursor()
+    
+    # director_fisiere = "C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local V2/output conversie"
     director_fisiere = '/home/efactura/efactura_bimed/outputConversie/'
 
 # Parcurgerea fișierelor din director și inserarea în baza de date
     for nume_fisier in os.listdir(director_fisiere):
-        if nume_fisier.endswith('.xml'):
+        if nume_fisier.endswith('.zip'):
             cale_absoluta = os.path.join(director_fisiere, nume_fisier)
             
             with open(cale_absoluta, 'rb') as file:
                 pdf_content = file.read()
-            nume_fisier=nume_fisier.replace(".xml", "")
+            nume_fisier=nume_fisier.replace(".zip", "")
             
             
 
-            insert_query = "INSERT INTO FisierePDFPrimite (nume_fisier, continut, data_introducere) VALUES (%s, %s, %s)"
+            insert_query = "INSERT INTO fisierezip (nume_fisier, continut, data_introducere) VALUES (%s, %s, %s)"
             values = (nume_fisier, pdf_content, timestamp)
             cursor.execute(insert_query, values)
     connection.commit()
     cursor.close()
+    # filename = 'rezultatArhiveConversie.zip'
+    # return send_from_directory('C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local V2/output arhive conversie PDF', filename, as_attachment = True)

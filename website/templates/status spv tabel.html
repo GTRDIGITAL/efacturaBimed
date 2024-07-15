@@ -313,7 +313,7 @@
                   class="nav-link font-roboto"
                   style="float: right; color: white"
                   href="/raport_client"
-                  >Modul transmitere facturi</a
+                  >Invoice submission</a
                 >
               </li>
 
@@ -322,13 +322,13 @@
                   class="nav-link font-roboto"
                   style="float: right; color: white"
                   href="/status"
-                  >Raport încărcare date</a
+                  >Data loading report</a
                 >
               </li>
             </ul>
           </div>
         </nav>
-        <h1>Istoric transmitere SPV</h1>
+        <h1>SPV sent invoices history</h1>
         <!--<div class="button-container">
             <form id="login-form" class="login-form" action="/main" method="POST">
                 <button type="submit">Pagina principală</button>
@@ -336,27 +336,27 @@
         </div>-->
 
         <!--<div class="procent-container">
-          <div><p id="facturi-total">Total facturi transmise: 0%</p></div>
+          <div><p id="facturi-total">Total invoices sent: 0%</p></div>
           <div>
-            <p id="facturi-total-validate">Total facturi validate: 0%</p>
+            <p id="facturi-total-validate">Total valid invoices: 0%</p>
           </div>
-          <div><p id="facturi-total-erori">Total facturi cu erori: 0%</p></div>
+          <div><p id="facturi-total-erori">Total invalid invoices: 0%</p></div>
         </div>
         <div class="procent-container">
-          <div><p id="facturi-eroare">Procent facturi cu erori: 0%</p></div>
+          <div><p id="facturi-eroare">Percentage of invoices with errors: 0%</p></div>
           <div>
-            <p id="facturi-fara-eroare">Procent facturi fără erori: 0%</p>
+            <p id="facturi-fara-eroare">Percentage of valid invoices: 0%</p>
           </div>
         </div>
       </div>-->
 
       <div id="toolbar1" class="select">
-        <form id="download-form" action="/refresh" method="GET">
+        <!--<form id="download-form" action="/refresh" method="GET">
           <button class="btn btn-default refresh" title="Refresh">
-            <i class="glyphicon glyphicon-refresh"></i> Actualizare informatii
+            <i class="glyphicon glyphicon-refresh"></i> Refresh Data
           </button>
-        </form>
-        <form id="download-form" action="/download" method="GET">
+        </form>-->
+        <form id="download-form" action="/downloadANAF" method="GET">
           <input type="hidden" name="iduri_selectate" id="iduri_selectate" />
           <button
             class="btn btn-default download"
@@ -365,10 +365,28 @@
             name="getSelectedIdsButton"
             title="Download"
           >
-            <i class="glyphicon glyphicon-download"></i> Descarcare facturi selectate
+            <i class="glyphicon glyphicon-download"></i> Download ANAF invoices
           </button>
         </form>
+        
       </div>
+
+      <div id="toolbar2" class="select">
+      <form id="download-form2" action="/download_invoices" method="GET">
+        <input type="hidden" name="iduri_selectate2" id="iduri_selectate2" />
+        <button
+          class="btn btn-default download"
+          type="submit"
+          id="getSelectedIdsButtonPDF"
+          name="getSelectedIdsButtonPDF"
+          title="Download"
+        >
+          <i class="glyphicon glyphicon-download"></i> Download PDF invoices
+        </button>
+      </form>
+    </div>
+
+
       <table
         id="table1"
         class="table table-bordered"
@@ -385,22 +403,22 @@
         data-show-refresh="false"
         data-toolbar="#toolbar1"
         data-click-to-select="true"
-        data-sort-name="data_creare"
+        data-sort-name="data_trimis"
         data-sort-order="desc"
       >
         <thead style="background-color: #2b144d; color: white; opacity: 80%">
           <tr>
-            <th data-field="factura" data-sortable="true">Factura</th>
-            <th data-field="data_creare" data-sortable="true">data_creare</th>
-            <th data-field="cif" data-sortable="true">cif</th>
-            <th data-field="id_solicitare" data-sortable="true">
-              id_solicitare
+            <th data-field="factura" data-sortable="true">Invoice</th>
+            <th data-field="data_trimis" data-sortable="true">Submission date</th>
+
+            <th data-field="index_incarcare" data-sortable="true">
+              Upload index
             </th>
-            <th data-field="detalii" data-sortable="true">detalii</th>
-            <th data-field="tip" data-sortable="true">tip</th>
-            <th data-field="id" data-sortable="true">id</th>
+            <th data-field="status_facturi" data-sortable="true">Invoice SPV status</th>
+            
+            
             <th data-field="user_id" data-sortable="true">User</th>
-            <th data-field="descarcata" data-sortable="true">Descarcata</th>
+            <th data-field="descarcata" data-sortable="true">Downloaded</th>
             <th data-field="state" data-checkbox="true"></th>
             <!--<th data-field="download" data-sortable="true"> Download</th>-->
           </tr>
@@ -409,17 +427,14 @@
           {% for mesaj in mesaje %}
           <tr>
             <td>{{ mesaj["factura"] }}</td>
-            <td>{{ mesaj["data_creare"] }}</td>
-            <td>{{ mesaj["cif"] }}</td>
-            <td>{{ mesaj["id_solicitare"] }}</td>
-            <td>{{ mesaj["detalii"] }}</td>
-            <td>{{ mesaj["tip"] }}</td>
-            <td>{{ mesaj["id_factura"] }}</td>
+            <td>{{ mesaj["data_trimis"] }}</td>
+            <td>{{ mesaj["index_incarcare"] }}</td>
+            <td>{{ mesaj["status_facturi"] }}</td>
             <td>{{ mesaj["user_id"] }}</td>
             <td>{{ mesaj["descarcata"] }}</td>
             <td></td>
             <!--<form id="download-form" class="download-form"  method="POST">
-                        <td> <button name="download" id="download" class="btn" value={{ mesaj["id_solicitare"] }}onclick="downloadFunction(this)"><i class="fa fa-download"></i> Download</button> </td>
+                        <td> <button name="download" id="download" class="btn" value={{ mesaj["index_incarcare"] }}onclick="downloadFunction(this)"><i class="fa fa-download"></i> Download</button> </td>
                         </form>-->
           </tr>
           {% endfor %}
@@ -428,6 +443,7 @@
     </div>
   </body>
   <script>
+    
         function downloadFunction(button) {
             // Get the closest table row (parent tr)
             var row = $(button).closest('tr');
@@ -435,11 +451,11 @@
             // Log the content of the row to the console for debugging
             console.log("Row content:", row.html());
 
-            // Retrieve the value of id_solicitare from the fourth column of the clicked row
+            // Retrieve the value of index_incarcare from the fourth column of the clicked row
             var idSolicitare = row.find('td:eq(3)').text();
 
             // You can use idSolicitare in your JavaScript logic
-            console.log("id_solicitare:", idSolicitare);
+            console.log("index_incarcare:", idSolicitare);
 
             // Perform other actions or use the value as needed
             // For example, you can send an AJAX request to download the corresponding data
@@ -463,6 +479,42 @@
                 });
 
         };
+
+        function downloadFunctionPDF(button) {
+          // Get the closest table row (parent tr)
+          var row = $(button).closest('tr');
+
+          // Log the content of the row to the console for debugging
+          console.log("Row content:", row.html());
+
+          // Retrieve the value of index_incarcare from the fourth column of the clicked row
+          var idSolicitarePDF = row.find('td:eq(3)').text();
+
+          // You can use idSolicitare in your JavaScript logic
+          console.log("index_incarcare:", idSolicitarePDF);
+
+          // Perform other actions or use the value as needed
+          // For example, you can send an AJAX request to download the corresponding data
+          // or redirect to a download link with the idSolicitare value.
+
+
+              var dataToSend = { variableFromJS: idSolicitarePDF };
+
+              $.ajax({
+                  type: 'POST',
+                  contentType: 'application/json;charset=UTF-8',
+                  url: '/statusFacturi',  // Ajustează la ruta corectă a serverului tău Flask
+                  data: JSON.stringify(dataToSend),
+                  success: function(response) {
+                      console.log("Raspuns de la server:", response);
+                      // Poți efectua acțiuni suplimentare aici dacă dorești
+                  },
+                  error: function(error) {
+                      console.error("Eroare la trimiterea datelor:", error);
+                  }
+              });
+
+      };
 
         /*$(document).ready(function() {
             $('#getSelectedIdsButton').click(function() {
@@ -513,12 +565,12 @@
                 columns: [
                     {
                         field: 'factura',
-                        title: 'Factura',
+                        title: 'Invoice',
                         sortable: true
                     },
                     {
-                        field: 'data_creare',
-                        title: 'Data',
+                        field: 'data_trimis',
+                        title: 'Date',
                         sortable: true,
                         order: 'desc',
                         formatter: function (value) {
@@ -536,22 +588,22 @@
                     },
                     {
                         field: 'cif',
-                        title: 'CIF',
+                        title: 'VAT Reg. No',
                         sortable: true
                     },
                     {
-                        field: 'id_solicitare',
-                        title: 'ID Solicitare',
+                        field: 'index_incarcare',
+                        title: 'Request ID',
                         sortable: true
                     },
                     {
-                        field: 'detalii',
-                        title: 'Detalii',
+                        field: 'status_facturi',
+                        title: 'Details',
                         sortable: true
                     },
                     {
                         field: 'tip',
-                        title: 'Tip',
+                        title: 'Type',
                         sortable: true
                     },
                     {
@@ -572,6 +624,9 @@
             });
         }).trigger('change');
     });
+
+
+
     document.addEventListener('DOMContentLoaded', function () {
         // Funcție pentru a prelua valorile coloanei "id_descarcare" a rândurilor selectate
         function getSelectedIds() {
@@ -581,15 +636,14 @@
             for (var i = 0; i < rows.length; i++) {
                 if (rows[i].classList.contains('selected')) {
                     var cells = rows[i].getElementsByTagName('td');
-                    selectedIds.push(cells[3].innerText); // Modifică indexul conform coloanei "id_descarcare"
+                    selectedIds.push(cells[2].innerText); // Modifică indexul conform coloanei "id_descarcare"
                 }
             }
             document.getElementById('iduri_selectate').value = selectedIds;
             return selectedIds;
         }
 
-
-
+        
         // Eveniment pentru clic pe butonul pentru a prelua valorile
         document.getElementById('getSelectedIdsButton').addEventListener('click', function () {
             var selectedIds = getSelectedIds();
@@ -597,16 +651,46 @@
         });
     });
 
+    document.addEventListener('DOMContentLoaded', function () {
+      // Funcție pentru a prelua valorile coloanei "id_descarcare" a rândurilor selectate
+      function getSelectedIds() {
+          var table = document.getElementById('table1');
+          var selectedIds = [];
+          var rows = table.getElementsByTagName('tr');
+          for (var i = 0; i < rows.length; i++) {
+              if (rows[i].classList.contains('selected')) {
+                  var cells = rows[i].getElementsByTagName('td');
+                  selectedIds.push(cells[2].innerText); // Modifică indexul conform coloanei "id_descarcare"
+              }
+          }
+          document.getElementById('iduri_selectate2').value = selectedIds;
+          return selectedIds;
+      }
+
+      
+      // Eveniment pentru clic pe butonul pentru a prelua valorile
+      document.getElementById('getSelectedIdsButtonPDF').addEventListener('click', function () {
+          var selectedIds = getSelectedIds();
+          console.log(selectedIds); // Poți înlocui această linie pentru a utiliza valorile în altă parte a codului
+      });
+  });
+
+
     function setCellTextColor(value, cell) {
-        if (value.includes("ERORI")) {
+        if (value.includes("nok")) {
             cell.css('background-color', 'red');
             cell.css('color', 'white');
             cell.css('font-weight', 'bold'); // Setează culoarea textului la roșu
-        } else {
-            cell.css('background-color', '#4F2D7F');
+        } if (value==="ok") {
+            cell.css('background-color', 'green');
             cell.css('color', 'white');
             cell.css('font-weight', 'bold'); // Setează culoarea textului la verde
         }
+        if (value.includes("in prelucrare")) {
+          cell.css('background-color', 'gray');
+          cell.css('color', 'white');
+          cell.css('font-weight', 'bold'); // Setează culoarea textului la verde
+      }
     }
     function datesSorter(a, b) {
       if (new Date(a) < new Date(b)) return 1;
@@ -615,7 +699,7 @@
     }
     // Obține toate celulele din coloana "TIP" și setează culoarea textului
     $table.find('tbody tr').each(function () {
-        var cell = $(this).find('td:eq(5)'); // Obține celula din coloana "TIP"
+        var cell = $(this).find('td:eq(3)'); // Obține celula din coloana "TIP"
         var value = cell.text(); // Obține valoarea din celulă
         setCellTextColor(value, cell); // Setează culoarea textului în funcție de valoare
     });
@@ -662,7 +746,7 @@
         numarFacturiUltimaRulare=0;
         numarFacturiValideUltimaRulare=0;
         var listaUltimaRulare={{ listaMesajeRulareCurenta | tojson  }};
-
+    
 
 
 
@@ -691,11 +775,11 @@
         var procentFacturiFaraEroare = 100 - procentFacturiCuEroare;
         var factValidate=numarFacturiUltimaRulare-numarFacturiCuEroare
 
-        //$('#facturi-total').text('Total facturi transmise la ultima transmitere: ' + numarFacturiUltimaRulare );
-        //$('#facturi-total-validate').text('Total facturi validate la ultima transmitere:' + numarFacturiValideUltimaRulare);
-        //$('#facturi-total-erori').text('Total facturi erori la ultima transmitere:' + numarFacturiCuEroare);
-        //$('#facturi-eroare').text('Procent facturi cu erori la ultima transmitere:' + procentFacturiCuEroare.toFixed(2) + '%');
-        //$('#facturi-fara-eroare').text('Procent facturi fără erori la ultima transmitere:' + procentFacturiFaraEroare.toFixed(2) + '%');
+        $('#facturi-total').text('Total invoices sent in the last submission: ' + numarFacturiUltimaRulare );
+        $('#facturi-total-validate').text('Total valid invoices in the last submission: ' + numarFacturiValideUltimaRulare);
+        $('#facturi-total-erori').text('Total invalid invoices in the last submission: ' + numarFacturiCuEroare);
+        $('#facturi-eroare').text('Percentage of invoices with errors in the last submission:' + procentFacturiCuEroare.toFixed(2) + '%');
+        $('#facturi-fara-eroare').text('Percentage of valid invoices in the last transmission:' + procentFacturiFaraEroare.toFixed(2) + '%');
 
     /*
         $('#facturi-total').text('Total facturi transmise la ultima transmitere: 20' );

@@ -11,6 +11,7 @@ from . import db
 from .apeluri_efactura import *
 from .prelucrareDate import *
 from .models import Users
+# from .facturiPrimite import *
 from .auth import login
 from tempfile import NamedTemporaryFile
 import json
@@ -28,12 +29,12 @@ def trimitereMail():
     sender_email = "GTRDigital@ro.gt.com"
     password = "g[&vuBR9WQqr=7>D"
     context = ssl.create_default_context()
-    message_text = "Buna ziua,\nAtasat regasiti facturile descarcate.\n\nMultumim,\nGTRDigital"
+    message_text = "Hello,\n\nPlease find above the downloaded invoices.\n\nThank you,\nGTRDigital"
     
     date = datetime.datetime.now().strftime("%d/%m/%Y %H:%M")
     subj = "Facturi SPV " + str(date)
-    mailTo = "alina.chiriac@bimedteknik.com"
-    # destinatie = "C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local/destinatie/"
+    mailTo = "cristian.iordache@ro.gt.com"
+    # destinatie = "C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local V2/destinatie/"
     destinatie = '/home/efactura/efactura_bimed/destinatie/'
     attachment_path = destinatie+"rezultat.zip"
 
@@ -166,28 +167,29 @@ def summary():
         # print("acesta e fisierul de vanzari ", fisierDeVanzari)
      
         # print(fisierDeVanzari,'-----------------------in summary')
-        primaFactura, ultimaFactura, totalFactura, numarFacturiTrimise, facturiNuleUnice = prelucrareDate(fisierDeVanzari)
+        primaFactura, ultimaFactura, totalFactura, numarFacturiTrimise, facturiNuleUnice, numarFacturi = prelucrareDate(fisierDeVanzari)
         numarFacturiCorecte = numarFacturiTrimise - facturiNuleUnice
         print(facturiNuleUnice, "facturi corecte")
         session['ultimaFactura'] = ultimaFactura
+        print(type(ultimaFactura))
         # parts = ultimaFactura.split(":")
         # ultimaFactura = parts[1].strip()
-        # if ultimaFactura.isdigit():
+        # if type(ultimaFactura) == str :
         #     # Dacă este doar cifre, convertim valoarea la int pentru a fi folosită în JavaScript
         #     numar_ultima_factura_js = int(ultimaFactura)
         # else:
         #     # Dacă nu conține doar cifre, lăsăm valoarea neschimbată
         #     numar_ultima_factura_js = ultimaFactura
             
-        if primaFactura.isdigit():
-            # Dacă este doar cifre, convertim valoarea la int pentru a fi folosită în JavaScript
-            primaFactura_js = int(primaFactura)
-        else:
-            # Dacă nu conține doar cifre, lăsăm valoarea neschimbată
-            primaFactura_js = primaFactura
+        # if primaFactura.isdigit():
+        #     # Dacă este doar cifre, convertim valoarea la int pentru a fi folosită în JavaScript
+        #     primaFactura_js = int(primaFactura)
+        # else:
+        #     # Dacă nu conține doar cifre, lăsăm valoarea neschimbată
+        #     primaFactura_js = primaFactura
         
-        print(primaFactura, ultimaFactura, totalFactura, numarFacturiCorecte)
-        return render_template('summary.html', primaFactura=primaFactura, ultimaFactura=ultimaFactura, totalFactura=totalFactura, nrFacturiTrimise=numarFacturiTrimise, numarFacturiCorecte=numarFacturiCorecte, facturiNuleUnice=facturiNuleUnice)
+        print(primaFactura, ultimaFactura, totalFactura, numarFacturiCorecte, numarFacturi)
+        return render_template('summary.html', primaFactura=primaFactura, ultimaFactura=ultimaFactura, totalFactura=totalFactura, nrFacturiTrimise=numarFacturiTrimise, numarFacturiCorecte=numarFacturiCorecte, facturiNuleUnice=facturiNuleUnice, numarFacturi = numarFacturi)
     else:
         return render_template('auth.html')
 
@@ -210,7 +212,7 @@ def download_excel():
     code = session.get('verified_code')
     if code == cod:
         try:
-            # excel_file_path = "C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local/logs/informatii.txt"
+            # excel_file_path = "C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local V2/logs/informatii.txt"
             excel_file_path = "/home/efactura/efactura_bimed/logs/informatii.txt"
             return send_file(excel_file_path, as_attachment=True, download_name='Informatii erori facturi.txt')
         except:
@@ -228,17 +230,35 @@ def trimitere_anaf():
     if code == cod:
         if request.method == 'GET':
             # filename = 'rezultat '+str(current_datetime)+'.zip'
-            filename = 'rezultatArhiveConversie.zip'
+            # filename = 'facturiTransmise.txt'
+            # try:
             eFactura()
+                # trimitere_anaf()
+            # except:
+            #     return render_template('main.html')
             listaMesajeEroare2 = listaMesajeEroare
             print("mergi fa ", listaMesajeEroare2)
     else:
         return render_template('auth.html')
         
 
-    # return send_from_directory('C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local/output arhive conversie PDF', filename, as_attachment = True)
-    return send_from_directory('/home/efactura/efactura_bimed/outputArhiveConversiePDF', filename, as_attachment = True)
-    
+    # return send_from_directory('C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local V2/Baza de date vanzari', 'facturiTransmise.txt', as_attachment = True)
+    return send_from_directory('/home/efactura/efactura_bimed/bazaDateVanzari', 'SentInvoicesConfirmation.txt', as_attachment = True)
+
+def stareMesaj():
+        listaIdDescarcare.clear()
+        for i in range(0, len(listaIndexIncarcare)):
+            apiStareMesaj = 'https://api.anaf.ro/prod/FCTEL/rest/stareMesaj?id_incarcare='+str(listaIndexIncarcare[i])
+            
+            while True:  # buclă infinită
+                stare = requests.get(apiStareMesaj, headers=headers, timeout=30)
+                if stare.status_code == 200:
+                    resp = stare.text
+                    root = ET.fromstring(resp)
+                    staree = str(root.attrib['stare'])
+                    # statusStareMesajBD(staree)
+            print(listaIndexIncarcare, staree)
+               
 @views.route("/statusFacturi", methods=['GET','POST'])
 @login_required
 def statusFacturi():
@@ -247,27 +267,33 @@ def statusFacturi():
     cod = session.get('cod')
     code = session.get('verified_code')
     valoare = request.form.get("download")
-    mesaje = interogareTabela() 
+    # -----------------------------------------------------------------------------------------------------------------------------
+    
+    
+    # ---------------------------------------------------------------------------------------------------------------------------------                
+    # mesaje = interogareTabela() 
     if request.method=='GET':
         idSelectate=request.args.get('iduri_selectate')
         print(request.args)
         print(idSelectate, '-iduri selectate')
         if code == cod:
+            statusStareMesajBD()
+            mesaje = interogareTabelaFacturiTrimise()
             session['idSelectate'] = idSelectate
             listaMesajeRulareCurenta = listaFactt
-            print(listaMesajeRulareCurenta, " aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
-            # asta e aici sa o testam ca primim id-ul tabelei din interfata
-            # print(valoare)
+    #         print(listaMesajeRulareCurenta, " aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+    #         # asta e aici sa o testam ca primim id-ul tabelei din interfata
+    #         # print(valoare)
             lista.append(idSelectate)
-            # lista.clear()
+            lista.clear()
             
-        
         descarcarepdf(lista)
-        # if request.method=='POST':
-        #     trimitereMail()
-        return render_template("status spv tabel.html", mesaje=mesaje, listaMesajeRulareCurenta=listaMesajeRulareCurenta)
-    else:
-        return render_template('auth.html')
+        if request.method=='POST':
+            trimitereMail()
+        # return render_template("status spv tabel.html", mesaje=mesaje, listaMesajeRulareCurenta=listaMesajeRulareCurenta)
+    return render_template("status spv tabel.html", mesaje = mesaje, listaMesajeRulareCurenta=listaMesajeRulareCurenta)
+    # else:
+    #     return render_template('auth.html')
     
 @views.route("/statusFacturiPrimite", methods=['GET','POST'])
 @login_required
@@ -278,7 +304,6 @@ def statusFacturiPrimite():
     code = session.get('verified_code')
     valoare = request.form.get("download")
     mesaje = interogareTabelaPrimite() 
-    print("acestea sunt mesaje ", mesaje)
     if request.method=='GET':
         idSelectate=request.args.get('iduri_selectate')
         print(request.args)
@@ -293,17 +318,16 @@ def statusFacturiPrimite():
             # lista.clear()
             
         
-        descarcarepdf(lista)
+        descarcarepdfPrimite(lista)
         # if request.method=='POST':
         #     trimitereMail()
         return render_template("status spv tabel primite.html", mesaje=mesaje, listaMesajeRulareCurenta=listaMesajeRulareCurenta)
     else:
         return render_template('auth.html')
     
-    
-@views.route('/download', methods=['GET'])
+@views.route('/downloadANAF', methods=['GET'])
 @login_required
-def download_file():
+def download_file_ANAF():
     # Specificați calea către fișierul pe care doriți să îl descărcați
     cod = session.get('cod')
     code = session.get('verified_code')
@@ -314,12 +338,40 @@ def download_file():
         session['idSelectate'] = idSelectate
         listaMesajeRulareCurenta = listaFactt
         print(listaMesajeRulareCurenta, " aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
-        # asta e aici sa o testam ca primim id-ul tabelei din interfata
-        # print(valoare)
         lista.append(idSelectate)
         print(lista,'-------------+++++++++++++++++++++++')
+    
+    # descarcarepdf(lista)
+    # trimitereMail()
+    # try:
+        raspunsANAF(lista)
+        stocareZIPAnaf()
+    #     return render_template("main.html")
+    # except:
+        # return render_template("status spv tabel.html")
+    # return render_template("main.html")
+    filename = 'rezultatArhiveConversie.zip'
+    # return send_from_directory('C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local V2/output arhive conversie PDF', filename, as_attachment = True)
+    return send_from_directory('/home/efactura/efactura_bimed/outputArhiveConversiepdf', filename, as_attachment = True)
+
+@views.route('/download_invoices', methods=['GET'])
+@login_required
+def download_file_invoices():
+    # Specificați calea către fișierul pe care doriți să îl descărcați
+    cod = session.get('cod')
+    code = session.get('verified_code')
+    idSelectatePDF=request.args.get('iduri_selectate2')
+    print(request.args)
+    print(idSelectatePDF, '-iduri selectate pdf')
+    if code == cod:
+        session['idSelectate'] = idSelectatePDF
+        listaMesajeRulareCurenta = listaFactt
+        print(listaMesajeRulareCurenta, " aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+        # asta e aici sa o testam ca primim id-ul tabelei din interfata
+        # print(valoare)
+        lista.append(idSelectatePDF)
+        print(lista,'-------------+++++++++++++++++++++++')
         # lista.clear()
-        
     
     descarcarepdf(lista)
     trimitereMail()
@@ -349,6 +401,8 @@ def download_file_recevied():
     trimitereMail()
     # Utilizați funcția send_file pentru a trimite fișierul către utilizator
     return render_template("main.html")
+
+
 
 def receive_data():
     data_from_js = request.json.get('variableFromJS')
@@ -398,6 +452,10 @@ def receive_data():
     return jsonify({'message': 'Data received successfully'})
 
 
+# -------------------------------------------------------------------------------   ADAUGARE CLIENTI NOI  ----------------------------------------------------------------------------
+
+
+
 @views.route('/add_new_clients', methods=["GET", "POST"])
 def addClient():
     if request.method == "POST":
@@ -434,6 +492,10 @@ def addClient():
             # connection.close()
 
     return render_template('addClient.html')
+
+
+# ------------------------------------------------------------------------------   AFISARE CLIENTI   -----------------------------------------------------------------------
+
 def query_clients_table():
     connection = pymysql.connect(
         host=mysql_config['host'],
@@ -555,95 +617,144 @@ def save_edited_client():
 
     return jsonify({'success': success, 'message': message})
 
-@views.route('/refresh', methods=['GET'])
+
+
+# ---------------------------------------------------------------------------- REFRESH FACTURI PRIMITE ------------------------------------------------------------------------------
+
+
+@views.route('/refreshReceived', methods=['GET'])
 @login_required
-def refresh():
-    def mesajeanafRefresh(headers, val1, val2):
-        time.sleep(15)
-        cif = dateFirma['cui']
-
-        current_time = datetime.datetime.now()
-        start_time = current_time - datetime.timedelta(days=60)
-        val1 = int(time.mktime(start_time.timetuple())) * 1000
-
-        X = 0
-        result = datetime.datetime.now() - datetime.timedelta(seconds=X)
-        val2 = int(datetime.datetime.timestamp(result) * 1000)
-
-        print("val1 ", val1)
-        print("val2 ", val2)
-
-        apiListaFacturi = f'https://api.anaf.ro/prod/FCTEL/rest/listaMesajePaginatieFactura'
-
-        params = {
-            'startTime': val1,
-            'endTime': val2,
-            'cif': cif,
-            'pagina': 1
-        }
-        while True:
-            try:
-                response = requests.get(apiListaFacturi, params=params, headers=headers)
-
-                if response.status_code == 200:
-                    data = response.json()
-                    print(data)
-                    if 'eroare' in data:
-                        time.sleep(5)
-                    else:
-                        numar_pagini = data.get('numar_total_pagini')
-                        print(numar_pagini, 'numar pagini')
-                        api_url_updated = f'{apiListaFacturi}?startTime={val1}&endTime={val2}&cif={cif}&pagina={numar_pagini}'
-
-                        listaMesaje = requests.get(api_url_updated, headers=headers)
-                        raspunsMesajeFacturi = json.loads(listaMesaje.text)
-                        stocareMesajeAnaf(raspunsMesajeFacturi)
-                        print('stocare a mesajelor cu success')
-                        break
-            except:
-                print(f'Eroare la cererea API, cod de stare: {response.status_code}')
-                time.sleep(10)
-
-    print('aici vedem mesajele anaf')
-    headers = {'Authorization': dateFirma['header']}
+# def refreshReceived():
+def sincronizareAPIvsBD():
+    result_list = interogareIDprimite()
+    # print("result list ", len(result_list), result_list)
+    # set_result_list = set(result_list)  # Convertim lista în set pentru căutare eficientă
+ 
+    time.sleep(10)
+   
     current_time = datetime.datetime.now()
-    start_time = current_time - datetime.timedelta(days=60)
+    start_time = current_time - datetime.timedelta(days=10)
     val1 = int(time.mktime(start_time.timetuple())) * 1000
+ 
     X = 0
     result = datetime.datetime.now() - datetime.timedelta(seconds=X)
     val2 = int(datetime.datetime.timestamp(result) * 1000)
-
-    mesajeanafRefresh(headers, val1, val2)
-
-    def stareMesajRefresh():
-        listaIdDescarcare.clear()
-        for i in range(0, len(listaIndexIncarcare)):
-            apiStareMesaj = 'https://api.anaf.ro/prod/FCTEL/rest/stareMesaj?id_incarcare='+str(listaIndexIncarcare[i])
-            
-            while True:  
-                stare = requests.get(apiStareMesaj, headers=headers)
-                if stare.status_code == 200:
-                    resp = stare.text
-                    root = ET.fromstring(resp)
-                    staree = str(root.attrib['stare'])
-                    if staree != 'in prelucrare':
-                        break
-                    time.sleep(5)
+ 
+    print("val1 ", val1)
+    print("val2 ", val2)
+ 
+    apiListaFacturi = f'https://api.anaf.ro/prod/FCTEL/rest/listaMesajePaginatieFactura'
+ 
+    params = {
+        'startTime': val1,
+        'endTime': val2,
+        'cif': cif,
+        'pagina': 1
+    }
+ 
+   
+ 
+    response = requests.get(apiListaFacturi, params=params, headers=headers)
+ 
+    if response.status_code == 200:
+        data = response.json()
+        if 'eroare' in data:
+            time.sleep(5)
+        else:
+            numar_pagini = data.get('numar_total_pagini')
+            for k in range(1,numar_pagini+1):
+                print(numar_pagini, 'numar pagini')
+                api_url_updated = f'{apiListaFacturi}?startTime={val1}&endTime={val2}&cif={cif}&pagina={k}&filtru=P'
+ 
+                listaMesaje = requests.get(api_url_updated, headers=headers, timeout=30)
+                print(listaMesaje)
+                if listaMesaje.status_code == 200:
+                    raspunsMesajeFacturi = listaMesaje.json()
+                    print(raspunsMesajeFacturi)
+                    listaIDANAF = [int(mesaj['id']) for mesaj in raspunsMesajeFacturi['mesaje'] if mesaj['tip'] == 'FACTURA PRIMITA']
+ 
+                    # print("Lista ID-uri ANAF: ", listaIDANAF, "lungimea id anaf ", len(listaIDANAF))
+ 
+                    # Convertirea ID-urilor în întregi
+                    result_list = [int(id) for id in result_list]
+ 
+                    listaDiferente = [id for id in listaIDANAF if id not in result_list]
+ 
+                    # print("Lista diferențe: ", listaDiferente, "lungimea diferente ", len(listaDiferente))
+                    # print("Lista diferențe: ", listaDiferente)
+                    # Filtrarea mesajelor pentru a păstra doar cele din listaDiferente
+                   
+                    listaDiferente = [str(id) for id in listaDiferente]
+                    mesajeFiltrate = [mesaj for mesaj in raspunsMesajeFacturi['mesaje'] if mesaj['id'] in listaDiferente]
+                    rezultat_final = {'mesaje': mesajeFiltrate}
+                    # print(mesajeFiltrate)
+                    # Stocare mesaje filtrate
+                    # print("urmeaza insert")
+                    stocareMesajeAnafPrimite(rezultat_final)
+                    # print(rezultat_final)
+                    # print('Stocare a mesajelor cu success')
                 else:
-                    print('Eroare la interogarea API-ului')
-                    break
+                    print(f'Eroare la cererea API, cod de stare: {listaMesaje.status_code}')
+    def descarcare():
+        for i in range(0, len(listaDiferente)):
+            apiDescarcare = 'https://api.anaf.ro/prod/FCTEL/rest/descarcare?id='+str(listaDiferente[i])
 
-            try:
-                id_descarcare = int(root.attrib['id_descarcare']) 
-                listaIdDescarcare.append(id_descarcare)
-                print('id descarcare',id_descarcare)   
-            except:
-                print(resp) 
-    print("aici am facut starea mesajului")                 
-    stareMesajRefresh()
-    print(listaIdDescarcare)
+            descarcare = requests.get(apiDescarcare, headers=headers, timeout=30)
 
-    return redirect(url_for("views.statusFacturi"))
+            if descarcare.status_code == 200:
+                # print("Cererea a fost efectuata cu succes!")
+                # with open('C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/Bimed local/output zip api/fisier'+str(listaDiferente[i])+'.zip', 'wb') as file:
+                with open("/home/efactura/efactura_bimed/outputZipAPI/fisier"+str(listaDiferente[i])+'.zip', 'wb') as file:
+                    file.write(descarcare.content)
+                    print('Descarcat cu success')
+                
+            # print(descarcare.text)
+            else:
+                print("Eroare la efectuarea cererii HTTP:", descarcare.status_code)
+                print(descarcare.text)
+    print("aici descarcam folosind id_descarcare")
+    descarcare()
+
+    # directory_path = 'C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/Bimed local/output zip api'
+    directory_path = "/home/efactura/efactura_bimed/outputZipAPI"
+
+    # output_directory = 'C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/Bimed local/output conversie'
+    output_directory = "/home/efactura/efactura_bimed/outputConversie"
+    arhiveANAF = "/home/efactura/efactura_bimed/arhiveANAF"
+
+    os.makedirs(output_directory, exist_ok=True)
+
+    for filename in os.listdir(directory_path):
+        # break
+        if filename.endswith('.zip'):
+            zip_file_path = os.path.join(directory_path, filename)
+            with zipfile.ZipFile(zip_file_path, 'r') as zip_file:
+                xml_files = [name for name in zip_file.namelist() if name.endswith('.xml') and "semnatura" not in name.lower()]
+                for xml_file in xml_files:
+                    with zip_file.open(xml_file) as file:
+                        xml_data = file.read()
+                        output_path = os.path.join(output_directory, xml_file)
+                        with open(output_path, 'wb') as output_file:
+                            output_file.write(xml_data)
+                            
+                            
+    def make_archive(source, destination):
+        base = os.path.basename(destination)
+        name = base.split('.')[0]
+        format = base.split('.')[1]
+        archive_from = os.path.dirname(source)
+        archive_to = os.path.basename(source.strip(os.sep))
+        shutil.make_archive(name, format, archive_from, archive_to)
+        shutil.move('%s.%s'%(name,format), destination)   
+        
+    stocarePDFPrimite()
+    print('s-au stocat facturile primite')
+    # stergeFisiere('C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/Bimed local/output conversie', '.zip')
+    return redirect(url_for("views.statusFacturiPrimite"))
+
+
+
+# -----------------------------------------------------------------------    REFRESH CLIENTI   ----------------------------------------------------------------------------
 
 @views.route('/refreshClienti', methods=['GET'])
 @login_required
@@ -721,144 +832,3 @@ def CUI_process():
         # Închideți conexiunea la baza de date
         # connection.close()
     return redirect(url_for("views.view_clients"))
-
-@views.route('/refreshReceived', methods=['GET'])
-@login_required
-# def refreshReceived():
-def sincronizareAPIvsBD():
-    result_list = interogareIDprimite()
-    # print("result list ", len(result_list), result_list)
-    # set_result_list = set(result_list)  # Convertim lista în set pentru căutare eficientă
-
-    time.sleep(10)
-    
-    current_time = datetime.datetime.now()
-    start_time = current_time - datetime.timedelta(days=60)
-    val1 = int(time.mktime(start_time.timetuple())) * 1000
-
-    X = 0
-    result = datetime.datetime.now() - datetime.timedelta(seconds=X)
-    val2 = int(datetime.datetime.timestamp(result) * 1000)
-
-    print("val1 ", val1)
-    print("val2 ", val2)
-
-    apiListaFacturi = f'https://api.anaf.ro/prod/FCTEL/rest/listaMesajePaginatieFactura'
-
-    params = {
-        'startTime': val1,
-        'endTime': val2,
-        'cif': cif,
-        'pagina': 1
-    }
-
-    while True:
-        try:
-            response = requests.get(apiListaFacturi, params=params, headers=headers)
-
-            if response.status_code == 200:
-                data = response.json()
-                if 'eroare' in data:
-                    time.sleep(5)
-                else:
-                    numar_pagini = data.get('numar_total_pagini')
-                    print(numar_pagini, 'numar pagini')
-                    api_url_updated = f'{apiListaFacturi}?startTime={val1}&endTime={val2}&cif={cif}&pagina={numar_pagini}'
-
-                    listaMesaje = requests.get(api_url_updated, headers=headers, timeout=30)
-                    if listaMesaje.status_code == 200:
-                        raspunsMesajeFacturi = listaMesaje.json()
-                        listaIDANAF = [int(mesaj['id']) for mesaj in raspunsMesajeFacturi['mesaje'] if mesaj['tip'] == 'FACTURA PRIMITA']
-
-                        # print("Lista ID-uri ANAF: ", listaIDANAF, "lungimea id anaf ", len(listaIDANAF))
-
-                        # Convertirea ID-urilor în întregi
-                        result_list = [int(id) for id in result_list]
-
-                        listaDiferente = [id for id in listaIDANAF if id not in result_list]
-
-                        # print("Lista diferențe: ", listaDiferente, "lungimea diferente ", len(listaDiferente))
-                        print("Lista diferențe: ", listaDiferente)
-                        # Filtrarea mesajelor pentru a păstra doar cele din listaDiferente
-                        
-                        listaDiferente = [str(id) for id in listaDiferente]
-                        mesajeFiltrate = [mesaj for mesaj in raspunsMesajeFacturi['mesaje'] if mesaj['id'] in listaDiferente]
-                        rezultat_final = {'mesaje': mesajeFiltrate}
-                        # print(mesajeFiltrate)
-                        # Stocare mesaje filtrate
-                        print("urmeaza insert")
-                        stocareMesajeAnafPrimite(rezultat_final)
-                        # print(rezultat_final)
-                        print('Stocare a mesajelor cu success')
-                        break
-                    else:
-                        print(f'Eroare la cererea API, cod de stare: {listaMesaje.status_code}')
-                        time.sleep(10)
-            else:
-                time.sleep(10)
-        except KeyError as e:
-            print(e)
-            time.sleep(10)
-        except Exception as e:
-            print(f'Eroare: {e}')
-            time.sleep(10)
-            
-    def descarcare():
-        for i in range(0, len(listaDiferente)):
-            apiDescarcare = 'https://api.anaf.ro/prod/FCTEL/rest/descarcare?id='+str(listaDiferente[i])
-
-            descarcare = requests.get(apiDescarcare, headers=headers, timeout=30)
-
-            if descarcare.status_code == 200:
-                # print("Cererea a fost efectuata cu succes!")
-                # with open('C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local/output zip api/fisier'+str(listaDiferente[i])+'.zip', 'wb') as file:
-                with open("/home/efactura/efactura_bimed/outputZipAPI/fisier"+str(listaDiferente[i])+'.zip', 'wb') as file:
-                    file.write(descarcare.content)
-                    print('Descarcat cu success')
-                
-            # print(descarcare.text)
-            else:
-                print("Eroare la efectuarea cererii HTTP:", descarcare.status_code)
-                print(descarcare.text)
-    print("aici descarcam folosind id_descarcare")
-    try:
-        descarcare()
-    except:
-        print("nu a mers descarcarea")
-
-    # directory_path = 'C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local/output zip api'
-    directory_path = "/home/efactura/efactura_bimed/outputZipAPI"
-
-    # output_directory = 'C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local/output conversie'
-    output_directory = "/home/efactura/efactura_bimed/outputConversie"
-    # arhiveANAF = "/home/efactura/efactura_konica/arhiveANAF"
-
-    os.makedirs(output_directory, exist_ok=True)
-
-    for filename in os.listdir(directory_path):
-        # break
-        if filename.endswith('.zip'):
-            zip_file_path = os.path.join(directory_path, filename)
-            with zipfile.ZipFile(zip_file_path, 'r') as zip_file:
-                xml_files = [name for name in zip_file.namelist() if name.endswith('.xml') and "semnatura" not in name.lower()]
-                for xml_file in xml_files:
-                    with zip_file.open(xml_file) as file:
-                        xml_data = file.read()
-                        output_path = os.path.join(output_directory, xml_file)
-                        with open(output_path, 'wb') as output_file:
-                            output_file.write(xml_data)
-                            
-                            
-    def make_archive(source, destination):
-        base = os.path.basename(destination)
-        name = base.split('.')[0]
-        format = base.split('.')[1]
-        archive_from = os.path.dirname(source)
-        archive_to = os.path.basename(source.strip(os.sep))
-        shutil.make_archive(name, format, archive_from, archive_to)
-        shutil.move('%s.%s'%(name,format), destination)   
-        
-    stocarePDFPrimite()
-    print('s-au stocat facturile primite')
-    # stergeFisiere('C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local/output conversie', '.zip')
-    return redirect(url_for("views.statusFacturiPrimite"))

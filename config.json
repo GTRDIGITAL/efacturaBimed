@@ -4,7 +4,7 @@
         "port": 3306,
         "user": "useradmin",
         "password": "parolamea123!",
-        "database": "efacturabimed"
+        "database": "efacturabimed_nou"
     },
     "dateFirma": {
         "cui": 37623474,

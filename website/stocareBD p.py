@@ -72,6 +72,42 @@ def stocareMesajeAnaf(data):
     mycursor.execute(select_query)
     updated_results = mycursor.fetchall()
     print("updated results ", updated_results)
+    
+def stocareMesajeAnaf2(data):
+    
+    connection = pymysql.connect(
+        host=mysql_config['host'],
+        user=mysql_config['user'],
+        password=mysql_config['password'],
+        database=mysql_config['database']
+    )
+
+    cursor = connection.cursor()
+    # Adaugă datele în tabela dict2
+    dict2 = data
+    for item in dict2["mesaje"]:
+        data_creare = item["data_creare"]
+        cif = item["cif"]
+        id_solicitare = str(item["id_solicitare"])
+        detalii = item["detalii"]
+        tip = item["tip"]
+        id_factura = item["id"]
+ 
+        insert_query = "INSERT IGNORE INTO statusMesaje2 (data_creare, cif, id_solicitare, detalii, tip, id_factura) VALUES (%s, %s, %s, %s, %s, %s)"
+        values = (data_creare, cif, id_solicitare, detalii, tip, id_factura)
+ 
+        cursor.execute(insert_query, values)
+        
+ 
+    connection.commit()
+    
+ 
+    # Interogare pentru a citi din nou datele actualizate
+    select_query = "SELECT * FROM statusMesaje"
+    cursor.execute(select_query)
+    updated_results = cursor.fetchall()
+    # print("updated results ", updated_results)
+    cursor.close()
 
 
 def interogareTabela():

@@ -331,10 +331,10 @@
             <a class="nav-link font-roboto" style="color: white" href="/main">Home</a>
           </li>
           <li class="nav-item" style="margin-right: 10px;margin-left: -750px;">
-            <a class="nav-link font-roboto" style="color: white" href="/raport_client">Modul transmitere facturi</a>
+            <a class="nav-link font-roboto" style="color: white" href="/raport_client">Invoice submission</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link font-roboto" style="color: white;margin-left: -550px;" href="/status">Raport încărcare date</a>
+            <a class="nav-link font-roboto" style="color: white;margin-left: -550px;" href="/status">Data loading report</a>
           </li>
         </ul>
       </div>
@@ -346,11 +346,11 @@
             <div class="table-title">
                 <div class="button-container">
                     <form action="/add_new_clients" method="GET">
-                        <button type="submit" class="button" id="leftButton">Adaugare clienti</button>
+                        <button type="submit" class="button" id="leftButton">Add client</button>
                     </form>
                     <form  action="/refreshClienti" method="GET">
                       <button class="btn btn-default refresh" title="Refresh">
-                        <i class="glyphicon glyphicon-refresh"></i> Actualizare date
+                        <i class="glyphicon glyphicon-refresh"></i> Refresh Data
                       </button>
                     </form>
                 </div>
@@ -361,14 +361,14 @@
             <table class="table table-bordered" data-toggle="table" data-search="true" data-searchable="true" data-filter-control="true" data-pagination="true" data-show-search-clear-button="true" data-toolbar="#toolbar1" data-sort-name="data_creare" data-sort-order="desc">
                 <thead>
                     <tr>
-                        <th data-field="id" data-sortable="true">Id Client</th>
-                        <th data-field="numeClient" data-sortable="true">Nume Client</th>
-                        <th data-field="tara" data-sortable="true">Tara</th>
-                        <th data-field="cust" data-sortable="true">Numar Client</th>
-                        <th data-field="cui" data-sortable="true">Cui</th>
-                        <th data-field="oras" data-sortable="true">Oras</th>
-                        <th data-field="strada" data-sortable="true">Strada</th>
-                        <th data-field="regiune" data-sortable="true">Regiune</th>
+                        <th data-field="id" data-sortable="true">Client Id</th>
+                        <th data-field="numeClient" data-sortable="true">Client Name</th>
+                        <th data-field="tara" data-sortable="true">Country</th>
+                        <th data-field="cust" data-sortable="true">Client Number</th>
+                        <th data-field="cui" data-sortable="true">VAT Reg. No</th>
+                        <th data-field="oras" data-sortable="true">City</th>
+                        <th data-field="strada" data-sortable="true">Street</th>
+                        <th data-field="regiune" data-sortable="true">Region</th>
                         <th data-field="actions" data-sortable="true">Actions</th>
                     </tr>
                 </thead>
