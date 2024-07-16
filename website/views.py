@@ -141,7 +141,7 @@ def welcome():
             fisierDeVanzari = request.files["excelFileInput"]
             print(fisierDeVanzari,'--------ds--s-d-sd-sdss-s-s--s-ds-d--d-s-d-s-d-s-s--s-d-sd--g--gr-')
             # return fisierDeVanzari
-            # file_path="C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local/Baza de date vanzari/"
+            # file_path="C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local V2/Baza de date vanzari/"
             file_path="/home/efactura/efactura_bimed/bazaDateVanzari"
             cale_fisier_temp = os.path.join(file_path + '/', 'baza de date.xlsx' )
             fisierDeVanzari.save(cale_fisier_temp)
@@ -695,30 +695,30 @@ def sincronizareAPIvsBD():
                     # print('Stocare a mesajelor cu success')
                 else:
                     print(f'Eroare la cererea API, cod de stare: {listaMesaje.status_code}')
-    def descarcare():
-        for i in range(0, len(listaDiferente)):
-            apiDescarcare = 'https://api.anaf.ro/prod/FCTEL/rest/descarcare?id='+str(listaDiferente[i])
+        def descarcare():
+            for i in range(0, len(listaDiferente)):
+                apiDescarcare = 'https://api.anaf.ro/prod/FCTEL/rest/descarcare?id='+str(listaDiferente[i])
 
-            descarcare = requests.get(apiDescarcare, headers=headers, timeout=30)
+                descarcare = requests.get(apiDescarcare, headers=headers, timeout=30)
 
-            if descarcare.status_code == 200:
-                # print("Cererea a fost efectuata cu succes!")
-                # with open('C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/Bimed local/output zip api/fisier'+str(listaDiferente[i])+'.zip', 'wb') as file:
-                with open("/home/efactura/efactura_bimed/outputZipAPI/fisier"+str(listaDiferente[i])+'.zip', 'wb') as file:
-                    file.write(descarcare.content)
-                    print('Descarcat cu success')
-                
-            # print(descarcare.text)
-            else:
-                print("Eroare la efectuarea cererii HTTP:", descarcare.status_code)
-                print(descarcare.text)
-    print("aici descarcam folosind id_descarcare")
-    descarcare()
+                if descarcare.status_code == 200:
+                    # print("Cererea a fost efectuata cu succes!")
+                    # with open('C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local V2/output zip api/fisier'+str(listaDiferente[i])+'.zip', 'wb') as file:
+                    with open("/home/efactura/efactura_bimed/outputZipAPI/fisier"+str(listaDiferente[i])+'.zip', 'wb') as file:
+                        file.write(descarcare.content)
+                        print('Descarcat cu success')
+                    
+                # print(descarcare.text)
+                else:
+                    print("Eroare la efectuarea cererii HTTP:", descarcare.status_code)
+                    print(descarcare.text)
+        print("aici descarcam folosind id_descarcare")
+        descarcare()
 
-    # directory_path = 'C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/Bimed local/output zip api'
+    # directory_path = 'C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local V2/output zip api'
     directory_path = "/home/efactura/efactura_bimed/outputZipAPI"
 
-    # output_directory = 'C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/Bimed local/output conversie'
+    # output_directory = 'C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local V2/output conversie'
     output_directory = "/home/efactura/efactura_bimed/outputConversie"
     arhiveANAF = "/home/efactura/efactura_bimed/arhiveANAF"
 
@@ -749,7 +749,8 @@ def sincronizareAPIvsBD():
         
     stocarePDFPrimite()
     print('s-au stocat facturile primite')
-    # stergeFisiere('C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/Bimed local/output conversie', '.zip')
+    # stergeFisiere('C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local V2/output conversie', '.zip')
+    stergeFisiere('/home/efactura/efactura_bimed/outputconversie/', '.zip')
     return redirect(url_for("views.statusFacturiPrimite"))
 
 
