@@ -221,7 +221,7 @@ def prelucrareDate(fisierDeVanzari):
     ultimaFactura=list(Sales_EFACTURA["Reference"])[-1]
     print(totalFactura, primaFactura, ultimaFactura)
     print("asta e prima factura in prelucrare_date.py ",primaFactura)
-    Sales_EFACTURA.to_excel("C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local V2/Baza de date vanzari\out/Sales.xlsx")
+    # Sales_EFACTURA.to_excel("C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local V2/Baza de date vanzari\out/Sales.xlsx")
 
     issue_date = pd.to_datetime(Sales_EFACTURA["Document Date"]).dt.strftime('%Y-%m-%d').iloc[0]
     nrFacturiTrimise = len(listaNumarFact)
