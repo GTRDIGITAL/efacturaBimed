@@ -33,7 +33,7 @@ def trimitereMail():
     
     date = datetime.datetime.now().strftime("%d/%m/%Y %H:%M")
     subj = "Facturi SPV " + str(date)
-    mailTo = "cristian.iordache@ro.gt.com"
+    mailTo = "alina.chiriac@bimedteknik.com"
     # destinatie = "C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local V2/destinatie/"
     destinatie = '/home/efactura/efactura_bimed/destinatie/'
     attachment_path = destinatie+"rezultat.zip"
