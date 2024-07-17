@@ -119,8 +119,8 @@ def eFactura():
                 message = "fisier cu probleme----------------->" + str(fisier_xml)
                 print("ASTA E RASPUNSUL LA EROARE ", response)
                 listaMesajeEroare.append(message)
-                with open('C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local V2/output conversie PDF/log.txt', 'a', encoding='utf-8') as log_file:
-                # with open('/home/efactura/efactura_bimed/outputConversiePDF/log.txt', 'a', encoding='utf-8') as log_file:
+                # with open('C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local V2/output conversie PDF/log.txt', 'a', encoding='utf-8') as log_file:
+                with open('/home/efactura/efactura_bimed/outputConversiePDF/log.txt', 'a', encoding='utf-8') as log_file:
                     log_file.write("Eroare validare fisier: "+str(fisier_xml)+" \n")
                     log_file.write("Eroare la efectuarea cererii HTTP: "+str(response.status_code)+"\n")
         
