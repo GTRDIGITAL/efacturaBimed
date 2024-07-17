@@ -47,17 +47,17 @@ def eFactura():
         except Exception as e:
             print(f"Eroare la stergerea fișierelor: {str(e)}")
 
-    stergeFisiere('C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local V2/output conversie', '.xml')
-    stergeFisiere('C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local V2/output zip api', '.zip')
-    stergeFisiere('C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local V2/output conversie PDF', '.pdf')
-    stergeFisiere('C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local V2/output conversie PDF', '.txt')
-    stergeFisiere('C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local V2/Baza de date vanzari', '.txt')
+    # stergeFisiere('C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local V2/output conversie', '.xml')
+    # stergeFisiere('C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local V2/output zip api', '.zip')
+    # stergeFisiere('C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local V2/output conversie PDF', '.pdf')
+    # stergeFisiere('C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local V2/output conversie PDF', '.txt')
+    # stergeFisiere('C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local V2/Baza de date vanzari', '.txt')
     
-    # stergeFisiere('/home/efactura/efactura_bimed/outputConversie', '.xml')
-    # stergeFisiere('/home/efactura/efactura_bimed/outputZipAPI', '.zip')
-    # stergeFisiere('/home/efactura/efactura_bimed/outputConversiePDF', '.pdf')
-    # stergeFisiere('/home/efactura/efactura_bimed/outputConversiePDF', '.txt')
-    # stergeFisiere('/home/efactura/efactura_bimed/bazaDateVanzari', '.txt')
+    stergeFisiere('/home/efactura/efactura_bimed/outputConversie', '.xml')
+    stergeFisiere('/home/efactura/efactura_bimed/outputZipAPI', '.zip')
+    stergeFisiere('/home/efactura/efactura_bimed/outputConversiePDF', '.pdf')
+    stergeFisiere('/home/efactura/efactura_bimed/outputConversiePDF', '.txt')
+    stergeFisiere('/home/efactura/efactura_bimed/bazaDateVanzari', '.txt')
 
     def lista_fisiere_xml(director_xml):
         fisiere_xml = []
@@ -125,8 +125,8 @@ def eFactura():
                     log_file.write("Eroare la efectuarea cererii HTTP: "+str(response.status_code)+"\n")
         
     # Lista fișierelor XML se obține în afara funcției
-    director_xml = "C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local V2/outs/"
-    # director_xml = "/home/efactura/efactura_bimed/outs"
+    # director_xml = "C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local V2/outs/"
+    director_xml = "/home/efactura/efactura_bimed/outs"
     fisiere_xml = lista_fisiere_xml(director_xml)
 
     # Apelarea funcției trimitereAnaf cu lista de fișiere XML
@@ -143,11 +143,12 @@ def eFactura():
     for item in dictionarFacturi["mesaje"]:
         factura = item["Factura"]
         index_solicitare = item["Index"]
-        with open('C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local V2/Baza de date vanzari/facturiTransmise.txt', 'a', encoding='utf-8') as raspunsANAFIndex:
-        # with open('/home/efactura/efactura_bimed/bazaDateVanzari/SentInvoicesConfirmation.txt', 'a', encoding='utf-8') as raspunsANAFIndex:
+        # with open('C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local V2/Baza de date vanzari/facturiTransmise.txt', 'a', encoding='utf-8') as raspunsANAFIndex:
+        with open('/home/efactura/efactura_bimed/bazaDateVanzari/SentInvoicesConfirmation.txt', 'a', encoding='utf-8') as raspunsANAFIndex:
             raspunsANAFIndex.write("Factura: "+str(factura)+" "+ "Index: " +str(index_solicitare)+" \n")
     
     stocareDictionarFacturi(dictionarFacturi)
+    stergeFisiere('/home/efactura/efactura_bimed/outs', '.xml')
     
     # print("asta e lista de facturi" ,listaFacturi(lungimeListaFacturi))
     
