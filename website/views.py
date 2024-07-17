@@ -633,7 +633,7 @@ def sincronizareAPIvsBD():
     time.sleep(10)
    
     current_time = datetime.datetime.now()
-    start_time = current_time - datetime.timedelta(days=10)
+    start_time = current_time - datetime.timedelta(days=60)
     val1 = int(time.mktime(start_time.timetuple())) * 1000
  
     X = 0
@@ -670,7 +670,7 @@ def sincronizareAPIvsBD():
                 print(listaMesaje)
                 if listaMesaje.status_code == 200:
                     raspunsMesajeFacturi = listaMesaje.json()
-                    print(raspunsMesajeFacturi)
+                    # print(raspunsMesajeFacturi)
                     listaIDANAF = [int(mesaj['id']) for mesaj in raspunsMesajeFacturi['mesaje'] if mesaj['tip'] == 'FACTURA PRIMITA']
  
                     # print("Lista ID-uri ANAF: ", listaIDANAF, "lungimea id anaf ", len(listaIDANAF))
@@ -680,7 +680,7 @@ def sincronizareAPIvsBD():
  
                     listaDiferente = [id for id in listaIDANAF if id not in result_list]
  
-                    # print("Lista diferențe: ", listaDiferente, "lungimea diferente ", len(listaDiferente))
+                    print("Lista diferențe: ", listaDiferente, "lungimea diferente ", len(listaDiferente))
                     # print("Lista diferențe: ", listaDiferente)
                     # Filtrarea mesajelor pentru a păstra doar cele din listaDiferente
                    
@@ -695,25 +695,25 @@ def sincronizareAPIvsBD():
                     # print('Stocare a mesajelor cu success')
                 else:
                     print(f'Eroare la cererea API, cod de stare: {listaMesaje.status_code}')
-        def descarcare():
-            for i in range(0, len(listaDiferente)):
-                apiDescarcare = 'https://api.anaf.ro/prod/FCTEL/rest/descarcare?id='+str(listaDiferente[i])
+                def descarcare():
+                    for i in range(0, len(listaDiferente)):
+                        apiDescarcare = 'https://api.anaf.ro/prod/FCTEL/rest/descarcare?id='+str(listaDiferente[i])
 
-                descarcare = requests.get(apiDescarcare, headers=headers, timeout=30)
+                        descarcare = requests.get(apiDescarcare, headers=headers, timeout=30)
 
-                if descarcare.status_code == 200:
-                    # print("Cererea a fost efectuata cu succes!")
-                    # with open('C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local V2/output zip api/fisier'+str(listaDiferente[i])+'.zip', 'wb') as file:
-                    with open("/home/efactura/efactura_bimed/outputZipAPI/fisier"+str(listaDiferente[i])+'.zip', 'wb') as file:
-                        file.write(descarcare.content)
-                        print('Descarcat cu success')
-                    
-                # print(descarcare.text)
-                else:
-                    print("Eroare la efectuarea cererii HTTP:", descarcare.status_code)
-                    print(descarcare.text)
-        print("aici descarcam folosind id_descarcare")
-        descarcare()
+                        if descarcare.status_code == 200:
+                            # print("Cererea a fost efectuata cu succes!")
+                            # with open('C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local V2/output zip api/fisier'+str(listaDiferente[i])+'.zip', 'wb') as file:
+                            with open("/home/efactura/efactura_bimed/outputZipAPI/fisier"+str(listaDiferente[i])+'.zip', 'wb') as file:
+                                file.write(descarcare.content)
+                                print('Descarcat cu success')
+                            
+                        # print(descarcare.text)
+                        else:
+                            print("Eroare la efectuarea cererii HTTP:", descarcare.status_code)
+                            print(descarcare.text)
+                print("aici descarcam folosind id_descarcare")
+                descarcare()
 
     # directory_path = 'C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local V2/output zip api'
     directory_path = "/home/efactura/efactura_bimed/outputZipAPI"
