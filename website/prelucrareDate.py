@@ -200,7 +200,8 @@ def prelucrareDate(fisierDeVanzari):
     Sales_EFACTURA["Quantity"]=Sales_EFACTURA["Quantity"]*(-1)
     Sales_EFACTURA.loc[Sales_EFACTURA["Quantity"]==0, 'Quantity']=1
     Sales_EFACTURA["Unit Price"]=Sales_EFACTURA["General ledger amount"]/Sales_EFACTURA["Quantity"]
-    Sales_EFACTURA['Data scadenta'] = Sales_EFACTURA['Document Date'] + pd.Timedelta(days=60)
+    # Sales_EFACTURA['Data scadenta'] = Sales_EFACTURA['Document Date'] + pd.Timedelta(days=60)
+    Sales_EFACTURA['Data scadenta'] = Sales_EFACTURA['Net due date']
     # Sales_EFACTURA['Amount'] = Sales_EFACTURA.groupby(['Billing Description', 'Reference'])['Amount'].transform('sum').round(2)
     # Sales_EFACTURA['General ledger amount'] = Sales_EFACTURA.groupby(['Billing Description', 'Reference'])['General ledger amount'].transform('sum').round(2)
 
