@@ -254,6 +254,7 @@ def prelucrareDate(fisierDeVanzari):
                 <cbc:IssueDate>{issue_date}</cbc:IssueDate>
                 <cbc:DueDate>{data_scadenta}</cbc:DueDate>
                 <cbc:InvoiceTypeCode>{str(df_fact_curenta["Inv Type code"].iloc[0]).replace(".0", "")[:299]}</cbc:InvoiceTypeCode>
+		<cbc:Note>{str(df_fact_curenta["Details"].iloc[0])[:299]}</cbc:Note>
 
     <cbc:DocumentCurrencyCode>RON</cbc:DocumentCurrencyCode>
     <cbc:TaxCurrencyCode>RON</cbc:TaxCurrencyCode>
@@ -496,6 +497,7 @@ def prelucrareDate(fisierDeVanzari):
                 <cbc:IssueDate>{issue_date}</cbc:IssueDate>
                 <cbc:DueDate>{data_scadenta}</cbc:DueDate>
                 <cbc:InvoiceTypeCode>{str(df_fact_curenta["Inv Type code"].iloc[0]).replace(".0", "")[:299]}</cbc:InvoiceTypeCode>
+		<cbc:Note>{str(df_fact_curenta["Details"].iloc[0])[:299]}</cbc:Note>
                 <cbc:DocumentCurrencyCode>{str(df_fact_curenta['General ledger currency'].iloc[0])}</cbc:DocumentCurrencyCode>
                 <cbc:TaxCurrencyCode>RON</cbc:TaxCurrencyCode>
                 '''
@@ -740,6 +742,7 @@ def prelucrareDate(fisierDeVanzari):
                 <cbc:IssueDate>{issue_date}</cbc:IssueDate>
                 
                 <cbc:CreditNoteTypeCode>{str(df_fact_curenta["Inv Type code"].iloc[0]).replace(".0", "")}</cbc:CreditNoteTypeCode>
+		<cbc:Note>{str(df_fact_curenta["Details"].iloc[0])[:299]}</cbc:Note>
                 <cbc:DocumentCurrencyCode>RON</cbc:DocumentCurrencyCode>
                 '''
 
@@ -978,6 +981,7 @@ def prelucrareDate(fisierDeVanzari):
                 <cbc:IssueDate>{issue_date}</cbc:IssueDate>
             
                 <cbc:CreditNoteTypeCode>{str(df_fact_curenta["Inv Type code"].iloc[0]).replace(".0", "")}</cbc:CreditNoteTypeCode>
+		<cbc:Note>{str(df_fact_curenta["Details"].iloc[0])[:299]}</cbc:Note>
                 <cbc:DocumentCurrencyCode>{str(df_fact_curenta['General ledger currency'].iloc[0])}</cbc:DocumentCurrencyCode>
                 <cbc:TaxCurrencyCode>RON</cbc:TaxCurrencyCode>
                 '''
