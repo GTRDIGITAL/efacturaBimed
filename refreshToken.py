@@ -51,8 +51,8 @@ def refreshToken():
             config = json.load(file)
         return config
 
-    config = citeste_configurare('config_test.json')
-    appData = config['appData']
+    config = citeste_configurare('config.json')
+    appData = config['dateFirma']
 
     def refresh_token(client_id, client_secret, refresh_token, config_file_path):
         token_url = 'https://logincert.anaf.ro/anaf-oauth2/v1/token'
@@ -78,9 +78,9 @@ def refreshToken():
         with open(config_file_path, 'r') as config_file:
             config_data = json.load(config_file)
         
-        config_data["appData"]["header"] = f"Bearer {new_token}"
-        config_data["appData"]["refresh_token"] = new_refresh_token
-        config_data["appData"]["data_token"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        config_data["dateFirma"]["header"] = f"Bearer {new_token}"
+        config_data["dateFirma"]["refresh_token"] = new_refresh_token
+        config_data["dateFirma"]["data_token"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
         with open(config_file_path, 'w') as config_file:
             json.dump(config_data, config_file, indent=4)
@@ -90,11 +90,11 @@ def refreshToken():
     client_secret = appData['client_secret']
     refresh_token_value = appData['refresh_token_value']
 
-    config_file_path = 'config_test.json'
+    config_file_path = 'config.json'
 
     new_token, new_refresh_token = refresh_token(client_id, client_secret, refresh_token_value, config_file_path)
     if new_token:
         print("Token-ul nou:", new_token)
         print("Refresh token-ul nou:", new_refresh_token)
     print("a rulat REFRESH TOKEN")
-# refreshToken()
+refreshToken()
