@@ -402,6 +402,7 @@ def stocarePDFPrimite():
             nume_furnizor_element = root.find('.//cac:PartyLegalEntity/cbc:RegistrationName', namespaces)
             if nume_furnizor_element is not None:
                 nume_furnizor = nume_furnizor_element.text
+                nume_furnizor=nume_furnizor[:49]
                 print(f'Numele furnizorului din fișierul {nume_fisier}: {nume_furnizor}')
             else:
                 print(f'Nu am putut găsi numele furnizorului în fișierul {nume_fisier}')
