@@ -120,7 +120,7 @@ def prelucrareDate(fisierDeVanzari):
 
     file_path = fisierDeVanzari
     # Sales_EFACTURA=pd.read_excel("C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local V2/Baza de date vanzari/Sales invoices _credit note_NA MARTIE 2023-FEB 2024.XLSX")
-    Sales_EFACTURA = pd.read_excel(file_path)
+    Sales_EFACTURA = pd.read_excel(file_path, engine="openpyxl")
 
     # Se actualizează moneda pentru liniile cu contul 704 folosind dicționarul creat
 
