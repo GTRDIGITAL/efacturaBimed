@@ -404,8 +404,10 @@ def prelucrareDate(fisierDeVanzari):
                     total_amount += line_amount
                     # total_amount=normal_round(total_amount, decimals=2)
                     invoiceLine += f'''<cac:InvoiceLine>
-                            <cbc:ID>{line_count}</cbc:ID>
-                            <cbc:InvoicedQuantity unitCode="{row["Cod Unitate Masura"]}">{row["Quantity"]}</cbc:InvoicedQuantity>
+                            <cbc:ID>{line_count}</cbc:ID>'''
+                    if str(row["Details"])!="nan" and str(row["Details"])!="":
+                        invoiceLine += f'''<cbc:Note>{str(row["Details"])}</cbc:Note>'''
+                    invoiceLine += f'''<cbc:InvoicedQuantity unitCode="{row["Cod Unitate Masura"]}">{row["Quantity"]}</cbc:InvoicedQuantity>
                             <cbc:LineExtensionAmount currencyID="RON">{str(round(float(str(row["General ledger amount"])),2))}</cbc:LineExtensionAmount>
                             <cac:Item>
                                 <cbc:Name>{row["Material Description"]}</cbc:Name>
@@ -649,7 +651,10 @@ def prelucrareDate(fisierDeVanzari):
                     total_amount += line_amount
                     # total_amount=normal_round(total_amount, decimals=2)
                     invoiceLine += f'''<cac:InvoiceLine>
-                            <cbc:ID>{line_count}</cbc:ID>
+                            <cbc:ID>{line_count}</cbc:ID>'''
+                    if str(row["Details"])!="nan" and str(row["Details"])!="":
+                        invoiceLine += f'''<cbc:Note>{str(row["Details"])}</cbc:Note>'''
+                    invoiceLine += f'''
                             <cbc:InvoicedQuantity unitCode="{row["Cod Unitate Masura"]}">{row["Quantity"]}</cbc:InvoicedQuantity>
                             <cbc:LineExtensionAmount currencyID="{str(row["General ledger currency"])}">{str(round(float(str(row["General ledger amount"])),2))}</cbc:LineExtensionAmount>
                             <cac:Item>
@@ -891,7 +896,10 @@ def prelucrareDate(fisierDeVanzari):
                     # tva_total=normal_round(tva_total, decimals=2)
 
                     invoiceLine += f'''<cac:CreditNoteLine>
-                            <cbc:ID>{line_count}</cbc:ID>
+                            <cbc:ID>{line_count}</cbc:ID>'''
+                    if str(row["Details"])!="nan" and str(row["Details"])!="":
+                        invoiceLine += f'''<cbc:Note>{str(row["Details"])}</cbc:Note>'''
+                    invoiceLine += f'''
                             <cbc:CreditedQuantity unitCode="{row["Cod Unitate Masura"]}">{row["Quantity"]}</cbc:CreditedQuantity>
                             <cbc:LineExtensionAmount currencyID="RON">{str(round(float(str(row["General ledger amount"])),2))}</cbc:LineExtensionAmount>
                             <cac:Item>
@@ -1135,7 +1143,10 @@ def prelucrareDate(fisierDeVanzari):
                     total_tva=normal_round(total_tva, decimals=2)
                     # total_amount=normal_round(total_amount, decimals=2)
                     invoiceLine += f'''<cac:CreditNoteLine>
-                            <cbc:ID>{line_count}</cbc:ID>
+                            <cbc:ID>{line_count}</cbc:ID>'''
+                    if str(row["Details"])!="nan" and str(row["Details"])!="":
+                        invoiceLine += f'''<cbc:Note>{str(row["Details"])}</cbc:Note>'''
+                    invoiceLine += f'''
                             <cbc:CreditedQuantity unitCode="{row["Cod Unitate Masura"]}">{row["Quantity"]}</cbc:CreditedQuantity>
                             <cbc:LineExtensionAmount currencyID="{str(row["General ledger currency"])}">{str(round(float(str(row["General ledger amount"])),2))}</cbc:LineExtensionAmount>
                             <cac:Item>
