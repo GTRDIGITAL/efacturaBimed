@@ -27,7 +27,7 @@ def trimitereMail():
     smtp_server = "smtp.office365.com"
     port = 587  # Pentru starttls
     sender_email = "GTRDigital@ro.gt.com"
-    password = "g[&vuBR9WQqr=7>D"
+    password = "Go1*,3v1PBRY075a^d5-"
     context = ssl.create_default_context()
     message_text = "Hello,\n\nPlease find above the downloaded invoices.\n\nThank you,\nGTRDigital"
     
