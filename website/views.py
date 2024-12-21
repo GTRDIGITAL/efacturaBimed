@@ -22,6 +22,7 @@ import os
 import pymysql
 from sqlalchemy import create_engine, text
 from .trimitereCodOTP import *
+from .sendMails import *
 
 def trimitereMail():
     smtp_server = "smtp.office365.com"
@@ -37,48 +38,12 @@ def trimitereMail():
     # destinatie = "C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local V2/destinatie/"
     destinatie = '/home/efactura/efactura_bimed/destinatie/'
     attachment_path = destinatie+"rezultat.zip"
-
+    cc_recipients=""
     with open(attachment_path, "rb") as attachment:
         attachment_data = attachment.read()
         attachment_encoded = base64.b64encode(attachment_data).decode()
+    send_email_via_graph_api(subj, mailTo,message_text ,attachment_path,cc_recipients)
 
-    boundary = "MY_BOUNDARY"
-
-    msg = f"""\
-From: {sender_email}
-To: {mailTo}
-Subject: {subj}
-Date: {date}
-MIME-Version: 1.0
-Content-Type: multipart/mixed; boundary={boundary}
-
---{boundary}
-Content-Type: text/plain; charset="utf-8"
-
-{message_text}
-
---{boundary}
-Content-Type: application/octet-stream
-Content-Disposition: attachment; filename="{attachment_path.split('/')[-1]}"
-Content-Transfer-Encoding: base64
-
-{attachment_encoded}
-
---{boundary}--
-"""
-
-    # Încercați să vă conectați la server și să trimiteți e-mailul
-    try:
-        server = smtplib.SMTP(smtp_server, port)
-        server.ehlo() # Poate fi omis
-        server.starttls(context=context) # Asigură conexiunea
-        server.ehlo() # Poate fi omis
-        server.login(sender_email, password)
-        server.sendmail(sender_email, mailTo, msg)
-    except Exception as e:
-        print(e)
-    finally:
-        server.quit()
 
 
 def citeste_configurare(file_path):

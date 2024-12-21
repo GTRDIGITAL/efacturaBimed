@@ -3,6 +3,7 @@ import datetime
 import base64
 import smtplib
 from flask import session
+from .sendMails import *
 
 def trimitereOTPMail(code, destinatari):
     smtp_server = "smtp.office365.com"
@@ -21,35 +22,6 @@ def trimitereOTPMail(code, destinatari):
     data_modificata_formatata = data_modificata.strftime("%d/%m/%Y %H:%M")
     subj = "Cod OTP eFactura" 
     mailTo = destinatari
-    
-
-
-    boundary = "MY_BOUNDARY"
-
-    msg = f"""\
-From: {sender_email}
-To: {mailTo}
-Subject: {subj}
-Date: {data_modificata_formatata}
-MIME-Version: 1.0
-Content-Type: multipart/mixed; boundary={boundary}
-
---{boundary}
-Content-Type: text/plain; charset="utf-8"
-
-{message_text}
-
-"""
-
-    # Încercați să vă conectați la server și să trimiteți e-mailul
-    try:
-        server = smtplib.SMTP(smtp_server, port)
-        server.ehlo() # Poate fi omis
-        server.starttls(context=context) # Asigură conexiunea
-        server.ehlo() # Poate fi omis
-        server.login(sender_email, password)
-        server.sendmail(sender_email, mailTo, msg)
-    except Exception as e:
-        print(e)
-    finally:
-        server.quit()
+    atasament=""
+    cc_recipients=""
+    send_email_via_graph_api(subj, destinatari,message_text ,atasament,cc_recipients)
