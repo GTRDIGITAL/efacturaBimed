@@ -54,4 +54,4 @@ def refreshToken():
         print("Token-ul nou:", new_token)
         print("Refresh token-ul nou:", new_refresh_token)
     print("a rulat REFRESH TOKEN")
-# refreshToken()
+refreshToken()
