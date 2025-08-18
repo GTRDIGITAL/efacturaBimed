@@ -40,6 +40,9 @@ def citeste_configurare(file_path):
 
 config = citeste_configurare('config.json')
 mysql_config = config['mysql']
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+CA_CERT_PATH = os.path.join(BASE_DIR, "..", "certs", "DigiCertGlobalRootCA.crt.pem")
+CA_CERT_PATH_SQL = CA_CERT_PATH.replace("\\", "/")
 
 def prelucrareDate(fisierDeVanzari):
     facturiNuleUnice = 0
@@ -76,7 +79,9 @@ def prelucrareDate(fisierDeVanzari):
 
     
 
-    engine = create_engine(f"mysql://{config['mysql']['user']}:{config['mysql']['password']}@{config['mysql']['host']}/{config['mysql']['database']}")
+    engine = create_engine(
+        f"mysql+mysqldb://{config['mysql']['user']}:{config['mysql']['password']}@{config['mysql']['host']}/{config['mysql']['database']}?ssl_ca={CA_CERT_PATH_SQL}"
+    )
     print("CONECTAT LA BAZA")
     query = "SELECT * FROM clients WHERE region IS NOT NULL"
 
