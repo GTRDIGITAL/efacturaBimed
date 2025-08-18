@@ -12,13 +12,16 @@ def citeste_configurare(file_path):
 
 config = citeste_configurare('config.json')
 mysql_config = config['mysql']
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+CA_CERT_PATH = os.path.join(BASE_DIR, "..", "certs", "DigiCertGlobalRootCA.crt.pem")
 
 def CUI_process():
     # Conectare la baza de date MySQL
     connection = pymysql.connect(host=mysql_config['host'],
     user=mysql_config['user'],
     password=mysql_config['password'],
-    database=mysql_config['database'])
+    database=mysql_config['database'],
+        ssl={"ca": CA_CERT_PATH})
 
     # Creați un cursor pentru a executa interogările SQL
     cursor = connection.cursor()

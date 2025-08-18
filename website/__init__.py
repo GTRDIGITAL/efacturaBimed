@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from os import path
 from flask_login import LoginManager
 import json
+import os
 
 def citeste_configurare(file_path):
     with open(file_path, 'r') as file:
@@ -11,7 +12,8 @@ def citeste_configurare(file_path):
 
 config = citeste_configurare('config.json')
 mysql_config = config['mysql']
-
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+CA_CERT_PATH = os.path.join(BASE_DIR, "..", "certs", "DigiCertGlobalRootCA.crt.pem")
 
 db = SQLAlchemy()
 # DB_NAME = "efactura.db"
@@ -21,8 +23,16 @@ def create_app():
     app = Flask(__name__)
     app.config['SECRET_KEY'] = 'secret'
     # app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://userAdmin:some_pass@192.168.1.222/efacturaferro'
-    app.config['SQLALCHEMY_DATABASE_URI'] = f"mysql://{config['mysql']['user']}:{config['mysql']['password']}@{config['mysql']['host']}/{config['mysql']['database']}"
-    
+    app.config['SQLALCHEMY_DATABASE_URI'] = (
+        'mysql+mysqldb://{user}:{password}@{host}/{database}?ssl_ca={ca_cert_path}'
+        .format(
+            user=config['mysql']['user'],
+            password=config['mysql']['password'],
+            host=config['mysql']['host'],
+            database=config['mysql']['database'],
+            ca_cert_path=CA_CERT_PATH.replace("\\", "/")
+        )
+    )
     
     db.init_app(app)
     

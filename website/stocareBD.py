@@ -21,6 +21,8 @@ config = citeste_configurare('config.json')
 mysql_config = config['mysql']
 dateFirma = config['dateFirma']
 headers = {'Authorization': dateFirma['header']}
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+CA_CERT_PATH = os.path.join(BASE_DIR, "..", "certs", "DigiCertGlobalRootCA.crt.pem")
 # Conectează-te la noua bază de date
 
 timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
@@ -36,7 +38,8 @@ def stocareDictionarFacturi(data):
         host=mysql_config['host'],
         user=mysql_config['user'],
         password=mysql_config['password'],
-        database=mysql_config['database']
+        database=mysql_config['database'],
+        ssl={"ca": CA_CERT_PATH}    
     )
 
     try:
@@ -70,7 +73,8 @@ def stocareMesajeAnaf(data):
         host=mysql_config['host'],
         user=mysql_config['user'],
         password=mysql_config['password'],
-        database=mysql_config['database']
+        database=mysql_config['database'],
+        ssl={"ca":CA_CERT_PATH}
     )
 
     cursor = connection.cursor()
@@ -106,7 +110,8 @@ def stocareMesajeAnafPrimite(data):
         host=mysql_config['host'],
         user=mysql_config['user'],
         password=mysql_config['password'],
-        database=mysql_config['database']
+        database=mysql_config['database'],
+        ssl={"ca": CA_CERT_PATH}    
     )
 
     cursor = connection.cursor()
@@ -217,7 +222,8 @@ def interogareTabelaPrimite():
         host=mysql_config['host'],
         user=mysql_config['user'],
         password=mysql_config['password'],
-        database=mysql_config['database']
+        database=mysql_config['database'],
+        ssl={"ca": CA_CERT_PATH}    
     )
     cursor = connection.cursor()
     
@@ -253,7 +259,8 @@ def interogareFisierePDFPrimite():
         host=mysql_config['host'],
         user=mysql_config['user'],
         password=mysql_config['password'],
-        database=mysql_config['database']
+        database=mysql_config['database'],
+        ssl={"ca": CA_CERT_PATH}    
     )
     cursor = connection.cursor()
     
@@ -272,7 +279,8 @@ def numarFacturiTrimise():
         host=mysql_config['host'],
         user=mysql_config['user'],
         password=mysql_config['password'],
-        database=mysql_config['database']
+        database=mysql_config['database'],
+        ssl={"ca": CA_CERT_PATH}    
     )
     cursor = connection.cursor()
     
@@ -293,7 +301,8 @@ def nrFacturiIstoric():
         host=mysql_config['host'],
         user=mysql_config['user'],
         password=mysql_config['password'],
-        database=mysql_config['database']
+        database=mysql_config['database'],
+        ssl={"ca": CA_CERT_PATH}    
     )
     cursor = connection.cursor()
     
@@ -313,7 +322,8 @@ def listaFacturi(data):
         host=mysql_config['host'],
         user=mysql_config['user'],
         password=mysql_config['password'],
-        database=mysql_config['database']
+        database=mysql_config['database'],
+        ssl={"ca": CA_CERT_PATH}    
     )
     cursor = connection.cursor()
     
@@ -339,7 +349,8 @@ def stocarePDF():
         host=mysql_config['host'],
         user=mysql_config['user'],
         password=mysql_config['password'],
-        database=mysql_config['database']
+        database=mysql_config['database'],
+        ssl={"ca": CA_CERT_PATH}    
     )
     cursor = connection.cursor()
     
@@ -369,7 +380,8 @@ def stocarePDFPrimite():
         host=mysql_config['host'],
         user=mysql_config['user'],
         password=mysql_config['password'],
-        database=mysql_config['database']
+        database=mysql_config['database'],
+        ssl={"ca": CA_CERT_PATH}    
     )
     cursor = connection.cursor()
     
@@ -421,7 +433,8 @@ def descarcarepdf(idSelectate):
         host=mysql_config['host'],
         user=mysql_config['user'],
         password=mysql_config['password'],
-        database=mysql_config['database']
+        database=mysql_config['database'],
+        ssl={"ca": CA_CERT_PATH}    
     )
     cursor = connection.cursor() 
     
@@ -578,7 +591,8 @@ def descarcarepdfPrimite(idSelectate):
         host=mysql_config['host'],
         user=mysql_config['user'],
         password=mysql_config['password'],
-        database=mysql_config['database']
+        database=mysql_config['database'],
+        ssl={"ca": CA_CERT_PATH}    
     )
     cursor = connection.cursor() 
     
@@ -725,7 +739,8 @@ def interogareTabelaClienti():
         host=mysql_config['host'],
         user=mysql_config['user'],
         password=mysql_config['password'],
-        database=mysql_config['database']
+        database=mysql_config['database'],
+        ssl={"ca": CA_CERT_PATH}    
     )
     cursor = connection.cursor()
     
@@ -795,7 +810,8 @@ def interogareIDprimite():
         host=mysql_config['host'],
         user=mysql_config['user'],
         password=mysql_config['password'],
-        database=mysql_config['database']
+        database=mysql_config['database'],
+        ssl={"ca": CA_CERT_PATH}    
     )
     cursor = connection.cursor()
     
@@ -813,7 +829,8 @@ def interogareTabelaFacturiTrimise():
         host=mysql_config['host'],
         user=mysql_config['user'],
         password=mysql_config['password'],
-        database=mysql_config['database']
+        database=mysql_config['database'],
+        ssl={"ca": CA_CERT_PATH}    
     )
     cursor = connection.cursor()
     
@@ -842,7 +859,8 @@ def interogareIndexIncarcare():
         host=mysql_config['host'],
         user=mysql_config['user'],
         password=mysql_config['password'],
-        database=mysql_config['database']
+        database=mysql_config['database'],
+        ssl={"ca": CA_CERT_PATH}    
     )
     cursor = connection.cursor()
     
@@ -861,7 +879,8 @@ def stareMesaj(results):
         host=mysql_config['host'],
         user=mysql_config['user'],
         password=mysql_config['password'],
-        database=mysql_config['database']
+        database=mysql_config['database'],
+        ssl={"ca": CA_CERT_PATH}    
     )
     cursor = connection.cursor()
     
@@ -896,7 +915,8 @@ def statusStareMesajBD():
         host=mysql_config['host'],
         user=mysql_config['user'],
         password=mysql_config['password'],
-        database=mysql_config['database']
+        database=mysql_config['database'],
+        ssl={"ca": CA_CERT_PATH}    
     )
 
     cursor = connection.cursor()
@@ -912,7 +932,8 @@ def updateFacturi(stringID):
             host=mysql_config['host'],
             user=mysql_config['user'],
             password=mysql_config['password'],
-            database=mysql_config['database']
+            database=mysql_config['database'],
+            ssl={"ca":CA_CERT_PATH}
         )
         
         cursor = connection.cursor()
@@ -1067,7 +1088,8 @@ def stocareZIPAnaf():
         host=mysql_config['host'],
         user=mysql_config['user'],
         password=mysql_config['password'],
-        database=mysql_config['database']
+        database=mysql_config['database'],
+        ssl={"ca": CA_CERT_PATH}    
     )
     cursor = connection.cursor()
     

@@ -184,4 +184,4 @@ def sincronizareAPIvsBD():
       
 
 print('Aici vedem mesajele ANAF')
-sincronizareAPIvsBD()
+# sincronizareAPIvsBD()
