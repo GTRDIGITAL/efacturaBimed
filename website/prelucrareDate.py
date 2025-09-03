@@ -185,7 +185,7 @@ def prelucrareDate(fisierDeVanzari):
     # Sales_EFACTURA["STREET_CLIENT"]=Sales_EFACTURA["GCI"].str.lstrip("0").str.replace(r'\.0$', '', regex=True).map(dictClients_Street)
     dictTaxCode={"A1":"S", "A2":"S", 'B0':"AE", 'Y8':'E', 'A9':'S'} 
     Sales_EFACTURA["ID TVA"]=Sales_EFACTURA["Tax Code"].map(dictTaxCode)
-    dictCota={"AE":0, "S":21.00, "E":0 } in prelucrareDate
+    dictCota={"AE":0, "S":21.00, "E":0 }
     # Sales_EFACTURA.to_excel("C:/Dezvoltare/E-Factura/2023/eFactura/Bimed/eFacturaBimed local V2/Baza de date vanzari/out/Sales initial.xlsx")
     Sales_EFACTURA["Valoare linia TVA (Valuta)"]=Sales_EFACTURA["General ledger amount"]*(Sales_EFACTURA["Tax Propotion"]/100)
     Sales_EFACTURA["Cota"]=Sales_EFACTURA["Tax Propotion"]
